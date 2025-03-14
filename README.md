@@ -29,7 +29,7 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 
 ## Features
 
-- Modular engine architecture with cross platform support.
+- Layered engine architecture with cross platform support.
 - Use HLSL to write shaders for Vulkan.
 - Forward PBR rendering with CubeMap IBL.
 - Directional shadow maps.
@@ -41,16 +41,17 @@ Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies 
 - **Fusion** framework for declarative GUI apps with text rendering.
 - **Fusion** uses the engine's builtin renderer instead of 3rd party imgui frameworks.
 
-## Modules Overview
+## Layered Architecture
 
-The engine is divided into different domains, and each domain can have multiple modules.
+The engine is divided into different layers as shown below, and each layer can have multiple modules. Left side is for standalone build and right side is for editor builds.
 
-### Core domain
-All modules inside the core domain are at the low level of the engine.
+<img src="./Screenshots/LayerArchitecture.jpg" height="500"/>
+
+### Core layer
+All modules inside the core layer are at the low level of the engine.
 
 * **Core**: The foundation of the engine. Provides runtime type reflection system, Binary & JSON serialization, containers, Object system, Job System, etc.
-* **CoreApplication**: Low level application layer to handle OS specific application & windowing. Uses SDL2 underneath the abstractions.
-* **CoreInput**: Low level input handling.
+* **CoreApplication**: Low level application layer to handle OS specific application, windowing and input. Uses SDL2 underneath the abstractions.
 * **CoreMedia**: Low level image handling and BC1-7 compression.
 * **CoreMesh**: Low level mesh loading.
 * **CoreShader**: Low level shader compilation and reflection. Uses DxCompiler & spirv reflect.
@@ -60,14 +61,14 @@ All modules inside the core domain are at the low level of the engine.
 * **FusionCore**: Widgets library used to build GUI applications with declarative syntax.
 * **Fusion**: Adds more high level Fusion widgets like TreeView, ListView and more.
 
-### Engine domain
+### Engine layer
 
-Engine domain modules are at high level of the engine.
+Engine layer modules are at high level of the engine.
 
 * **Engine**: The main module that contains the high level game engine systems, game framework, etc.
 * **GameEngine**: Only for standalone builds. Runtime implementation of System module.
 
-### Editor domain
+### Editor layer
 
 Contains all the editor modules.
 
