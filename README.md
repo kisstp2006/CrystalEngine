@@ -8,6 +8,9 @@ A WIP cross-platform Vulkan game engine with PBR rendering, Directed Acyclic Fra
 
 ### Check out [Fusion widget library](./Docs/FusionWidgets.md).
 
+Join discord server here:
+https://discord.gg/TXGWUrFarx
+
 ## Requirements
 
 The engine and editor compiles and runs on **Windows (x64)**, Linux (Ubuntu) and Mac (Apple Silicon).
