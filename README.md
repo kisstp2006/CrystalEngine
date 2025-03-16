@@ -2,6 +2,8 @@
 
 A WIP cross-platform Vulkan game engine with PBR rendering, Directed Acyclic FrameGraph based render architecture, and a declarative syntax Widget GUI framework built from scratch that is used for the editor GUI.
 
+### ⭐ Feel free to star the project to show your support!
+
 ![](./Screenshots/NewEditor_Mac.png)
 
 ### Check more [screenshots below](#screenshots).
