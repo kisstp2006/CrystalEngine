@@ -116,10 +116,10 @@ namespace CE::Editor
 				ShaderReflector shaderReflector{};
 				ShaderReflector::ErrorCode reflectionResult =
 					shaderReflector.Reflect(ShaderBlobFormat::Spirv, vertBlob->byteCode.GetDataPtr(), vertBlob->byteCode.GetDataSize(),
-						RHI::ShaderStage::Vertex, variant.reflectionInfo);
+						RHI::ShaderStage::Vertex, variant.reflectionInfo, buildConfig.entry);
 				if (reflectionResult != ShaderReflector::ERR_Success)
 				{
-					errorMessage = "Failed to reflect vertex shader. Error: " + compiler.GetErrorMessage();
+					errorMessage = "Failed to reflect vertex shader.";
 					return false;
 				}
 
@@ -146,10 +146,10 @@ namespace CE::Editor
 				}
 
 				reflectionResult = shaderReflector.Reflect(ShaderBlobFormat::Spirv, fragBlob->byteCode.GetDataPtr(), fragBlob->byteCode.GetDataSize(),
-					RHI::ShaderStage::Fragment, variant.reflectionInfo);
+					RHI::ShaderStage::Fragment, variant.reflectionInfo, buildConfig.entry);
 				if (reflectionResult != ShaderReflector::ERR_Success)
 				{
-					errorMessage = "Failed to reflect fragment shader. Error: " + compiler.GetErrorMessage();
+					errorMessage = "Failed to reflect fragment shader.";
 					return false;
 				}
 

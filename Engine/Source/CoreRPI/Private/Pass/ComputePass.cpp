@@ -3,24 +3,22 @@
 namespace CE::RPI
 {
 
-    RasterPass::RasterPass()
+    ComputePass::ComputePass()
     {
 
     }
 
-    RasterPass::~RasterPass()
+    ComputePass::~ComputePass()
     {
-	    
+        
     }
-	
-    void RasterPass::ProduceScopes(RHI::FrameScheduler* scheduler)
+
+    void ComputePass::ProduceScopes(RHI::FrameScheduler* scheduler)
     {
         Name scopeId = GetScopeId();
-        
-        scheduler->BeginScope(scopeId);
+
+        scheduler->BeginScope(scopeId, ScopeOperation::Compute, HardwareQueueClass::Compute);
         {
-            // - Use Attachments -
-            
             auto useAttachment = [&](const PassAttachmentBinding& attachmentBinding)
                 {
                     Ptr<PassAttachment> attachment = attachmentBinding.GetOriginalAttachment();
@@ -94,6 +92,50 @@ namespace CE::RPI
                 useAttachment(attachmentBinding);
             }
 
+            auto& attachmentDatabase = scheduler->GetAttachmentDatabase();
+            Vec3i dispatchSize = Vec3i(-1, -1, -1);
+            bool foundSize = false;
+
+            if (dispatchSizeSource.source.IsValid())
+            {
+                Ptr<PassAttachment> attachment = renderPipeline->FindAttachment(dispatchSizeSource.source);
+                if (attachment != nullptr)
+                {
+                    RHI::FrameAttachment* sourceAttachment = attachmentDatabase.FindFrameAttachment(attachment->attachmentId);
+                    if (sourceAttachment != nullptr)
+                    {
+                        if (sourceAttachment->IsImageAttachment())
+                        {
+                            const ImageDescriptor& imageDescriptor = static_cast<ImageFrameAttachment*>(sourceAttachment)->GetImageDescriptor();
+                            dispatchSize.x = (int)ceil(imageDescriptor.width * dispatchSizeSource.sizeMultipliers.x);
+                            dispatchSize.y = (int)ceil(imageDescriptor.height * dispatchSizeSource.sizeMultipliers.y);
+                            dispatchSize.z = (int)ceil(imageDescriptor.depth * dispatchSizeSource.sizeMultipliers.z);
+                            foundSize = true;
+                        }
+                        else if (sourceAttachment->IsBufferAttachment())
+                        {
+
+                        }
+                    }
+                }
+            }
+
+            if (!foundSize)
+            {
+                dispatchSize = dispatchSizeSource.fixedSizes;
+            }
+
+            scheduler->SetDispatchGroupCount(dispatchSize.x, dispatchSize.y, dispatchSize.z);
+
+            if (shader)
+            {
+                scheduler->UsePipeline(shader->GetPipelineState());
+            }
+            else
+            {
+                CE_LOG(Error, All, "Compute Pass ({}) does not have compute shader assigned!", GetName());
+            }
+
             // - Use SRGs -
 
             if (shaderResourceGroup)
@@ -111,12 +153,15 @@ namespace CE::RPI
                 scheduler->UseShaderResourceGroup(sceneSrg);
             }
 
-            if (!perPassSrgLayout.IsEmpty())
-            {
-                scheduler->UsePassSrgLayout(perPassSrgLayout);
-            }
+            scheduler->UsePassSrgLayout(shader->GetPassSrgLayout());;
         }
         scheduler->EndScope();
     }
 
-} // namespace CE::RPI
+    void ComputePass::SetShader(RPI::ComputeShader* shader)
+    {
+        this->shader = shader;
+    }
+
+} // namespace CE
+

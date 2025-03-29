@@ -195,10 +195,22 @@ namespace CE::Vulkan
 					else
 					{
 						RHI::RHIResource* resource = imageFrameAttachment->GetResource();
-						if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+						if (resource == nullptr)
 							continue;
-						Texture* image = (Texture*)resource;
-						format = image->GetFormat();
+						if (resource->GetResourceType() == RHI::ResourceType::Texture)
+						{
+							Texture* image = (Texture*)resource;
+							format = image->GetFormat();
+						}
+						else if (resource->GetResourceType() == RHI::ResourceType::TextureView)
+						{
+							TextureView* imageView = (TextureView*)resource;
+							format = imageView->GetFormat();
+						}
+						else
+						{
+							continue;
+						}
 					}
 
 					bool initialUse = false;
@@ -444,11 +456,27 @@ namespace CE::Vulkan
 				else
 				{
 					RHIResource* resource = imageFrameAttachment->GetResource();
-					if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+					if (resource == nullptr)
 						continue;
-					Texture* image = (Texture*)resource;
-					format = image->GetFormat();
-					sampleCount = image->GetSampleCount();
+
+					if (resource->GetResourceType() == RHI::ResourceType::Texture)
+					{
+						Texture* image = (Texture*)resource;
+						format = image->GetFormat();
+						sampleCount = image->GetSampleCount();
+					}
+					else if (resource->GetResourceType() == RHI::ResourceType::TextureView)
+					{
+						TextureView* imageView = (TextureView*)resource;
+						if (imageView->GetTexture() == nullptr)
+							continue;
+						format = imageView->GetFormat();
+						sampleCount = imageView->GetTexture()->GetSampleCount();
+					}
+					else
+					{
+						continue;
+					}
 				}
 
 				AttachmentBinding attachmentBinding{};

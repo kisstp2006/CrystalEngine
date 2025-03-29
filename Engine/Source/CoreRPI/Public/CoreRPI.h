@@ -51,6 +51,7 @@ namespace CE::RPI
 #include "Pass/ParentPass.h"
 #include "Pass/GpuPass.h"
 #include "Pass/RasterPass.h"
+#include "Pass/ComputePass.h"
 #include "Pass/PassTree.h"
 #include "Pass/PassRegistry.h"
 #include "Pass/PassSystem.h"
@@ -85,6 +86,7 @@ namespace CE::RPI
 #include "Shader/ShaderResourceGroup.h"
 #include "Shader/ShaderVariant.h"
 #include "Shader/Shader.h"
+#include "Shader/ComputeShader.h"
 
 #include "Text/FontAtlasLayout.h"
 #include "Text/FontAtlas.h"

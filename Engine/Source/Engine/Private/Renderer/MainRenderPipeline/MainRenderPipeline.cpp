@@ -22,11 +22,11 @@ namespace CE
 
 	    RPI::ParentPass* rootPass = passTree->GetRootPass();
 
-        // -------------------------------
-        // Attachments
-        // -------------------------------
+    	RPI::PassAttachment* pipelineOutput = renderPipeline->FindAttachment("PipelineOutput");
 
-	    RPI::PassAttachment* pipelineOutput = renderPipeline->FindAttachment("PipelineOutput");
+        // -------------------------------
+        // Transient Attachments
+        // -------------------------------
 
 		// - Depth Stencil -
 
@@ -266,7 +266,7 @@ namespace CE
 
                 resolvePass->AddAttachmentBinding(colorBinding);
 		    }
-	    	
+
 		    {
                 RPI::PassAttachmentBinding resolveBinding{};
                 resolveBinding.name = "Resolve";
@@ -281,8 +281,49 @@ namespace CE
             rootPass->AddChild(resolvePass);
 	    }
 
+    	// - Test Compute Pass -
+
+    	auto assetManager = AssetManager::Get();
+    	Ref<CE::ComputeShader> computeShader = assetManager->LoadAssetAtPath<CE::ComputeShader>("/Engine/Assets/Sandbox/TestCompute");
+
+    	if (false)
+    	{
+    		auto computePass = CreateObject<RPI::ComputePass>(this, "TestComputePass");
+    		{
+    			Vec3i invocationSize = computeShader->GetReflection().invocationSize;
+
+    			computePass->SetShader(computeShader->GetRpiShader(0));
+    			computePass->dispatchSizeSource.source = pipelineOutput->name;
+    			computePass->dispatchSizeSource.sizeMultipliers = Vec3(1.0f / invocationSize.x, 1.0f / invocationSize.y, 1.0f / invocationSize.z);
+
+    			// _Texture
+    			{
+    				RPI::PassSlot textureSlot{};
+    				textureSlot.name = "Texture";
+    				textureSlot.slotType = RPI::PassSlotType::InputOutput;
+    				textureSlot.shaderInputName = "_TextureTest";
+    				textureSlot.attachmentUsage = ScopeAttachmentUsage::Shader;
+    				textureSlot.loadStoreAction.loadAction = AttachmentLoadAction::Load;
+    				textureSlot.loadStoreAction.storeAction = AttachmentStoreAction::Store;
+
+    				computePass->AddSlot(textureSlot);
+
+    				RPI::PassAttachmentBinding textureBinding{};
+    				textureBinding.name = "Texture";
+    				textureBinding.slotType = RPI::PassSlotType::InputOutput;
+    				textureBinding.attachmentUsage = ScopeAttachmentUsage::Shader;
+    				textureBinding.connectedBinding = resolvePass->FindOutputBinding("Resolve");
+    				textureBinding.fallbackBinding = nullptr;
+
+    				computePass->AddAttachmentBinding(textureBinding);
+    			}
+
+    			rootPass->AddChild(computePass);
+    		}
+    	}
+
         // -------------------------------
-        // Apply Shader Layout
+        // Apply Shader Layout (SRG_PerPass)
         // -------------------------------
 
         Ref<CE::Shader> standardShader = gEngine->GetAssetManager()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");

@@ -144,15 +144,6 @@ namespace CE::Vulkan
 			numFramesInFlight = imageCount;
 			presentSwapChains = true;
 		}
-		
-		/*Vulkan::Scope* presentingScope = (Vulkan::Scope*)frameGraph->presentingScope;
-		auto swapChain = (Vulkan::SwapChain*)frameGraph->presentSwapChain;
-
-		if (swapChain && presentingScope)
-		{
-			imageCount = swapChain->GetImageCount();
-			numFramesInFlight = imageCount;
-		}*/
 
 		for (auto scope : frameGraph->scopes)
 		{
@@ -427,10 +418,25 @@ namespace CE::Vulkan
 							continue;
 
 						RHI::RHIResource* resource = imageAttachment->GetResource(imageIndex);
-						if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+						if (resource == nullptr)
 							continue;
 
-						Vulkan::Texture* image = dynamic_cast<Vulkan::Texture*>(resource);
+						Texture* image = nullptr;
+
+						if (resource->GetResourceType() == RHI::ResourceType::Texture)
+						{
+							image = dynamic_cast<Texture*>(resource);
+						}
+						else if (resource->GetResourceType() == RHI::ResourceType::TextureView)
+						{
+							TextureView* imageView = dynamic_cast<TextureView*>(resource);
+							image = (Texture*)imageView->GetTexture();
+						}
+						else
+						{
+							continue;
+						}
+
 						if (image == nullptr || image->GetImage() == nullptr)
 							continue;
 
@@ -472,12 +478,15 @@ namespace CE::Vulkan
 							if (EnumHasFlag(fromImage->GetAccess(), RHI::ScopeAttachmentAccess::Write))
 							{
 								imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
-								imageBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+								imageBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL; // You can only write to general layouts in shader
 							}
 							else // Read only
 							{
 								imageBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-								imageBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+								if (producerScope->GetOperation() == RHI::ScopeOperation::Compute)
+									imageBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+								else
+									imageBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 							}
 							break;
 						case RHI::ScopeAttachmentUsage::Copy:
@@ -536,7 +545,10 @@ namespace CE::Vulkan
 							else // Read only
 							{
 								imageBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-								imageBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+								if (current->GetOperation() == RHI::ScopeOperation::Compute)
+									imageBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+								else
+									imageBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 							}
 							break;
 						case RHI::ScopeAttachmentUsage::Copy:

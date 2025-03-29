@@ -308,13 +308,17 @@ namespace CE::Vulkan
 				Vulkan::Scope* currentScope = scopeChain[scopeIndex];
 				if (currentScope == nullptr)
 					continue;
+				if (currentScope->IsComputePass())
+				{
+					String::IsAlphabet('a');
+				}
 
 				executedScopes.Add(currentScope->id);
 
 				commandList->currentPass = currentScope->renderPass;
 				commandList->currentSubpass = currentScope->subpassIndex;
 
-				bool usesSwapChainAttachment = currentScope->swapChainsUsedByAttachments.NotEmpty();
+				//bool usesSwapChainAttachment = currentScope->swapChainsUsedByAttachments.NotEmpty();
 				RenderPass* renderPass = currentScope->renderPass;
 				FixedArray<VkClearValue, RHI::Limits::Pipeline::MaxRenderAttachmentCount> clearValues{};
 				HashSet<RHI::AttachmentID> clearedAttachments{};
@@ -403,16 +407,28 @@ namespace CE::Vulkan
 							RHI::ImageFrameAttachment* imageFrameAttachment = (RHI::ImageFrameAttachment*)scopeAttachment->GetFrameAttachment();
 
 							RHI::RHIResource* resource = imageFrameAttachment->GetResource(currentSubmissionIndex);
-							if (resource == nullptr || resource->GetResourceType() != RHI::ResourceType::Texture)
+							if (resource == nullptr)
 								continue;
 							if (initializedAttachmentIds.Exists(imageFrameAttachment->GetId()))
+								continue;
+							if (resource->GetResourceType() != RHI::ResourceType::Buffer && resource->GetResourceType() != RHI::ResourceType::Texture &&
+								resource->GetResourceType() != RHI::ResourceType::TextureView)
 								continue;
 
 							initializedAttachmentIds.Add(imageFrameAttachment->GetId());
 
-							if (resource->GetResourceType() == RHI::ResourceType::Texture)
+							if (resource->GetResourceType() == RHI::ResourceType::Texture || resource->GetResourceType() == RHI::ResourceType::TextureView)
 							{
-								Vulkan::Texture* image = (Vulkan::Texture*)resource;
+								Vulkan::Texture* image = nullptr;//(Vulkan::Texture*)resource;
+								if (resource->GetResourceType() == RHI::ResourceType::Texture)
+								{
+									image = (Vulkan::Texture*)resource;
+								}
+								else if (resource->GetResourceType() == RHI::ResourceType::TextureView)
+								{
+									TextureView* imageView = (TextureView*)resource;
+									image = (Vulkan::Texture*)imageView->GetTexture();
+								}
 
 								VkImageLayout requiredLayout = image->curImageLayout;
 								VkPipelineStageFlags dstStageMask = 0;
@@ -450,6 +466,8 @@ namespace CE::Vulkan
 									else
 									{
 										requiredLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+										if (currentSubPassScope->IsComputePass())
+											requiredLayout = VK_IMAGE_LAYOUT_GENERAL;
 										dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 									}
 									break;
@@ -600,6 +618,8 @@ namespace CE::Vulkan
 				// Graphics operation
 				if (!shouldNotExecuteAtAll && currentScope->queueClass == RHI::HardwareQueueClass::Graphics)
 				{
+					commandList->ClearShaderResourceGroups();
+
 					VkRenderPassBeginInfo beginInfo{};
 					beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 					beginInfo.renderPass = renderPass->GetHandle();
@@ -715,11 +735,24 @@ namespace CE::Vulkan
 											!scopeAttachment->GetFrameAttachment()->IsImageAttachment())
 											continue;
 
-										Vulkan::Texture* texture = (Vulkan::Texture*)scopeAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
-										if (texture == nullptr)
+										RHI::RHIResource* resource = scopeAttachment->GetFrameAttachment()->GetResource(currentSubmissionIndex);
+										if (resource == nullptr)
 											continue;
 
-										texture->curImageLayout = attachmentBinding.finalLayout;
+										if (resource->GetResourceType() == RHI::ResourceType::Texture)
+										{
+											Texture* texture = (Texture*)resource;
+											texture->curImageLayout = attachmentBinding.finalLayout;
+										}
+										else if (resource->GetResourceType() == RHI::ResourceType::TextureView)
+										{
+											TextureView* textureView = (TextureView*)resource;
+											Texture* texture = (Texture*)textureView->GetTexture();
+											if (texture != nullptr)
+											{
+												texture->curImageLayout = attachmentBinding.finalLayout;
+											}
+										}
 									}
 								}
 
@@ -760,6 +793,8 @@ namespace CE::Vulkan
 				}
 				else if (currentScope->queueClass == RHI::HardwareQueueClass::Compute)
 				{
+					commandList->ClearShaderResourceGroups();
+
 					// TODO: Add compute pass
 					RHI::PipelineState* pipelineToUse = nullptr;
 
@@ -773,6 +808,8 @@ namespace CE::Vulkan
 
 					if (pipelineToUse != nullptr)
 					{
+						commandList->BindPipelineState(pipelineToUse);
+
 						for (auto srg : currentScope->externalShaderResourceGroups)
 						{
 							commandList->SetShaderResourceGroup(srg);
@@ -782,6 +819,8 @@ namespace CE::Vulkan
 							commandList->SetShaderResourceGroup(currentScope->passShaderResourceGroup);
 						if (currentScope->subpassShaderResourceGroup)
 							commandList->SetShaderResourceGroup(currentScope->subpassShaderResourceGroup);
+
+						commandList->CommitShaderResources();;
 
 						commandList->Dispatch(Math::Max((u32)1, currentScope->groupCountX),
 							Math::Max((u32)1, currentScope->groupCountY),
