@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv)
 {
-	AssetProcessor assetProcessor{ argc, argv };
+	AssetProcessorCLI assetProcessor{ argc, argv };
 
 	return assetProcessor.Run();
 }

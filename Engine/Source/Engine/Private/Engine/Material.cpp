@@ -17,7 +17,7 @@ namespace CE
         }
     }
 
-    void CE::Material::SetShader(CE::Shader* shader)
+    void CE::Material::SetShader(Ref<CE::Shader> shader)
     {
         if (this->shader == shader)
             return;

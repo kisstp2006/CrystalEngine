@@ -93,6 +93,8 @@ namespace CE::Editor
 
 		virtual bool ProcessAsset(const Ref<Bundle>& bundle) = 0;
 
+		virtual Array<Name> PrepareProductAssetDependencies();
+
 		inline bool Succeeded() const { return success; }
 		inline const String& GetErrorMessage() const { return errorMessage; }
 

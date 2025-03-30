@@ -16,7 +16,7 @@ using namespace CE::Editor;
 
 namespace CE
 {
-	class AssetProcessor
+	class AssetProcessorCLI
 	{
 	public:
 
@@ -28,9 +28,9 @@ namespace CE
 			Plugin,
 		};
 
-		AssetProcessor(int argc, char** argv);
+		AssetProcessorCLI(int argc, char** argv);
 
-		~AssetProcessor();
+		~AssetProcessorCLI();
 
 		int Run();
 

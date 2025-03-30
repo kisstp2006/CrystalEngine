@@ -42,6 +42,23 @@ namespace CE
     void StaticMeshComponent::SetStaticMesh(Ref<StaticMesh> staticMesh)
     {
         this->staticMesh = staticMesh;
+
+        if (materialsPerLod.IsEmpty() && staticMesh != nullptr)
+        {
+            for (int lod = 0; lod < staticMesh->GetLodCount(); ++lod)
+            {
+                materialsPerLod.Add({});
+                LodMaterial& lodMaterial = materialsPerLod.Top();
+
+                for (int i = 0; i < staticMesh->GetBuiltinMaterialCount(); ++i)
+                {
+                    lodMaterial.materials.Add(staticMesh->GetBuiltinMaterial(i));
+                }
+            }
+
+            SetMaterialDirty(true);
+        }
+
         meshChanged = true;
     }
 

@@ -11,7 +11,7 @@ namespace CE
         Material();
         ~Material();
 
-        void SetShader(CE::Shader* shader);
+        void SetShader(Ref<CE::Shader> shader);
 
         void SetProperty(const Name& name, u32 value) override;
 

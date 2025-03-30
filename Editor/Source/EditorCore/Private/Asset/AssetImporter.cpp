@@ -147,6 +147,11 @@ namespace CE::Editor
 		visitor(bundle.Get(), uuidFetchers);
 	}
 
+	Array<Name> AssetImportJob::PrepareProductAssetDependencies()
+	{
+		return {};
+	}
+
 	void AssetImportJob::Finish()
 	{
 		

@@ -60,6 +60,8 @@ namespace CE
 
             lodMaterial.materials[subMeshIndex] = material;
         }
+
+        material->ApplyProperties();
     }
 
     Ref<MaterialInterface> MeshComponent::GetMaterial(u32 lodIndex, u32 subMeshIndex)

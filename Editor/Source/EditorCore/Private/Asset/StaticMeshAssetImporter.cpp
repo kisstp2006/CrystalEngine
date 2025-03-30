@@ -19,6 +19,14 @@ namespace CE::Editor
         return jobs;
     }
 
+	Array<Name> StaticMeshAssetImporter::GetProductAssetDependencies()
+	{
+		return {
+			"/Engine/Assets/Shaders/PBR/Standard"
+		};
+	}
+
+
     bool StaticMeshAssetImportJob::ProcessAsset(const Ref<Bundle>& bundle)
     {
 		if (bundle == nullptr)
@@ -107,6 +115,29 @@ namespace CE::Editor
 		Ref<StaticMesh> staticMesh = CreateObject<StaticMesh>(bundle.Get(), fileName,
 			OF_NoFlags, StaticMesh::StaticClass(), nullptr,
 			meshUuid);
+
+    	// - Materials -
+
+    	Ref<CE::Shader> standardShader = AssetManager::Get()->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
+
+    	const Array<CMMaterial>& materials = scene->GetMaterials();
+		for (int i = 0; i < materials.GetSize(); ++i)
+		{
+			Ref<CE::Material> material = CreateObject<CE::Material>(staticMesh.Get(), String::Format("Material_{}", i));
+
+			material->SetShader(standardShader);
+
+			material->SetProperty("_Albedo", Color(materials[i].diffuse));
+			material->SetProperty("_Metallic", materials[i].metallicFactor);
+			material->SetProperty("_Roughness", materials[i].roughnessFactor);
+			material->SetProperty("_NormalStrength", 1.0f);
+
+			// TODO: Implement textures
+
+			staticMesh->builtinMaterials.Add(material);
+		}
+
+    	// - Meshes -
 
 		Ref<RPI::ModelAsset> modelAsset = CreateObject<RPI::ModelAsset>(staticMesh.Get(), "ModelAsset",
 			OF_NoFlags, RPI::ModelAsset::StaticClass(), nullptr,

@@ -19,6 +19,7 @@ namespace CE::RPI
         Sampler,
         Matrix4x4,
         Enum,
+        Name,
         COUNT
     };
     ENUM_CLASS(MaterialPropertyDataType);
@@ -94,6 +95,11 @@ namespace CE::RPI
             u.bufferValue = bufferValue;
         }
 
+        MaterialPropertyValue(const Name& nameValue) : valueType(MaterialPropertyDataType::Name)
+        {
+            u.nameValue = nameValue;
+        }
+
         template<typename TEnum> requires TIsEnum<TEnum>::Value
         MaterialPropertyValue(TEnum enumValue) : valueType(MaterialPropertyDataType::Enum)
         {
@@ -141,6 +147,12 @@ namespace CE::RPI
                 return u.matrixValue == other.u.matrixValue;
             case MaterialPropertyDataType::Buffer:
                 return u.bufferValue == other.u.bufferValue;
+            case MaterialPropertyDataType::Name:
+                return u.nameValue == other.u.nameValue;
+            case MaterialPropertyDataType::Enum:
+                return u.enumValue == other.u.enumValue;
+            case MaterialPropertyDataType::None:
+                return true;
             }
 
             return false;
@@ -153,7 +165,7 @@ namespace CE::RPI
 
         inline MaterialPropertyDataType GetValueType() const { return valueType; }
 
-        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RPI::Texture*, RHI::TextureView*, RHI::Sampler*, Matrix4x4, RHI::BufferView>::Value or TIsEnum<T>::Value
+        template<typename T> requires TContainsType<T, s32, u32, f32, Color, Vec2, Vec3, Vec4, RPI::Texture*, RHI::TextureView*, RHI::Sampler*, Matrix4x4, RHI::BufferView, CE::Name>::Value or TIsEnum<T>::Value
         inline T GetValue() const
         {
             if constexpr (TIsEnum<T>::Value)
@@ -207,6 +219,10 @@ namespace CE::RPI
             else if constexpr (TIsSameType<T, RHI::BufferView>::Value)
             {
                 return u.bufferValue;
+            }
+            else if constexpr (TIsSameType<T, CE::Name>::Value)
+            {
+                return u.nameValue;
             }
             return {};
         }
@@ -272,6 +288,10 @@ namespace CE::RPI
             {
                 return valueType == MaterialPropertyDataType::Buffer;
             }
+            else if constexpr (TIsSameType<T, CE::Name>::Value)
+            {
+                return valueType == MaterialPropertyDataType::Name;
+            }
             return false;
         }
         
@@ -294,6 +314,7 @@ namespace CE::RPI
             RHI::TextureView* textureViewValue;
             RHI::Sampler* samplerValue;
             RHI::BufferView bufferValue;
+            CE::Name nameValue;
             s64 enumValue;
         } u;
 

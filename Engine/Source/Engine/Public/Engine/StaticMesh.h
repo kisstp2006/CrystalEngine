@@ -2,6 +2,7 @@
 
 namespace CE
 {
+    class Material;
 
     CLASS()
     class ENGINE_API StaticMesh : public Asset
@@ -39,10 +40,23 @@ namespace CE
             return lod->GetSubMeshCount();
         }
 
+        int GetBuiltinMaterialCount() const { return builtinMaterials.GetSize(); }
+
+        Ref<CE::Material> GetBuiltinMaterial(u32 index) const
+        {
+            if (index >= builtinMaterials.GetSize())
+                return nullptr;
+
+            return builtinMaterials[index];
+        }
+
     private:
 
         FIELD()
         Ref<RPI::ModelAsset> modelAsset = nullptr;
+
+        FIELD()
+        Array<Ref<CE::Material>> builtinMaterials;
         
 #if PAL_TRAIT_BUILD_EDITOR
         friend class CE::Editor::StaticMeshAssetImportJob;

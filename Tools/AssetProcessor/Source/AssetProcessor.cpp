@@ -7,7 +7,7 @@ namespace CE
 {
 	constexpr u32 StampFileVersion = 2;
 
-	AssetProcessor::AssetProcessor(int argc, char** argv)
+	AssetProcessorCLI::AssetProcessorCLI(int argc, char** argv)
 	{
 		options.add_options()
 			("h,help", "Print this help info.")
@@ -117,14 +117,14 @@ namespace CE
 		gProjectPath = PlatformDirectories::GetLaunchDir();
 		if (projectPath.NotEmpty())
 			gProjectPath = projectPath;
-		gProjectName = "AssetProcessor";
+		gProjectName = "AssetProcessorCLI";
 	}
 
-	AssetProcessor::~AssetProcessor()
+	AssetProcessorCLI::~AssetProcessorCLI()
 	{
 	}
 
-	int AssetProcessor::Run()
+	int AssetProcessorCLI::Run()
 	{
 		Initialize();
 		PostInit();
@@ -308,7 +308,7 @@ namespace CE
 
 		struct ImportJobEntry
 		{
-			Array<IO::Path> productAssetDependencies{};
+			HashSet<IO::Path> productAssetDependencies{};
 			AssetImportJob* job = nullptr;
 		};
 
@@ -333,7 +333,7 @@ namespace CE
 			// Get product asset dependencies required by the asset importer.
 
 			Array<Name> productAssetDependencies = assetImporter->GetProductAssetDependencies();
-			Array<IO::Path> productDependencies{};
+			HashSet<IO::Path> productDependencies{};
 			for (const Name& productAssetName : productAssetDependencies)
 			{
 				IO::Path assetPath = Bundle::GetAbsoluteBundlePath(productAssetName);
@@ -368,7 +368,19 @@ namespace CE
 				job->SetAutoDelete(true);
 				importJobsByProductPath[job->GetProductPath()] = job;
 
-				importJobs.Add({ productDependencies, job });
+				Array<Name> perJobProductDependencies = job->PrepareProductAssetDependencies();
+				HashSet<IO::Path> finalProductDependencies{};
+
+				for (const auto& dependency : perJobProductDependencies)
+				{
+					finalProductDependencies.Add(dependency.GetString());
+				}
+				for (const auto& dependency : productDependencies)
+				{
+					finalProductDependencies.Add(dependency);
+				}
+
+				importJobs.Add({ finalProductDependencies, job });
 			}
 		}
 
@@ -451,7 +463,7 @@ namespace CE
 		return failCounter;
 	}
 
-	void AssetProcessor::Initialize()
+	void AssetProcessorCLI::Initialize()
 	{
 		ModuleManager::Get().LoadModule("Core");
 		ModuleManager::Get().LoadModule("CoreSettings");
@@ -471,7 +483,7 @@ namespace CE
 		ModuleManager::Get().LoadModule("EditorEngine");
 	}
 
-	void AssetProcessor::PostInit()
+	void AssetProcessorCLI::PostInit()
 	{
 		gEditorMode = EditorMode::AssetProcessor;
 
@@ -494,7 +506,7 @@ namespace CE
 		RPI::RPISystem::Get().Initialize();
 	}
 
-	void AssetProcessor::PreShutdown()
+	void AssetProcessorCLI::PreShutdown()
 	{
 		auto app = PlatformApplication::Get();
 
@@ -507,7 +519,7 @@ namespace CE
 		app->PreShutdown();
 	}
 
-	void AssetProcessor::Shutdown()
+	void AssetProcessorCLI::Shutdown()
 	{
 		auto app = PlatformApplication::Get();
 

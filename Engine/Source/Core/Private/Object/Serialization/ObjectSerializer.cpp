@@ -24,6 +24,7 @@ namespace CE
         { TYPEID(Vec2), 13 },
         { TYPEID(Vec3), 14 },
         { TYPEID(Vec4), 15 },
+        { TYPEID(Color), 15 },
         { TYPEID(Vec2i), 16 },
         { TYPEID(Vec3i), 17 },
         { TYPEID(Vec4i), 18 },
@@ -988,6 +989,8 @@ namespace CE
                         field->ForceSetFieldValue<Vec3>(instance, value);
                     else if (fieldTypeId == TYPEID(Vec4))
                         field->ForceSetFieldValue<Vec4>(instance, value);
+                    else if (fieldTypeId == TYPEID(Color))
+                        field->ForceSetFieldValue<Color>(instance, value);
                 }
                 break;
             }

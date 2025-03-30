@@ -100,6 +100,31 @@ namespace CE::Editor
                 meshComponent->SetMaterial(plasticMaterial, 0, 1);
             }
 
+            Ref<StaticMesh> carMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Engine/Assets/Sandbox/car");
+            StaticMeshActor* carActor = CreateObject<StaticMeshActor>(scene, "CarActor");
+            scene->AddActor(carActor);
+            {
+                StaticMeshComponent* meshComponent = carActor->GetMeshComponent();
+                meshComponent->SetStaticMesh(carMesh);
+                meshComponent->SetLocalPosition(Vec3(0, 0, 5));
+                meshComponent->SetLocalEulerAngles(Vec3(0, -90, 0));
+                meshComponent->SetLocalScale(Vec3(1, 1, 1));
+
+                auto modelAsset = carMesh->GetModelAsset();
+                auto lodAsset = modelAsset->GetModelLod(0);
+
+                for (int i = 0; i < meshComponent->GetLodSubMeshCount(0); ++i)
+                {
+                    const RPI::ModelLodSubMesh& subMesh = lodAsset->GetSubMesh(i);
+                    Ref<CE::Material> builtinMaterial = carMesh->GetBuiltinMaterial(subMesh.materialIndex);
+
+                    meshComponent->SetMaterial(aluminumMaterial, 0, i);
+                    // TODO: Find out why built-in materials are not working
+                    //meshComponent->SetMaterial(builtinMaterial.Get(), 0, subMesh.materialIndex);
+                    //builtinMaterial->ApplyProperties();
+                }
+            }
+
             StaticMeshActor* sphereActor = CreateObject<StaticMeshActor>(scene, "SphereMesh");
             scene->AddActor(sphereActor);
 	        {

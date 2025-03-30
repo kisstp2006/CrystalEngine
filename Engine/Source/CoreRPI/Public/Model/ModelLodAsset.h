@@ -43,6 +43,8 @@ namespace CE::RPI
 
         u32 GetSubMeshCount() const { return subMeshes.GetSize(); }
 
+        const ModelLodSubMesh& GetSubMesh(u32 index) const { return subMeshes[index]; }
+
     private:
 
         FIELD()
