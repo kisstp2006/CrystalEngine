@@ -82,9 +82,9 @@ namespace CE
     };
 
     CLASS(Abstract)
-    class ENGINE_API MaterialInterface : public Object
+    class ENGINE_API MaterialInterface : public Asset
     {
-        CE_CLASS(MaterialInterface, Object)
+        CE_CLASS(MaterialInterface, Asset)
     public:
 
         MaterialInterface();

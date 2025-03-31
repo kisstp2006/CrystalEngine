@@ -117,11 +117,16 @@ namespace CE::Editor
                 {
                     const RPI::ModelLodSubMesh& subMesh = lodAsset->GetSubMesh(i);
                     Ref<CE::Material> builtinMaterial = carMesh->GetBuiltinMaterial(subMesh.materialIndex);
+                    //builtinMaterial->SetShader(standardShader);
 
-                    meshComponent->SetMaterial(aluminumMaterial, 0, i);
-                    // TODO: Find out why built-in materials are not working
-                    //meshComponent->SetMaterial(builtinMaterial.Get(), 0, subMesh.materialIndex);
+                    //builtinMaterial->SetProperty("_AlbedoTex", plasticAlbedoTex);
+                    //builtinMaterial->SetProperty("_NormalTex", plasticNormalTex);
+                    //builtinMaterial->SetProperty("_MetallicTex", plasticMetallicTex);
+                    //builtinMaterial->SetProperty("_RoughnessTex", plasticRoughnessTex);
                     //builtinMaterial->ApplyProperties();
+
+                    //meshComponent->SetMaterial(aluminumMaterial, 0, i);
+                    meshComponent->SetMaterial(builtinMaterial.Get(), 0, subMesh.materialIndex);
                 }
             }
 
@@ -473,14 +478,6 @@ namespace CE::Editor
                         .OnClick([this]
                         {
                             SampleWidgetWindow::Show();
-                        }),
-
-                        // TODO: Add Fusion Demo here
-                        FNew(FMenuItem)
-                        .Text("Fusion Demo")
-                        .OnClick([this]
-                        {
-                            FusionDemoWindow::Show();
                         }),
 
 						FNew(FMenuItem)

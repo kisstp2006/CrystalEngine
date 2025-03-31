@@ -28,7 +28,6 @@
 
 #include "CrystalEditor/Windows/Misc/AboutWindow.h"
 #include "CrystalEditor/Windows/Misc/SampleWidgetWindow.h"
-#include "CrystalEditor/Windows/Misc/FusionDemoWindow.h"
 
 // - Debug -
 #include "CrystalEditor/Windows/Debug/FusionImageAtlasWindow.h"

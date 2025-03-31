@@ -87,6 +87,8 @@ namespace CE::RPI
 
 		bool IsInitialized() const { return isInitialized; }
 
+		RPI::Texture* FindBuiltinTexture(const Name& name);
+
 	private:
 
 		RPISystem() = default;
@@ -135,6 +137,7 @@ namespace CE::RPI
 		HashMap<SIZE_T, RHI::Sampler*> samplerCache{};
 
 		HashMap<BuiltinDrawItemTag, RHI::DrawListTag> builtinDrawTags{};
+		HashMap<Name, RPI::Texture*> builtinTextures;
 
 		b8 isFirstTick = true;
 		clock_t startTime;

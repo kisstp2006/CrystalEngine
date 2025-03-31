@@ -388,6 +388,8 @@ namespace CE
 
             deserializer.Deserialize(stream);
 
+            object->OnAfterDeserialize();
+
             serializedObject.isLoaded = true;
         }
 
@@ -516,6 +518,8 @@ namespace CE
             {
                 ClassType* targetClass = objectsToSerialize[i]->GetClass();
                 ObjectSerializer serializer{ bundle, objectsToSerialize[i], (u32)schemaTypeToIndex[targetClass] };
+
+                objectsToSerialize[i]->OnBeforeSerialize();
 
                 serializer.Serialize(stream);
             }
@@ -1283,6 +1287,11 @@ namespace CE
                     DeserializeField(structField, structInstance, stream, structSchema.fields[i]);
                 }
 
+                if (structType != nullptr && structInstance != nullptr)
+                {
+                    structType->OnAfterDeserialize(structInstance);
+                }
+
                 break;
             }
             case 0x1B: // Uuid
@@ -1616,6 +1625,11 @@ namespace CE
         {
             StructType* structType = (StructType*)field->GetDeclarationType();
             void* structInstance = field->GetFieldInstance(instance);
+
+            if (structType != nullptr && structInstance != nullptr)
+            {
+                structType->OnBeforeSerialize(structInstance);
+            }
 
             for (int i = 0; i < structType->GetFieldCount(); ++i)
             {

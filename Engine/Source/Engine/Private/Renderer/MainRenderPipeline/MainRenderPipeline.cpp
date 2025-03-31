@@ -284,10 +284,11 @@ namespace CE
     	// - Test Compute Pass -
 
     	auto assetManager = AssetManager::Get();
-    	Ref<CE::ComputeShader> computeShader = assetManager->LoadAssetAtPath<CE::ComputeShader>("/Engine/Assets/Sandbox/TestCompute");
 
-    	if (false)
+	    if (false)
     	{
+	    	Ref<CE::ComputeShader> computeShader = assetManager->LoadAssetAtPath<CE::ComputeShader>("/Engine/Assets/Sandbox/TestCompute");
+
     		auto computePass = CreateObject<RPI::ComputePass>(this, "TestComputePass");
     		{
     			Vec3i invocationSize = computeShader->GetReflection().invocationSize;

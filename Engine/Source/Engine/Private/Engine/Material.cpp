@@ -19,7 +19,7 @@ namespace CE
 
     void CE::Material::SetShader(Ref<CE::Shader> shader)
     {
-        if (this->shader == shader)
+        if (this->shader == shader && material != nullptr && shaderCollection != nullptr)
             return;
 
         valuesModified = true;
@@ -125,11 +125,13 @@ namespace CE
 
         if (shader != nullptr)
         {
+            // We need to actually apply the shader if it was already serialized!
             Ref<CE::Shader> resetShader = shader;
             shaderCollection = nullptr;
             this->shader = nullptr;
 
             SetShader(resetShader.Get());
+            ApplyProperties();
         }
         else
         {
@@ -314,6 +316,19 @@ namespace CE
                     material->SetPropertyValue(prop.name, prop.textureValue.texture->GetRpiTexture());
                     material->SetPropertyValue(prop.name.GetString() + "Transform", Vec4(prop.textureValue.offset, prop.textureValue.scaling));
                 }
+                else if (prop.textureValue.textureName.IsValid())
+                {
+                    auto& rpiSystem = RPI::RPISystem::Get();
+                    RPI::Texture* builtinTexture = rpiSystem.FindBuiltinTexture(prop.textureValue.textureName);
+
+                    if (builtinTexture != nullptr)
+                    {
+                        material->SetPropertyValue(prop.name, builtinTexture);
+                        material->SetPropertyValue(prop.name.GetString() + "Transform", Vec4(prop.textureValue.offset, prop.textureValue.scaling));
+                    }
+                }
+                break;
+            case MaterialPropertyType::None:
                 break;
             }
         }

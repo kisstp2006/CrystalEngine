@@ -270,6 +270,8 @@ namespace CE::RPI
         }
         vertexBuffers.Clear();
 
+        builtinTextures.Clear();
+
         delete defaultNormalTex; defaultNormalTex = nullptr;
         delete defaultAlbedoTex; defaultAlbedoTex = nullptr;
         delete defaultRoughnessTex; defaultRoughnessTex = nullptr;
@@ -418,6 +420,13 @@ namespace CE::RPI
         rhiDestructionQueue.Add({ .resource = rhiResource, .frameCounter = 0 });
     }
 
+    RPI::Texture* RPISystem::FindBuiltinTexture(const Name& name)
+    {
+        if (!builtinTextures.KeyExists(name))
+            return nullptr;
+        return builtinTextures[name];
+    }
+
     void RPISystem::CreateDefaultTextures()
     {
         auto prevTime = clock();
@@ -444,11 +453,15 @@ namespace CE::RPI
 
         defaultAlbedoTex = new RPI::Texture(albedoTex, samplerDesc);
 
+        builtinTextures["white"] = defaultAlbedoTex;
+
         textureDesc.name = "Default Normal";
         textureDesc.format = RHI::Format::R8G8B8A8_UNORM;
         auto normalTex = RHI::gDynamicRHI->CreateTexture(textureDesc);
 
         defaultNormalTex = new RPI::Texture(normalTex, samplerDesc);
+
+        builtinTextures["bump"] = defaultAlbedoTex;
 
         textureDesc.name = "Default Roughness";
         textureDesc.format = RHI::Format::R8_UNORM;

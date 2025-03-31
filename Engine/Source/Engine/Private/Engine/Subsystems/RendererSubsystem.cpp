@@ -357,6 +357,7 @@ namespace CE
 
 			if (app)
 			{
+				// Emplace attachments from Fusion
 				app->EmplaceFrameAttachments();
 
 				// Cleanup first
@@ -369,6 +370,8 @@ namespace CE
 					nativeContext->shaderReadOnlyAttachmentDependencies.Clear();
 					nativeContext->shaderWriteAttachmentDependencies.Clear();
 				}
+
+				//
 
 				for (FGameWindow* renderViewport : renderViewports)
 				{
@@ -433,10 +436,12 @@ namespace CE
 							}
 						}
 
+						// Emplace all attachments and then add scopes from the pipeline
 						rpiPipeline->ImportScopeProducers(scheduler);
 					}
 				}
 
+				// Enqueue Scopes from Fusion
 				app->EnqueueScopes();
 			}
 		}
