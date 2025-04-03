@@ -5,7 +5,7 @@ namespace CE::RPI
     Material::Material(Shader* shader) : ownsShaderCollection(true)
     {
         shaderCollection = new ShaderCollection();
-        shaderCollection->Add(ShaderCollection::Item{ .shaderTag = shader->GetName(), .shader = shader, .enabled = true, .drawListOverride = DrawListTag() });
+        shaderCollection->Add(ShaderCollection::Item{ .shaderTag = shader->GetName(), .shader = shader, .enabled = true, .drawListOverride = RHI::DrawListTag() });
         currentShaderItem = 0;
 
         SetShaderCollection(shaderCollection);
@@ -16,14 +16,14 @@ namespace CE::RPI
     Material::Material(ShaderCollection* shaderCollection)
 		: ownsShaderCollection(false), shaderCollection(shaderCollection)
 	{
-        MaterialSystem::Get().RemoveMaterial(this);
+        MaterialSystem::Get().AddMaterial(this);
 
         SetShaderCollection(shaderCollection);
 	}
 
 	Material::~Material()
 	{
-        MaterialSystem::Get().materials.Remove(this);
+        MaterialSystem::Get().RemoveMaterial(this);
 
 		delete shaderResourceGroup; shaderResourceGroup = nullptr;
 
