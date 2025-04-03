@@ -18,6 +18,8 @@ namespace CE::Editor
 
         void Construct() override;
 
+        void OnBeginDestroy() override;
+
         void OnAssetPathTreeUpdated(PathTree& pathTree) override;
 
     public: // - Public API -
@@ -31,6 +33,8 @@ namespace CE::Editor
 
         FUNCTION()
         void OnLeftExpansionChanged(FExpandableSection* section);
+
+        void UpdateBreadCrumbs();
 
         void UpdateAssetGridView();
 
@@ -47,6 +51,8 @@ namespace CE::Editor
 
         PathTreeNode* currentDirectory = nullptr;
         CE::Name currentPath = {};
+
+        Ref<FHorizontalStack> breadCrumbsContainer = nullptr;
 
         Array<Ref<FSelectableButton>> selectables;
 

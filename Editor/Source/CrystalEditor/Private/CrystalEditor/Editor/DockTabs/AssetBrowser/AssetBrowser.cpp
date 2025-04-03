@@ -53,11 +53,29 @@ namespace CE::Editor
                     FAssignNew(FHorizontalStack, searchBarStack)
                     .ContentVAlign(VAlign::Center)
                     .ContentHAlign(HAlign::Left)
+                    .Gap(10.0f)
                     .MinHeight(25)
                     .Padding(Vec4(1, 1, 1, 1) * 2.5f)
                     (
-                        FNew(FWidget)
-                        .FillRatio(1.0f),
+                        FNew(FImageButton)
+                        .Image(FBrush("/Editor/Assets/Icons/Refresh"))
+                        .Width(18)
+                        .Height(18)
+                        .Padding(Vec4(1, 1, 1, 1) * 3)
+                        .Style("Button"),
+
+                        FNew(FScrollBox)
+                        .HideHorizontalScroll(true)
+                        .HorizontalScroll(true)
+                        .VerticalScroll(false)
+                        .FillRatio(1.0f)
+                        (
+                            FAssignNew(FHorizontalStack, breadCrumbsContainer)
+                            .Gap(0)
+                            .VAlign(VAlign::Fill)
+                            .HAlign(HAlign::Left)
+                            .Padding(Vec4(1, 0, 1, 0) * 2.5f)
+                        ),
 
                         FNew(FTextButton)
                         .Text("Settings")
@@ -105,6 +123,9 @@ namespace CE::Editor
 
         leftSections = { directorySection };
 
+        AssetRegistry* registry = AssetRegistry::Get();
+        registry->AddRegistryListener(this);
+
         treeViewModel = CreateObject<AssetBrowserTreeViewModel>(this, "TreeViewModel");
         treeViewModel->Init();
         treeView->Model(treeViewModel.Get());
@@ -116,6 +137,17 @@ namespace CE::Editor
         currentPath = "/";
         currentDirectory = AssetRegistry::Get()->GetCachedPathTree().GetRootNode();
         UpdateAssetGridView();
+    }
+
+    void AssetBrowser::OnBeginDestroy()
+    {
+        Super::OnBeginDestroy();
+
+        AssetRegistry* registry = AssetRegistry::Get();
+        if (registry)
+        {
+            registry->RemoveRegistryListener(this);
+        }
     }
 
     void AssetBrowser::OnAssetPathTreeUpdated(PathTree& pathTree)
@@ -140,7 +172,7 @@ namespace CE::Editor
             if (currentDirectory != nullptr)
             {
                 currentDirectory = nullptr;
-                currentPath = {};
+                currentPath = "/";
                 UpdateAssetGridView();
             }
             return;
@@ -152,13 +184,6 @@ namespace CE::Editor
                 continue;
 
             PathTreeNode* node = (PathTreeNode*)index.GetDataPtr();
-
-            /*if (!directoryTree.GetRootNode()->ChildExistsRecursive(node))
-            {
-                // Directory was deleted!
-                selectionModel->ClearSelection(); // This will recursively call current function again
-                break;
-            }*/
 
             if (currentDirectory != node)
             {
@@ -182,11 +207,67 @@ namespace CE::Editor
         }
     }
 
+    void AssetBrowser::UpdateBreadCrumbs()
+    {
+        breadCrumbsContainer->QueueDestroyAllChildren();
+
+        if (currentPath == "/")
+        {
+            breadCrumbsContainer->AddChild(
+                FNew(FTextButton)
+                .Text("/")
+                .OnClicked([this]
+                {
+                    SetCurrentPath("/");
+                })
+                .Style("Button.Icon")
+                .Padding(Vec4(1, 1, 1, 1) * 5.0f)
+            );
+
+            return;
+        }
+
+        Array<String> split;
+        currentPath.GetString().Split("/", split);
+        String pathIterator = "";
+
+        for (int i = 0; i < split.GetSize(); ++i)
+        {
+            pathIterator += "/";
+
+            breadCrumbsContainer->AddChild(
+                FNew(FTextButton)
+                .Text("/")
+                .OnClicked([pathIterator, this]
+                {
+                    SetCurrentPath(pathIterator);
+                })
+                .Style("Button.Icon")
+                .Padding(Vec4(1, 1, 1, 1) * 5.0f)
+            );
+
+            pathIterator += split[i];
+
+            breadCrumbsContainer->AddChild(
+                FNew(FTextButton)
+                .Text(split[i])
+                .OnClicked([pathIterator, this]
+                {
+                    SetCurrentPath(pathIterator);
+                })
+                .Style("Button.Icon")
+                .Padding(Vec4(1, 1, 1, 1) * 5.0f)
+            );
+        }
+    }
+
     void AssetBrowser::UpdateAssetGridView()
     {
         gridViewModel->SetCurrentDirectory(currentPath);
 
         gridView->OnModelUpdate();
+
+        UpdateBreadCrumbs();
     }
 
     void AssetBrowser::SetCurrentPath(const CE::Name& path)
@@ -198,6 +279,12 @@ namespace CE::Editor
         PathTreeNode* node = registry->GetCachedPathTree().GetNode(path);
         if (!node || node->nodeType != PathTreeNodeType::Directory)
             return;
+        if (node == registry->GetCachedPathTree().GetRootNode())
+        {
+            treeView->SelectionModel()->ClearSelection();
+            return;
+        }
+
         FModelIndex index = treeViewModel->FindIndex(node);
         if (!index.IsValid())
             return;
