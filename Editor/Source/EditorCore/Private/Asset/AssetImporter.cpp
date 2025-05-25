@@ -275,6 +275,11 @@ namespace CE::Editor
 
     	rootNode.Clear();
 
+    	if (!isGameAsset && productPath.Exists())
+    	{
+    		IO::Path::Remove(productPath);
+    	}
+
 		if (productPath.Exists())
 		{
 			LoadBundleArgs args{

@@ -47,6 +47,26 @@ namespace CE
 		Super::OnAfterConstruct();
 	}
 
+	void CE::Shader::OnAfterDeserialize()
+	{
+		Super::OnAfterDeserialize();
+
+		SubShader* subShader = GetSubShader();
+
+		if (!subShader)
+		{
+			String::IsAlphabet('a');
+		}
+	}
+
+	u32 CE::Shader::GetShaderPassCount()
+	{
+		SubShader* subShader = GetSubShader();
+		if (!subShader)
+			return 0;
+		return subShader->passes.GetSize();
+	}
+
 	RPI::ShaderCollection* CE::Shader::GetShaderCollection()
 	{
 		LockGuard<SharedMutex> lock{ rpiShaderMutex };
@@ -55,7 +75,7 @@ namespace CE
 		{
 			shaderCollection = RPI::ShaderCollection();
 
-			SubShader* subShader = GetSubshader();
+			SubShader* subShader = GetSubShader();
 
 			for (int i = 0; i < GetShaderPassCount(); i++)
 			{
@@ -131,7 +151,7 @@ namespace CE
 		return &shaderCollection;
 	}
 
-	SubShader* CE::Shader::GetSubshader()
+	SubShader* CE::Shader::GetSubShader()
 	{
 		String platformName = PlatformMisc::GetPlatformName();
 #if PLATFORM_DESKTOP
