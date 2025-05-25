@@ -142,21 +142,23 @@ namespace CE
 
 		void OnAfterConstruct() override;
 
+		void OnAfterDeserialize() override;
+
 		inline Name GetShaderName() const
 		{
 			return shaderName;
 		}
 
-		inline u32 GetShaderPassCount() { return GetSubshader()->passes.GetSize(); }
+		u32 GetShaderPassCount();
 
 		inline ShaderPass* GetShaderPass(int index)
 		{
-			return &GetSubshader()->passes[index];
+			return &GetSubShader()->passes[index];
 		}
 
 		inline Name GetShaderPassName(int index)
 		{
-			return GetSubshader()->passes[index].passName;
+			return GetSubShader()->passes[index].passName;
 		}
 
 		RPI::ShaderCollection* GetShaderCollection();
@@ -165,7 +167,7 @@ namespace CE
 
 	protected:
 
-		SubShader* GetSubshader();
+		SubShader* GetSubShader();
 
 		SharedMutex rpiShaderMutex{};
 		RPI::ShaderCollection shaderCollection{};
