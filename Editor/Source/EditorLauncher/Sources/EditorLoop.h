@@ -40,6 +40,8 @@ private:
 	// Application
 	CE::PlatformApplication* app = nullptr;
 	PlatformWindow* mainWindow = nullptr;
+	PlatformWindow* splashWindow = nullptr;
+	bool showSplashScreen = true;
 
 	IO::Path projectPath{};
 

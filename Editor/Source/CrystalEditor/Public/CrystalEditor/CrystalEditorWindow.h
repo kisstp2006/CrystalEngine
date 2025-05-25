@@ -12,6 +12,9 @@ namespace CE::Editor
 
         static CrystalEditorWindow* Get();
 
+        //! Internal use only!
+        static void Launch();
+
     protected:
 
         CrystalEditorWindow();

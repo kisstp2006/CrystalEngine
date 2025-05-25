@@ -55,6 +55,8 @@ namespace CE
 
         SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
         u32 mouseBtnMask = SDL_GetGlobalMouseState(&globalMousePosition.x, &globalMousePosition.y);
+
+        // TODO: Fix keyStatesDelayed: It is way too fast if FPS is high
         
         switch (event->type)
         {

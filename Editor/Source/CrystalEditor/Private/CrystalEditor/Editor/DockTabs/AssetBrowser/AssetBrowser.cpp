@@ -314,6 +314,11 @@ namespace CE::Editor
                 importedSourceAssetPath = gProjectPath / currentPath.GetString().GetSubstring(1) / selectedFile.GetFileName();
             }
 
+            if (importedSourceAssetPath.Exists())
+            {
+                IO::Path::Remove(importedSourceAssetPath);
+            }
+
             IO::Path::Copy(selectedFile, importedSourceAssetPath);
 
             ReimportAsset(importedSourceAssetPath);

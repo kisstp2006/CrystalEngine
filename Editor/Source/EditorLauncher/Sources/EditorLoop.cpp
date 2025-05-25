@@ -238,16 +238,55 @@ void EditorLoop::PostInit()
 			IO::Path::CreateDirectories(editorHistoryFolder);
 		}
 
-		FNativeContext* crystalEditorCtx = FNativeContext::Create(mainWindow, "CrystalEditor", rootContext);
-		rootContext->AddChildContext(crystalEditorCtx);
+		if (showSplashScreen)
+		{
+			mainWindow->Hide();
 
-		Ref<CrystalEditorWindow> crystalEditor = nullptr;
+			f32 systemScaling = PlatformApplication::Get()->GetSystemDpiScaling();
+			f32 fusionScaling = FusionApplication::Get()->GetDefaultScalingFactor();
 
-		FAssignNewOwned(CrystalEditorWindow, crystalEditor, crystalEditorCtx);
-		crystalEditorCtx->SetOwningWidget(crystalEditor.Get());
+#if PLATFORM_MAC
+			f32 finalScaling = 1.0f;
+#else
+			f32 finalScaling = systemScaling * fusionScaling;
+#endif
 
-		mainWindow->SetResizable(true);
-		mainWindow->Show();
+			splashWindow = app->CreatePlatformWindow("SplashScreen", 800 * finalScaling, 600 * finalScaling, PlatformWindowInfo{
+				.maximised = false,
+				.fullscreen = false,
+				.resizable = false,
+				.hidden = true,
+				.windowFlags = PlatformWindowFlags::Utility | PlatformWindowFlags::DestroyOnClose
+			});
+
+			splashWindow->SetBorderless(true);
+
+			// TODO: Show splash screen
+			FNativeContext* nativeCtx = FNativeContext::Create(splashWindow, "CrystalEditorSplashScreen", rootContext);
+			rootContext->AddChildContext(nativeCtx);
+
+			Ref<CrystalEditorSplashWindow> splashScreen = nullptr;
+
+			FAssignNewOwned(CrystalEditorSplashWindow, splashScreen, nativeCtx);
+			nativeCtx->SetOwningWidget(splashScreen.Get());
+
+			splashWindow->Show();
+
+			splashScreen->Launch(); // Launch the editor
+		}
+		else
+		{
+			FNativeContext* crystalEditorCtx = FNativeContext::Create(mainWindow, "CrystalEditor", rootContext);
+			rootContext->AddChildContext(crystalEditorCtx);
+
+			Ref<CrystalEditorWindow> crystalEditor = nullptr;
+
+			FAssignNewOwned(CrystalEditorWindow, crystalEditor, crystalEditorCtx);
+			crystalEditorCtx->SetOwningWidget(crystalEditor.Get());
+
+			mainWindow->SetResizable(true);
+			mainWindow->Show();
+		}
 	}
 
 	auto tickDelegate = MemberDelegate(&EditorLoop::ExposedTick, this);
@@ -290,6 +329,9 @@ void EditorLoop::RunLoop()
 
 		auto curTime = clock();
 		deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
+
+		// Asset Processor Tick
+		CrystalEditorModule::Get()->GetAssetProcessor()->Tick();
 
 		// App & Input Tick
 		app->Tick();

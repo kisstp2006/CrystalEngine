@@ -9,7 +9,24 @@ namespace CE::Editor
         return instance;
 	}
 
-    CrystalEditorWindow::CrystalEditorWindow()
+	void CrystalEditorWindow::Launch()
+	{
+		auto mainWindow = PlatformApplication::Get()->GetMainWindow();
+		auto rootContext = FusionApplication::Get()->GetRootContext();
+
+		FNativeContext* crystalEditorCtx = FNativeContext::Create(mainWindow, "CrystalEditor", rootContext);
+		rootContext->AddChildContext(crystalEditorCtx);
+
+		Ref<CrystalEditorWindow> crystalEditor = nullptr;
+
+		FAssignNewOwned(CrystalEditorWindow, crystalEditor, crystalEditorCtx);
+		crystalEditorCtx->SetOwningWidget(crystalEditor.Get());
+
+		mainWindow->SetResizable(true);
+		mainWindow->Show();
+	}
+
+	CrystalEditorWindow::CrystalEditorWindow()
     {
 
     }

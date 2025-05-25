@@ -64,8 +64,6 @@ namespace CE
     	includePaths = {
         	EngineDirectories::GetEngineInstallDirectory() / "Engine/Shaders"
     	};
-
-    	RunAll();
     }
 
     void AssetProcessor::Shutdown()
@@ -77,8 +75,19 @@ namespace CE
         if (!validScanPath)
             return;
 
+    	totalScheduledJobs = 0;
+    	totalFinishedJobs = 0;
+    	totalSuccessfulJobs = 0;
+
         allSourceAssetPaths.Clear();
         allProductAssetPaths.Clear();
+
+    	sourcePathsByAssetDef.Clear();
+    	productPathsByAssetDef.Clear();
+
+    	productAssetPaths.Clear();
+    	importers.Clear();
+    	assetDefinitions.Clear();
 
         scanPath.RecursivelyIterateChildren([&](const IO::Path& path)
         {
@@ -188,12 +197,6 @@ namespace CE
             }
         });
 
-        HashMap<AssetDefinition*, Array<IO::Path>> sourcePathsByAssetDef{};
-        HashMap<AssetDefinition*, Array<IO::Path>> productPathsByAssetDef{};
-
-        // Paths to product assets to be generated in this run
-        HashSet<IO::Path> productAssetPaths{};
-
         AssetDefinitionRegistry* assetDefRegistry = GetAssetDefinitionRegistry();
 
         for (int i = 0; i < allSourceAssetPaths.GetSize(); i++)
@@ -218,9 +221,6 @@ namespace CE
             }
         }
 
-        Array<Ref<AssetImporter>> importers{};
-        Array<AssetDefinition*> assetDefinitions{};
-
         struct ImportJobEntry
         {
             HashSet<IO::Path> productAssetDependencies{};
@@ -230,7 +230,7 @@ namespace CE
         Array<ImportJobEntry> importJobs{};
         HashMap<IO::Path, AssetImportJob*> importJobsByProductPath{};
 
-    	JobCompletion jobCompletion = JobCompletion();
+    	//JobCompletion jobCompletion = JobCompletion();
 
         for (const auto& [assetDef, sourcePaths] : sourcePathsByAssetDef)
 		{
@@ -285,6 +285,24 @@ namespace CE
 				job->SetAutoDelete(true);
 				importJobsByProductPath[job->GetProductPath()] = job;
 
+				totalScheduledJobs++;
+
+				job->onFinish.Bind([this](AssetImportJob* job)
+				{
+					LockGuard guard{ mainThreadDispatcherLock };
+
+					WeakRef<AssetProcessor> selfRef = this;
+					bool success = job->Succeeded();
+
+					mainThreadDispatcher.Add([selfRef, success]
+					{
+						if (Ref<AssetProcessor> self = selfRef.Lock())
+						{
+							self->OnJobFinished(success);
+						}
+					});
+				});
+
 				Array<Name> perJobProductDependencies = job->PrepareProductAssetDependencies();
 				HashSet<IO::Path> finalProductDependencies{};
 
@@ -299,7 +317,7 @@ namespace CE
 
 				importJobs.Add({ finalProductDependencies, job });
 
-				job->SetDependent(&jobCompletion);
+				//job->SetDependent(&jobCompletion);
 			}
 		}
 
@@ -315,6 +333,8 @@ namespace CE
 			}
 		}
 
+    	inProgress = true;
+
 		// Launch the jobs
 		for (const ImportJobEntry& entry : importJobs)
 		{
@@ -322,59 +342,95 @@ namespace CE
 		}
 
 		// Wait for all jobs to complete
-    	jobCompletion.StartAndWaitForCompletion();
-
-		Array<AssetImportJobResult> assetImportResults{};
-		Array<u32> assetDefinitionVersions{};
-		Array<u32> assetImporterVersions{};
-
-		for (int i = 0; i < importers.GetSize(); ++i)
-		{
-			int count = importers[i]->GetResults().GetSize();
-			assetImportResults.AddRange(importers[i]->GetResults());
-			for (int j = 0; j < count; ++j)
-			{
-				assetDefinitionVersions.Add(assetDefinitions[i]->GetAssetVersion());
-				assetImporterVersions.Add(importers[i]->GetImporterVersion());
-			}
-			importers[i]->BeginDestroy();
-		}
-		importers.Clear();
-
-		int failCounter = 0;
-
-		// Update time stamps
-		{
-			for (int i = 0; i < assetImportResults.GetSize(); i++)
-			{
-				const auto& [success, sourcePath, productPath, errorMessage] = assetImportResults[i];
-
-				IO::Path relativePath = IO::Path::GetRelative(sourcePath, inputRoot);
-				IO::Path stampFilePath = tempPath / relativePath.ReplaceExtension(".stamp");
-				if (success)
-				{
-					FileStream writer = FileStream(stampFilePath, Stream::Permissions::WriteOnly);
-					writer.SetBinaryMode(true);
-
-					writer << StampFileVersion;
-					writer << sourcePath.GetLastWriteTime().ToNumber();
-
-					writer << Bundle::GetCurrentMajor();
-					writer << Bundle::GetCurrentMinor();
-					writer << Bundle::GetCurrentPatch();
-
-					writer << assetDefinitionVersions[i];
-
-					writer << assetImporterVersions[i];
-				}
-				else
-				{
-					failCounter++;
-				}
-			}
-		}
+    	//jobCompletion.StartAndWaitForCompletion();
     }
 
-    
+    void AssetProcessor::Tick()
+    {
+    	LockGuard guard{ mainThreadDispatcherLock };
+
+	    for (int i = mainThreadDispatcher.GetSize() - 1; i >= 0; --i)
+	    {
+	    	mainThreadDispatcher[i].InvokeIfValid();
+
+		    mainThreadDispatcher.RemoveAt(i);
+	    }
+    }
+
+    void AssetProcessor::OnJobFinished(bool success)
+    {
+    	totalFinishedJobs++;
+
+    	if (success)
+    	{
+    		totalSuccessfulJobs++;
+    	}
+
+    	if (totalFinishedJobs == totalScheduledJobs)
+    	{
+    		inProgress = false;
+    	}
+
+    	onProgressUpdate.Broadcast(this);
+
+    	if (totalFinishedJobs == totalScheduledJobs)
+    	{
+    		// We finished executing all the jobs!
+
+    		Array<AssetImportJobResult> assetImportResults{};
+    		Array<u32> assetDefinitionVersions{};
+    		Array<u32> assetImporterVersions{};
+
+    		for (int i = 0; i < importers.GetSize(); ++i)
+    		{
+    			int count = importers[i]->GetResults().GetSize();
+    			assetImportResults.AddRange(importers[i]->GetResults());
+    			for (int j = 0; j < count; ++j)
+    			{
+    				assetDefinitionVersions.Add(assetDefinitions[i]->GetAssetVersion());
+    				assetImporterVersions.Add(importers[i]->GetImporterVersion());
+    			}
+    			importers[i]->BeginDestroy();
+    		}
+    		importers.Clear();
+
+    		int failCounter = 0;
+
+    		// Update time stamps
+    		{
+    			for (int i = 0; i < assetImportResults.GetSize(); i++)
+    			{
+    				const auto& [success, sourcePath, productPath, errorMessage] = assetImportResults[i];
+
+    				IO::Path relativePath = IO::Path::GetRelative(sourcePath, inputRoot);
+    				IO::Path stampFilePath = tempPath / relativePath.ReplaceExtension(".stamp");
+    				if (success)
+    				{
+    					FileStream writer = FileStream(stampFilePath, Stream::Permissions::WriteOnly);
+    					writer.SetBinaryMode(true);
+
+    					writer << StampFileVersion;
+    					writer << sourcePath.GetLastWriteTime().ToNumber();
+
+    					writer << Bundle::GetCurrentMajor();
+    					writer << Bundle::GetCurrentMinor();
+    					writer << Bundle::GetCurrentPatch();
+
+    					writer << assetDefinitionVersions[i];
+
+    					writer << assetImporterVersions[i];
+    				}
+    				else
+    				{
+    					failCounter++;
+    				}
+    			}
+    		}
+
+    		totalFinishedJobs = 0;
+    		totalScheduledJobs = 0;
+    		totalSuccessfulJobs = 0;
+    	}
+    }
 } // namespace CE
 

@@ -51,7 +51,19 @@ namespace CE::IO
 		return false;
 	}
 
-    void Path::IterateChildren(std::function<void(const IO::Path& path)> func)
+	void Path::Copy(const Path& from, const Path& to)
+	{
+		try
+		{
+			fs::copy(from.impl, to.impl, fs::copy_options::recursive);
+		}
+		catch (...)
+		{
+			CE_LOG(Info, All, "Failed to copy Path from {} to {}", from.GetString(), to.GetString());
+		}
+	}
+
+	void Path::IterateChildren(std::function<void(const IO::Path& path)> func)
 	{
 		for (const auto& iter : fs::directory_iterator(impl))
 		{

@@ -159,6 +159,10 @@ namespace CE::Editor
 
 		AssetImporter* importer = nullptr;
 
+	public:
+
+		ScriptEvent<void(AssetImportJob*)> onFinish;
+
 	private:
 
 		bool success = false;

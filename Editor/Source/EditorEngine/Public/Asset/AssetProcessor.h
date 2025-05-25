@@ -28,7 +28,17 @@ namespace CE
 
         void RunAll();
 
+        void Tick();
+
+        int GetTotalJobs() const { return totalScheduledJobs; }
+        int GetFinishedJobs() const { return totalFinishedJobs; }
+        int GetSuccessfulJobs() const { return totalSuccessfulJobs; }
+
+        ScriptEvent<void(AssetProcessor*)> onProgressUpdate;
+
     protected:
+
+        void OnJobFinished(bool success);
 
         bool inProgress = false;
 
@@ -41,8 +51,26 @@ namespace CE
         Array<IO::Path> allSourceAssetPaths{};
         Array<IO::Path> allProductAssetPaths{};
 
+        SharedMutex mainThreadDispatcherLock;
+        Array<Delegate<void(void)>> mainThreadDispatcher;
+
+        int totalScheduledJobs = 0;
+        int totalFinishedJobs = 0;
+        int totalSuccessfulJobs = 0;
+
         bool validScanPath = false;
 
+
+        // - Import Processes -
+
+        HashMap<AssetDefinition*, Array<IO::Path>> sourcePathsByAssetDef{};
+        HashMap<AssetDefinition*, Array<IO::Path>> productPathsByAssetDef{};
+
+        // Paths to product assets to be generated in this run
+        HashSet<IO::Path> productAssetPaths{};
+
+        Array<Ref<AssetImporter>> importers{};
+        Array<AssetDefinition*> assetDefinitions{};
     };
     
 } // namespace CE

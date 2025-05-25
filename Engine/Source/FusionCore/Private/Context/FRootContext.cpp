@@ -114,7 +114,7 @@ namespace CE
 				event.sender = hoveredWidgetStack.Top().Get();
 				event.Reset();
 
-				if (event.sender->SupportsMouseEvents())
+				if (event.sender->SupportsMouseEvents() && event.sender->GetContext() != nullptr)
 				{
 					if (event.sender->GetContext() != nativeContext)
 					{
@@ -124,6 +124,7 @@ namespace CE
 
 					event.sender->HandleEvent(&event);
 				}
+
 				hoveredWidgetStack.Pop();
 			}
 		}

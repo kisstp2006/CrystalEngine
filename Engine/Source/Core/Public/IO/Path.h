@@ -162,10 +162,7 @@ namespace CE::IO
             return fs::create_directories(path.impl);
         }
 
-        inline static void Copy(const Path& from, const Path& to)
-        {
-            fs::copy(from.impl, to.impl, fs::copy_options::recursive);
-        }
+        static void Copy(const Path& from, const Path& to);
         
         inline static bool Remove(const Path& path)
         {

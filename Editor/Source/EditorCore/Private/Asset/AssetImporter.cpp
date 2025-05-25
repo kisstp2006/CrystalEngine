@@ -192,7 +192,7 @@ namespace CE::Editor
 
 	void AssetImportJob::Finish()
 	{
-		
+		onFinish.Broadcast(this);
 	}
 
 	void AssetImportJob::Process()
