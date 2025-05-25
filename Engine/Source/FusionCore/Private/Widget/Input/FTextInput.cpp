@@ -261,8 +261,6 @@ namespace CE
                 {
                     String str = "";
                     str.Append(c);
-                    bool isSelected = IsTextSelected();
-                    bool canRemove = CanRemoveSelectedText();
 
                     if (CanInsertAt(str, cursorPos))
                     {
@@ -275,7 +273,7 @@ namespace CE
                 }
             }
             else if ((int)keyEvent->key >= (int)KeyCode::KeypadDivide && (int)keyEvent->key <= (int)KeyCode::KeypadPeriod &&
-                keyEvent->key != KeyCode::KeypadEnter
+                    keyEvent->key != KeyCode::KeypadEnter
 #if PLATFORM_WINDOWS
                      && EnumHasFlag(keyEvent->modifiers, KeyModifier::Num)
 #endif
@@ -658,6 +656,8 @@ namespace CE
     {
         if (insertPos < 0 || insertPos > m_Text.GetLength())
             return;
+
+
 
         String newText = m_Text;
         newText.Reserve(newText.GetLength() + string.GetLength());

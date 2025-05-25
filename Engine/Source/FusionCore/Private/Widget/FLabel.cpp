@@ -47,7 +47,13 @@ namespace CE
         painter->SetPen(FPen(m_Foreground));
         painter->SetBrush(FBrush());
 
-        painter->DrawText(m_Text, Vec2(), computedSize, m_WordWrap);
+        Vec2 size = computedSize;
+        if (m_WordWrap == FWordWrap::NoWrap)
+        {
+            size.x = 0;
+        }
+
+        painter->DrawText(m_Text, Vec2(), size, m_WordWrap);
 
         if (m_Underline.GetStyle() != FPenStyle::None && m_Underline.GetColor().a > 0.001f && 
             !m_Text.IsEmpty())

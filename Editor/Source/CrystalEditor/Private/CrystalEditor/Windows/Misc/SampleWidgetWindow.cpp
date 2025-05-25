@@ -122,10 +122,15 @@ namespace CE::Editor
 
                     FNew(FComboBox)
                     .Bind_Items(BIND_PROPERTY_R(model, ItemList))
-                    .MinWidth(60)
+                    .MinWidth(60),
+
+                    FNew(FTextInput)
+                    .Width(150)
+                    .Name("DebugTextInput")
                 ),
 
                 FNew(FHorizontalStack)
+                .Gap(2)
                 .ContentVAlign(VAlign::Center)
                 .ContentHAlign(HAlign::Left)
                 (
