@@ -111,6 +111,9 @@ namespace CE::Editor
 		// - Editor -
 
 		FIELD()
+		FStyledWidgetStyle* assetImportProgressPopup = nullptr;
+
+		FIELD()
 		ComponentTreeViewStyle* componentTreeView = nullptr;
 
 		FIELD()

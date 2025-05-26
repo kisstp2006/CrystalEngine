@@ -32,7 +32,7 @@ namespace CE
 
 		bool IsInitialized() const { return isInitialized; }
 
-		AssetManager* GetAssetManager() const { return assetManager; }
+		AssetManager* GetAssetManager() const { return assetManager.Get(); }
 
 		EngineSubsystem* GetSubsystem(ClassType* subsystemClass);
 
@@ -73,7 +73,7 @@ namespace CE
 		SubClass<GameInstance> gameInstanceClass = nullptr;
 
 		FIELD()
-		AssetManager* assetManager = nullptr;
+		Ref<AssetManager> assetManager = nullptr;
 
 		FIELD()
 		Array<GameInstance*> gameInstances = {};

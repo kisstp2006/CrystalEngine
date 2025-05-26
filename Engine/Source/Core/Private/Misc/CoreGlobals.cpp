@@ -1,5 +1,5 @@
 ﻿
-#include "CoreMinimal.h"
+#include "Core.h"
 
 namespace CE
 {
@@ -10,6 +10,8 @@ namespace CE
     CORE_API IO::Path gProjectPath{};
 
     CORE_API String gProjectName{};
+
+    CORE_API ThreadId gMainThreadId = 0;
 
     CORE_API u32 gDefaultWindowWidth = 1360;
     CORE_API u32 gDefaultWindowHeight = 768;

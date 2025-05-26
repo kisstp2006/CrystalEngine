@@ -27,6 +27,8 @@ namespace CE
 
     void CoreModule::StartupModule()
     {
+        gMainThreadId = Thread::GetCurrentThreadId();
+
 		gConfigCache = new ConfigCache();
 
 #if PAL_TRAIT_BUILD_EDITOR

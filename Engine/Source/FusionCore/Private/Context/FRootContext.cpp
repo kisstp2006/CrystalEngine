@@ -97,6 +97,11 @@ namespace CE
 
 		Ref<FWidget> hoveredWidget = nativeContext->HitTest(mousePos);
 
+    	if (hoveredWidget == nullptr && !hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top()->IsOfType<FLabel>())
+    	{
+    		String::IsAlphabet('a');
+    	}
+
 		if (!hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top() != hoveredWidget &&
 			(hoveredWidget == nullptr || !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top().Get())))
 		{
@@ -109,7 +114,7 @@ namespace CE
 			event.isInside = true;
 			event.keyModifiers = keyModifierStates;
 
-			while (hoveredWidgetStack.NotEmpty() && hoveredWidget != nullptr && !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top().Get()))
+			while (hoveredWidgetStack.NotEmpty() && (hoveredWidget == nullptr || (hoveredWidget != nullptr && !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top().Get()))))
 			{
 				event.sender = hoveredWidgetStack.Top().Get();
 				event.Reset();
@@ -225,7 +230,7 @@ namespace CE
 			{
 				mouseEvent.sender = hoveredWidgetStack.Top().Get();
 
-				if (mouseEvent.sender->GetContext() != nativeContext)
+				if (mouseEvent.sender->GetContext() != nullptr && mouseEvent.sender->GetContext() != nativeContext)
 				{
 					mouseEvent.mousePosition = mouseEvent.sender->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
 					mouseEvent.prevMousePosition = mouseEvent.sender->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);

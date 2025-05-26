@@ -221,9 +221,14 @@ namespace CE
     {
         ZoneScoped;
 
+        if (Thread::GetCurrentThreadId() != gMainThreadId)
+        {
+            String::IsAlphabet('a');
+        }
+
         for (int i = destructionQueue.GetSize() - 1; i >= 0; --i)
         {
-            //if (destructionQueue[i].frameCounter >= RHI::Limits::MaxSwapChainImageCount)
+            if (destructionQueue[i].frameCounter >= RHI::Limits::MaxSwapChainImageCount)
             {
                 destructionQueue[i].object->BeginDestroy();
                 destructionQueue.RemoveAt(i);
@@ -353,6 +358,11 @@ namespace CE
 
     void FusionApplication::QueueDestroy(Object* object)
     {
+        if (Thread::GetCurrentThreadId() != gMainThreadId)
+        {
+            String::IsAlphabet('a');
+        }
+
         destructionQueue.Add({ .object = object, .frameCounter = 0 });
     }
 

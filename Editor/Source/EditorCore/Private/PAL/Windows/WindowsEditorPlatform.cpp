@@ -127,6 +127,80 @@ namespace CE::Editor
 		return result;
 	}
 
+	Array<IO::Path> WindowsEditorPlatform::ShowMultiFileSelectionDialog(const IO::Path& defaultPath,
+		const Array<FileType>& inFileTypes)
+	{
+		Array<IO::Path> result{};
+		if (inFileTypes.IsEmpty())
+			return result;
+
+		IFileOpenDialog* pfd = nullptr;
+		if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pfd))))
+		{
+			DWORD dwFlags;
+			if (SUCCEEDED(pfd->GetOptions(&dwFlags)))
+				pfd->SetOptions(dwFlags | FOS_ALLOWMULTISELECT);
+
+			List<COMDLG_FILTERSPEC> fileTypes{};
+			List<std::wstring> descStore{};
+			List<std::wstring> extStore{};
+
+			for (const auto& inFileType : inFileTypes)
+			{
+				descStore.Add(ToWString(inFileType.desc));
+				std::string ext = "";
+				for (int i = 0; i < inFileType.extensions.GetSize(); i++)
+				{
+					if (inFileType.extensions[i].StartsWith("*"))
+						ext += inFileType.extensions[i].ToStdString();
+					else
+						ext += "*" + inFileType.extensions[i].ToStdString();
+
+					if (i < inFileType.extensions.GetSize() - 1) // Not last element
+						ext += ";";
+				}
+				extStore.Add(ToWString(ext));
+			}
+
+			for (int i = 0; i < descStore.GetSize(); i++)
+			{
+				fileTypes.Add({ descStore[i].c_str(), extStore[i].c_str() });
+			}
+
+			if (SUCCEEDED(pfd->SetFileTypes(fileTypes.GetSize(), fileTypes.GetData())))
+			{
+				if (SUCCEEDED(pfd->Show(NULL)))
+				{
+					IShellItemArray* psia = nullptr;
+					if (SUCCEEDED(pfd->GetResults(&psia)))
+					{
+						DWORD count = 0;
+						psia->GetCount(&count);
+						for (DWORD i = 0; i < count; ++i)
+						{
+							IShellItem* psi = nullptr;
+							if (SUCCEEDED(psia->GetItemAt(i, &psi)))
+							{
+								LPWSTR pathString{};
+								if (SUCCEEDED(psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &pathString)))
+								{
+									result.Add(ToString(std::wstring(pathString)));
+									CoTaskMemFree(pathString);
+								}
+								psi->Release();
+							}
+						}
+						psia->Release();
+					}
+				}
+			}
+
+			pfd->Release();
+		}
+
+		return result;
+	}
+
 	IO::Path WindowsEditorPlatform::GetEditorExecutablePath()
 	{
 		return PlatformDirectories::GetLaunchDir() / GetEditorExecutableName();

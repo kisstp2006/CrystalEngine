@@ -35,8 +35,11 @@ namespace CE
 
 		Vec2 contentSize = {};
 
-		for (const auto& child : children)
+		for (auto childWeak : children)
 		{
+			Ref<FWidget> child = childWeak.Lock();
+			if (!child)
+				continue;
 			if (!child->Enabled())
 				continue;
 
@@ -199,8 +202,11 @@ namespace CE
 			curPos.y += contentAlignmentRatio * remainingSize;
 		}
 
-		for (const auto& child : children)
+		for (int i = 0; i < children.GetSize(); i++)
 		{
+			Ref<FWidget> child = children[i].Lock();
+			if (!child)
+				continue;
 			if (!child->Enabled())
 				continue;
 

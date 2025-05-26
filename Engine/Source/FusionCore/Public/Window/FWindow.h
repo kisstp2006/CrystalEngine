@@ -20,12 +20,15 @@ namespace CE
 
     protected:
 
+        void OnPaint(FPainter* painter) override;
+
         virtual void OnMaximized() {}
         virtual void OnRestored() {}
         virtual void OnMinimized() {}
 
-    private: // - Fields -
+    public: // - Fusion Properties -
 
+        FUSION_PROPERTY(f32, Opacity);
 
         FUSION_WIDGET;
     };

@@ -7,8 +7,6 @@
 namespace CE
 {
 
-    typedef SIZE_T ThreadId;
-
     class CORE_API Thread
     {
     public:

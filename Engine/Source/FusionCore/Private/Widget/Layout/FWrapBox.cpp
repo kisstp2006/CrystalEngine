@@ -34,9 +34,9 @@ namespace CE
         Vec2 curSize = Vec2();
         bool isFinished = false;
 
-        for (const auto& childWeakRef : children)
+        for (int i = 0; i < children.GetSize(); i++)
         {
-            auto child = childWeakRef.Lock();
+            auto child = children[i].Lock();
             if (child.IsNull())
                 continue;
 
@@ -173,8 +173,12 @@ namespace CE
                 Matrix4x4::Translation(-computedPosition - m_Translation - GetComputedSize() * m_Anchor), computedSize);
         }
 
-        for (const auto& child : children)
+        for (int i = 0; i < children.GetSize(); i++)
         {
+            Ref<FWidget> child = children[i].Lock();
+            if (!child)
+                continue;
+
             if (!child->Enabled() || !child->Visible())
                 continue;
 

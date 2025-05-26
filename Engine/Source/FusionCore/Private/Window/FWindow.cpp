@@ -5,7 +5,7 @@ namespace CE
 
     FWindow::FWindow()
     {
-        
+        m_Opacity = 1.0f;
     }
 
     void FWindow::ShowWindow()
@@ -38,6 +38,21 @@ namespace CE
         return nativeContext->GetPlatformWindow();
     }
 
+    void FWindow::OnPaint(FPainter* painter)
+    {
+        bool pushed = false;
+        if (m_Opacity < 0.999f)
+        {
+            pushed = true;
+            painter->PushOpacity(m_Opacity);
+        }
 
+        Super::OnPaint(painter);
+
+        if (pushed)
+        {
+            painter->PopOpacity();
+        }
+    }
 }
 

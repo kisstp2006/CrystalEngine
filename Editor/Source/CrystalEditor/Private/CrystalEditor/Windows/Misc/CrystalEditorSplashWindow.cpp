@@ -25,6 +25,11 @@ namespace CE::Editor
         splash.SetImageFit(FImageFit::Cover);
         splash.SetBrushPosition(Vec2(0.5f, 0.5f));
 
+        FBrush logo = FBrush("/Editor/Assets/Icons/Logo");
+        logo.SetBrushTiling(FBrushTiling::None);
+        logo.SetImageFit(FImageFit::Contain);
+        logo.SetBrushPosition(Vec2(0.5f, 0.5f));
+
         (*this)
         .Title("Splash Screen")
         .MinimizeEnabled(false)
@@ -39,6 +44,14 @@ namespace CE::Editor
                 .Background(splash)
                 .HAlign(HAlign::Fill)
                 .VAlign(VAlign::Fill),
+
+                FNew(FImage)
+                .Background(logo)
+                .HAlign(HAlign::Center)
+                .VAlign(VAlign::Center)
+                .Width(256)
+                .Height(256)
+                .Margin(Vec4(0, 0, 0, 20)),
 
                 FNew(FStyledWidget)
                 .Background(Color::RGBHex(0x090C10))

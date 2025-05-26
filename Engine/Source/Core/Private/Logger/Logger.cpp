@@ -116,16 +116,19 @@ namespace CE
         if (!GIsLoggerInitialized)
             return;
 
-        String fullMsg = message;
-
-        Log(level, fullMsg, target);
-
 #if !CE_BUILD_RELEASE // For Non-release builds
         if (level == LogLevel::Critical)
         {
             //fullMsg = String::Format("{}\n{} Line {}", message, fileName, line);
-            cpptrace::generate_trace().print();
+            String fullMessage = String::Format("{}\n{}", message.GetCString(), cpptrace::generate_trace().to_string());
+            Log(level, fullMessage, target);
         }
+        else
+        {
+            Log(level, message, target);
+        }
+#else
+        Log(level, message, target);
 #endif
     }
 

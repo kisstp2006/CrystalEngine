@@ -120,10 +120,14 @@ namespace CE
 			subsystem->Tick(deltaTime);
 		}
 		
-		while (!mainThreadQueue.IsEmpty())
 		{
-			mainThreadQueue.GetFront().InvokeIfValid();
-			mainThreadQueue.PopFront();
+			LockGuard guard{ mainThreadQueueMutex };
+
+			while (!mainThreadQueue.IsEmpty())
+			{
+				mainThreadQueue.GetFront().InvokeIfValid();
+				mainThreadQueue.PopFront();
+			}
 		}
 
 		for (auto gameInstance : gameInstances)
@@ -135,9 +139,9 @@ namespace CE
 
 	void Engine::DispatchOnMainThread(const Delegate<void(void)>& action)
 	{
-		mainThreadQueueMutex.Lock();
+		LockGuard guard{ mainThreadQueueMutex };
+
 		mainThreadQueue.PushBack(action);
-		mainThreadQueueMutex.Unlock();
 	}
 
 	GameInstance* Engine::GetGameInstance()

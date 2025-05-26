@@ -52,16 +52,49 @@ namespace CE::Editor
 	    }
 
         Style("EditorDockspace");
+
+		Ref<AssetProcessor> assetProcessor = CrystalEditorModule::Get()->GetAssetProcessor();
+		assetProcessor->onProgressUpdate.Bind(FUNCTION_BINDING(this, OnAssetProcessorUpdate));
+
+		assetImportProgressPopup = CreateObject<AssetImportProgressPopup>(this, "AssetImportProgressPopup");
     }
 
     void CrystalEditorWindow::OnBeginDestroy()
     {
 	    Super::OnBeginDestroy();
 
+		if (!IsDefaultInstance())
+		{
+			Ref<AssetProcessor> assetProcessor = CrystalEditorModule::Get()->GetAssetProcessor();
+			assetProcessor->onProgressUpdate.UnbindAll(this);
+		}
+
         if (this == instance)
         {
             instance = nullptr;
         }
+    }
+
+    void CrystalEditorWindow::OnAssetProcessorUpdate(AssetProcessor* assetProcessor)
+    {
+		if (assetProcessor->IsInProgress())
+		{
+			if (!progressPopupShown)
+			{
+				Vec2 windowSize = GetComputedSize();
+				Vec2 popupSize = Vec2(650, 100);
+				Vec2 popupPos = (windowSize - popupSize) * 0.5f;
+
+				GetContext()->PushLocalPopup(assetImportProgressPopup.Get(), popupPos, popupSize);
+			}
+
+			assetImportProgressPopup->UpdateProgress(assetProcessor);
+		}
+		else
+		{
+			// Finished
+			assetImportProgressPopup->ClosePopup();
+		}
     }
 }
 

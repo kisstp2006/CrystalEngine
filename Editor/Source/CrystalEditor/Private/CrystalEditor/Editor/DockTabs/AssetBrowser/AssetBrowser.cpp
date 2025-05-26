@@ -107,8 +107,7 @@ namespace CE::Editor
                                 .Text("Option 1")
                                 .OnClick([this]
                                 {
-                                	Ref<CE::Texture2D> texture = AssetManager::Get()->LoadAssetAtPath<CE::Texture2D>("/Game/Assets/Textures/fancy_scaled_gold_albedo");
-                                    String::IsAlphabet('a');
+                                    
                                 }),
 
                                 FNew(FMenuItem)
@@ -128,31 +127,7 @@ namespace CE::Editor
                     FAssignNew(FScrollBox, gridViewScrollBox)
                     .VerticalScroll(true)
                     .HorizontalScroll(false)
-                    .OnEvent([this] (FEvent* event)
-                    {
-                        if (event->IsMouseEvent() && event->sender == gridViewScrollBox.Get())
-                        {
-                            auto* mouseEvent = static_cast<FMouseEvent*>(event);
-
-                            if (mouseEvent->type == FEventType::MousePress && mouseEvent->IsLeftButton())
-                            {
-                                gridView->DeselectAll();
-                            }
-                            else if (mouseEvent->type == FEventType::MousePress && mouseEvent->IsRightButton())
-                            {
-                                if (gridView->GetSelectedItemCount() == 0 || !mouseEvent->IsMultiSelectionModifier())
-                                {
-                                    gridView->DeselectAll();
-
-                                    gridView->OnBackgroundRightClicked(mouseEvent->mousePosition);
-                                }
-                                else
-                                {
-                                    gridView->ShowAssetContextMenu(mouseEvent->mousePosition);
-                                }
-                            }
-                        }
-                    })
+                    .OnEvent(FUNCTION_BINDING(this, OnScrollBoxHandleEvent))
                     .HAlign(HAlign::Fill)
                     .FillRatio(1.0f)
                     (
@@ -297,32 +272,39 @@ namespace CE::Editor
             .extensions = allExtensions
         });
 
-        IO::Path selectedFile = EditorPlatform::ShowFileSelectionDialog(defaultAssetImportPath.GetString(), fileTypes);
+        Array<IO::Path> selectedFiles = EditorPlatform::ShowMultiFileSelectionDialog(defaultAssetImportPath.GetString(), fileTypes);
 
-        if (selectedFile.Exists())
+        Array<IO::Path> assetsToImport;
+
+        for (const IO::Path& selectedFile : selectedFiles)
         {
-            defaultAssetImportPath = selectedFile.GetParentPath().GetString();
-
-            IO::Path importedSourceAssetPath;
-
-            if (currentPath == "/")
+            if (selectedFile.Exists())
             {
-                importedSourceAssetPath = gProjectPath / selectedFile.GetFileName();
-            }
-            else // Ex: currentPath == "/Game/Assets"
-            {
-                importedSourceAssetPath = gProjectPath / currentPath.GetString().GetSubstring(1) / selectedFile.GetFileName();
-            }
+                defaultAssetImportPath = selectedFile.GetParentPath().GetString();
 
-            if (importedSourceAssetPath.Exists())
-            {
-                IO::Path::Remove(importedSourceAssetPath);
+                IO::Path importedSourceAssetPath;
+
+                if (currentPath == "/")
+                {
+                    importedSourceAssetPath = gProjectPath / selectedFile.GetFileName();
+                }
+                else // Ex: currentPath == "/Game/Assets"
+                {
+                    importedSourceAssetPath = gProjectPath / currentPath.GetString().GetSubstring(1) / selectedFile.GetFileName();
+                }
+
+                if (importedSourceAssetPath.Exists())
+                {
+                    IO::Path::Remove(importedSourceAssetPath);
+                }
+
+                IO::Path::Copy(selectedFile, importedSourceAssetPath);
+
+                assetsToImport.Add(importedSourceAssetPath);
             }
-
-            IO::Path::Copy(selectedFile, importedSourceAssetPath);
-
-            ReimportAsset(importedSourceAssetPath);
         }
+
+        ImportSourceAssets(assetsToImport);
     }
 
     void AssetBrowser::UpdateBreadCrumbs()
@@ -430,14 +412,55 @@ namespace CE::Editor
         }
     }
 
-    void AssetBrowser::ImportExternalAsset(const IO::Path& absolutePath)
+    void AssetBrowser::ImportSourceAssets(const Array<IO::Path>& sourceAssetPaths)
     {
+        if (sourceAssetPaths.IsEmpty())
+            return;
 
+        Ref<AssetProcessor> assetProcessor = CrystalEditorModule::Get()->GetAssetProcessor();
+
+        assetProcessor->ImportAssets(sourceAssetPaths);
     }
 
-    void AssetBrowser::ReimportAsset(const IO::Path& absoluteSourcePath)
+    void AssetBrowser::OnScrollBoxHandleEvent(FEvent* event)
     {
+        if (event->IsMouseEvent() && event->sender == gridViewScrollBox.Get())
+        {
+            auto* mouseEvent = static_cast<FMouseEvent*>(event);
 
+            if (mouseEvent->type == FEventType::MousePress && mouseEvent->IsLeftButton())
+            {
+                gridView->DeselectAll();
+            }
+            else if (mouseEvent->type == FEventType::MousePress && mouseEvent->IsRightButton())
+            {
+                if (gridView->GetSelectedItemCount() == 0 || !mouseEvent->IsMultiSelectionModifier())
+                {
+                    gridView->DeselectAll();
+
+                    gridView->OnBackgroundRightClicked(mouseEvent->mousePosition);
+                }
+                else
+                {
+                    gridView->ShowAssetContextMenu(mouseEvent->mousePosition);
+                }
+            }
+        }
+        else if (event->IsKeyEvent() && event->sender == gridViewScrollBox.Get())
+        {
+            FKeyEvent* keyEvent = static_cast<FKeyEvent*>(event);
+
+            KeyModifier ctrl = KeyModifier::Ctrl;
+#if PLATFORM_MAC
+            ctrl = KeyModifier::Gui;
+#endif
+
+            if (keyEvent->type == FEventType::KeyPress && keyEvent->key == KeyCode::A &&
+                EnumHasFlag(keyEvent->modifiers, ctrl))
+            {
+                gridView->SelectAll();
+            }
+        }
     }
 
     void AssetBrowser::CreateNewEmptyDirectory()

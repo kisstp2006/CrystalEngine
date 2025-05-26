@@ -16,6 +16,8 @@ namespace CE::Editor
 
         void OnAssetUnloaded(Uuid bundleUuid) override;
 
+        void OnAssetDeleted(const CE::Name& bundlePath) override;
+
     public: // - Public API -
 
         ClassType* GetTargetObjectType() const override;

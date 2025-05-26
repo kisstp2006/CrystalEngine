@@ -166,6 +166,21 @@ namespace CE::Editor
         materialBundle = nullptr;
     }
 
+    void MaterialEditor::OnAssetDeleted(const CE::Name& bundlePath)
+    {
+        if (targetMaterial == nullptr)
+            return;
+        Ref<Bundle> materialBundle = targetMaterial->GetBundle();
+
+        if (!materialBundle || materialBundle->GetBundlePath() != bundlePath)
+            return;
+
+        viewportTab->QueueDestroy();
+
+        QueueDestroy();
+        materialBundle = nullptr;
+    }
+
     ClassType* MaterialEditor::GetTargetObjectType() const
     {
         return CE::Material::StaticClass();

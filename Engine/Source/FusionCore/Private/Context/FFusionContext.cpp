@@ -223,6 +223,11 @@ namespace CE
 
 	void FFusionContext::QueueDestroy()
 	{
+		if (Thread::GetCurrentThreadId() != gMainThreadId)
+		{
+			String::IsAlphabet('a');
+		}
+
 		if (isDestroyed)
 			return;
 

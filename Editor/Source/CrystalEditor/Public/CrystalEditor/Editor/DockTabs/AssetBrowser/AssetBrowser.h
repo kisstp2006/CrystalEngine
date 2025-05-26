@@ -34,11 +34,12 @@ namespace CE::Editor
 
         void BrowseToAsset(const CE::Name& path);
 
-        void ImportExternalAsset(const IO::Path& absolutePath);
-
     protected: // - Internal -
 
-        void ReimportAsset(const IO::Path& absoluteSourcePath);
+        void ImportSourceAssets(const Array<IO::Path>& sourceAssetPaths);
+
+        FUNCTION()
+        void OnScrollBoxHandleEvent(FEvent* event);
 
         FUNCTION()
         void OnDirectorySelectionChanged(FItemSelectionModel* selectionModel);

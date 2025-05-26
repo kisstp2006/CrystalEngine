@@ -24,6 +24,14 @@ namespace CE::Editor
         }
     }
 
+    void AssetBrowserGridView::SelectAll()
+    {
+        for (AssetBrowserItem* item : items)
+        {
+            item->Select();
+        }
+    }
+
     void AssetBrowserGridView::SetCurrentDirectory(const CE::Name& directory)
     {
         this->currentPath = directory;
@@ -391,6 +399,21 @@ namespace CE::Editor
 
                     OnBackgroundRightClicked(mouseEvent->mousePosition);
                 }
+            }
+        }
+        else if (event->IsKeyEvent())
+        {
+            FKeyEvent* keyEvent = static_cast<FKeyEvent*>(event);
+
+            KeyModifier ctrl = KeyModifier::Ctrl;
+#if PLATFORM_MAC
+            ctrl = KeyModifier::Gui;
+#endif
+
+            if (keyEvent->type == FEventType::KeyPress && keyEvent->key == KeyCode::A && 
+                EnumHasFlag(keyEvent->modifiers, ctrl))
+            {
+                SelectAll();
             }
         }
 

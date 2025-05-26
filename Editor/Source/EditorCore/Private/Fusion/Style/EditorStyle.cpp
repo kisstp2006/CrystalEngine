@@ -527,6 +527,16 @@ namespace CE::Editor
     	objectEditorField->hoveredBorderColor = Color::RGBA(74, 74, 74);
     	objectEditorField->pressedBorderColor = highlightColor;
     	objectEditorField->borderWidth = 1.0f;
+
+    	if (!assetImportProgressPopup)
+    	{
+    		assetImportProgressPopup = CreateObject<FStyledWidgetStyle>(this, "Popup_AssetImportProgress");
+    		Add("Popup.AssetImportProgress", assetImportProgressPopup);
+    	}
+
+    	assetImportProgressPopup->background = Color::RGBA(36, 36, 36);
+    	assetImportProgressPopup->borderColor = Color::RGBA(20, 20, 20);
+    	assetImportProgressPopup->borderWidth = 1.0f;
     }
 
 } // namespace CE::Editor

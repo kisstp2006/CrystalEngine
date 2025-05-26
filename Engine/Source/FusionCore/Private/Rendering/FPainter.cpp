@@ -86,7 +86,7 @@ namespace CE
 
 	Vec2 FPainter::CalculateTextSize(const String& text, const FFont& font, f32 width, FWordWrap wordWrap)
 	{
-		static Array<Rect> quads{};
+		thread_local Array<Rect> quads{};
 		return renderer2->CalculateTextQuads(quads, text, font, width, wordWrap);
 	}
 

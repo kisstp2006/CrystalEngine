@@ -193,7 +193,7 @@ namespace CE
 			newEntry = true;
 		}
 
-		String sourceAssetRelativePath = sourcePath.GetString();
+		//String sourceAssetRelativePath = sourcePath.GetString();
 		Bundle::ObjectData primaryObjectData = load->GetPrimaryObjectData();
 
 		Name primaryName = primaryObjectData.name;
@@ -207,7 +207,11 @@ namespace CE
 		
 #if PAL_TRAIT_BUILD_EDITOR
 		// Source asset path relative in project
-		assetData->sourceAssetPath = sourceAssetRelativePath;
+		//assetData->sourceAssetPath = sourceAssetRelativePath;
+		if (load->sourceAssetRelativePath.IsValid())
+		{
+			assetData->sourceAssetPath = load->GetBundlePath().GetParentPath() + "/" + load->sourceAssetRelativePath.GetString();
+		}
 #endif
 		
 		if (newEntry && relativePathStr.NotEmpty())
@@ -459,12 +463,14 @@ namespace CE
 
 		Ref<Bundle> bundle = nullptr;
 		AssetManager* assetManager = AssetManager::Get();
+		bool bundleLoaded = false;
 
 		{
 			LockGuard lock{ assetManager->loadedAssetsMutex };
 
 			if (assetManager->loadedAssetsByPath.KeyExists(originalPath))
 			{
+				bundleLoaded = true;
 				assetManager->loadedAssetsByPath[newPath] = assetManager->loadedAssetsByPath[originalPath];
 				assetManager->loadedAssetsByPath.Remove(originalPath);
 
@@ -475,7 +481,7 @@ namespace CE
 				bundle = Bundle::LoadBundleAbsolute(this, newAbsolutePath, LoadBundleArgs{
 					.loadFully = true,
 					.forceReload = false,
-					.destroyOutdatedObjects = false
+					.destroyOutdatedObjects = true
 				});
 			}
 		}
@@ -503,7 +509,10 @@ namespace CE
 		if (bundle == nullptr)
 			return;
 
-		DetachSubobject(bundle.Get());
+		if (!bundleLoaded)
+		{
+			DetachSubobject(bundle.Get());
+		}
 
 		bundle->SetName(newName);
 
@@ -837,38 +846,75 @@ namespace CE
 		if (!cachedAssetsByPath.KeyExists(bundlePath))
 			return;
 
-		const Array<AssetData*>& assetDatas = cachedAssetsByPath[bundlePath];
-
-		String parentPathStr = IO::Path(bundlePath.GetString()).GetParentPath().GetString().Replace({ '\\' }, '/');
-		Name parentPath = parentPathStr;
-
-		for (AssetData* assetData : assetDatas)
+		for (IAssetRegistryListener* listener : listeners)
 		{
-			if (assetData != nullptr)
+			if (listener != nullptr)
 			{
-				ClassType* assetClass = ClassType::FindClass(assetData->assetClassTypeName);
-				while (assetClass != nullptr)
-				{
-					cachedAssetsByType.Remove(assetClass->GetTypeId());
-
-					if (assetClass->GetSuperClassCount() == 0)
-						break;
-					assetClass = assetClass->GetSuperClass(0);
-				}
-
-				cachedPrimaryAssetByBundleUuid.Remove(assetData->bundleUuid);
-				cachedPrimaryAssetsByParentPath[parentPath].Remove(assetData);
-
-				allAssetDatas.Remove(assetData);
-
-				Name sourcePath = assetData->sourceAssetPath;
-				if (cachedAssetBySourcePath.KeyExists(sourcePath))
-				{
-					cachedAssetBySourcePath.Remove(sourcePath);
-				}
-				delete assetData;
+				listener->OnAssetDeleted(bundlePath);
 			}
 		}
+
+		Name sourceAssetPath = {};
+
+		{
+			const Array<AssetData*>& assetDataList = cachedAssetsByPath[bundlePath];
+
+			String parentPathStr = IO::Path(bundlePath.GetString()).GetParentPath().GetString().Replace({ '\\' }, '/');
+			Name parentPath = parentPathStr;
+
+			for (AssetData* assetData : assetDataList)
+			{
+				if (assetData != nullptr)
+				{
+					if (!sourceAssetPath.IsValid())
+					{
+						sourceAssetPath = assetData->sourceAssetPath;
+					}
+
+					ClassType* assetClass = ClassType::FindClass(assetData->assetClassTypeName);
+					while (assetClass != nullptr)
+					{
+						cachedAssetsByType.Remove(assetClass->GetTypeId());
+
+						if (assetClass->GetSuperClassCount() == 0)
+							break;
+						assetClass = assetClass->GetSuperClass(0);
+					}
+
+					cachedPrimaryAssetByBundleUuid.Remove(assetData->bundleUuid);
+					cachedPrimaryAssetsByParentPath[parentPath].Remove(assetData);
+
+					allAssetDatas.Remove(assetData);
+
+					Name sourcePath = assetData->sourceAssetPath;
+					if (cachedAssetBySourcePath.KeyExists(sourcePath))
+					{
+						cachedAssetBySourcePath.Remove(sourcePath);
+					}
+
+					delete assetData;
+				}
+			}
+		}
+
+		IO::Path projectPath = gProjectPath;
+
+		IO::Path stampPath = gProjectPath / ("Temp/AssetCache" + bundlePath.GetString() + ".stamp");
+		if (stampPath.Exists())
+		{
+			IO::Path::Remove(stampPath);
+		}
+
+		if (sourceAssetPath.IsValid())
+		{
+			IO::Path sourceAssetAbsolutePath = projectPath / sourceAssetPath.GetString().GetSubstring(1);
+			if (sourceAssetAbsolutePath.Exists() && !sourceAssetAbsolutePath.IsDirectory())
+			{
+				IO::Path::Remove(sourceAssetAbsolutePath);
+			}
+		}
+
+		cachedAssetsByPath.Remove(bundlePath);
 
 		AssetManager* assetManager = AssetManager::Get();
 		Ref<Bundle> bundle = nullptr;
@@ -882,15 +928,6 @@ namespace CE
 			}
 		}
 
-		for (IAssetRegistryListener* listener : listeners)
-		{
-			if (listener != nullptr)
-			{
-				listener->OnAssetDeleted(bundlePath);
-				listener->OnAssetPathTreeUpdated(cachedPathTree);
-			}
-		}
-
 		if (bundle != nullptr)
 		{
 			Uuid bundleUuid = bundle->GetUuid();
@@ -898,9 +935,16 @@ namespace CE
 			assetManager->UnloadAsset(bundle);
 		}
 
-		//cachedPathTree.RemovePath(bundlePath);
-		cachedAssetsByPath.Remove(bundlePath);
+		cachedPathTree.RemovePath(bundlePath);
 		cachedPrimaryAssetByPath.Remove(bundlePath);
+
+		for (IAssetRegistryListener* listener : listeners)
+		{
+			if (listener != nullptr)
+			{
+				listener->OnAssetPathTreeUpdated(cachedPathTree);
+			}
+		}
 	}
 
 	void AssetRegistry::HandleFileAction(IO::WatchID watchId, IO::Path directory, const String& fileName, IO::FileAction fileAction, const String& oldFileName)

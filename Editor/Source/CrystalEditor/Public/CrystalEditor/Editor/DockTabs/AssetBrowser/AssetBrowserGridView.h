@@ -58,6 +58,8 @@ namespace CE::Editor
 
         void DeselectAll();
 
+        void SelectAll();
+
     protected: // - Internal -
 
         Array<AssetBrowserItem*> items;

@@ -13,6 +13,8 @@ namespace CE::Editor
         static IO::Path ShowSelectDirectoryDialog(const IO::Path& defaultPath);
 
         static IO::Path ShowFileSelectionDialog(const IO::Path& defaultPath, const Array<FileType>& fileTypes);
+
+        static Array<IO::Path> ShowMultiFileSelectionDialog(const IO::Path& defaultPath, const Array<FileType>& fileTypes) { return {}; }
     };
 
     typedef MacEditorPlatform EditorPlatform;

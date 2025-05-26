@@ -2,6 +2,8 @@
 
 namespace CE
 {
+    typedef SIZE_T ThreadId;
+
     /*
      *  Forward Declarations
      */
@@ -18,6 +20,7 @@ namespace CE
      */
     extern CORE_API IO::Path gProjectPath;
     extern CORE_API String gProjectName;
+    extern CORE_API ThreadId gMainThreadId;
 
     extern CORE_API u32 gDefaultWindowWidth;
     extern CORE_API u32 gDefaultWindowHeight;

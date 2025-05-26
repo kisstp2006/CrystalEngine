@@ -1228,6 +1228,7 @@ namespace CE
         int idx = 0;
 
         outQuads.Resize(text.GetLength());
+        int numQuads = outQuads.GetSize();
 
         for (int i = 0; i < text.GetLength(); ++i)
         {

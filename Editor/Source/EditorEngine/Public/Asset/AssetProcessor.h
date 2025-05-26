@@ -28,11 +28,14 @@ namespace CE
 
         void RunAll();
 
+        void ImportAssets(const Array<IO::Path>& sourceAssets);
+
         void Tick();
 
         int GetTotalJobs() const { return totalScheduledJobs; }
         int GetFinishedJobs() const { return totalFinishedJobs; }
         int GetSuccessfulJobs() const { return totalSuccessfulJobs; }
+        int GetImportQueueSize() const { return importQueue.GetSize(); }
 
         ScriptEvent<void(AssetProcessor*)> onProgressUpdate;
 
@@ -42,14 +45,13 @@ namespace CE
 
         bool inProgress = false;
 
+        Array<IO::Path> importQueue;
+
         IO::Path inputRoot;
         IO::Path scanPath;
         IO::Path tempPath;
 
         Array<IO::Path> includePaths;
-
-        Array<IO::Path> allSourceAssetPaths{};
-        Array<IO::Path> allProductAssetPaths{};
 
         SharedMutex mainThreadDispatcherLock;
         Array<Delegate<void(void)>> mainThreadDispatcher;

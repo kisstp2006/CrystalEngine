@@ -259,7 +259,7 @@ namespace CE::Editor
                             // - Logo -
 
                             FAssignNew(FImage, logo)
-                            .Background(FBrush("/Engine/Resources/Icons/LogoGray"))
+                            .Background(FBrush("/Editor/Assets/Icons/Logo128"))
                             .Width(32)
                             .Height(32)
                             .VAlign(VAlign::Center)

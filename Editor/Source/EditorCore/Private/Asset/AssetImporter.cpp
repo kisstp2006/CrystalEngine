@@ -114,7 +114,19 @@ namespace CE::Editor
 
 		if (job->success)
 		{
-			AssetManager::GetRegistry()->OnAssetImported(job->productPath);
+			if (gEditorMode == EditorMode::AssetProcessor)
+			{
+				AssetManager::GetRegistry()->OnAssetImported(job->productPath);
+			}
+			else
+			{
+				IO::Path productPath = job->productPath;
+
+				gEngine->DispatchOnMainThread([productPath]
+				{
+					AssetManager::GetRegistry()->OnAssetImported(productPath);
+				});
+			}
 		}
 
 		importResults.Add(importResult);

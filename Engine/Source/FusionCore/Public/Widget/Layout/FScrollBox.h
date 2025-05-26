@@ -20,6 +20,8 @@ namespace CE
 
         bool CapturesMouseWheel() const override { return true; }
 
+        bool SupportsKeyboardEvents() const override { return true; }
+
     protected:
 
         void OnPostComputeLayout() override;

@@ -6,7 +6,7 @@
 
 namespace CE::Editor
 {
-	EDITORENGINE_API AssetDefinitionRegistry* gAssetDefinitionRegistry = nullptr;
+	EDITORENGINE_API Ref<AssetDefinitionRegistry> gAssetDefinitionRegistry = nullptr;
 
     EDITORENGINE_API Ref<EditorEngine> gEditor = nullptr;
 
@@ -39,7 +39,7 @@ namespace CE::Editor
 
     EDITORENGINE_API AssetDefinitionRegistry* GetAssetDefinitionRegistry()
     {
-        return gAssetDefinitionRegistry;
+        return gAssetDefinitionRegistry.Get();
     }
 }
 

@@ -23,6 +23,12 @@ namespace CE::Editor
 
         void OnBeginDestroy() override;
 
+        FUNCTION()
+        void OnAssetProcessorUpdate(AssetProcessor* assetProcessor);
+
+        Ref<AssetImportProgressPopup> assetImportProgressPopup;
+        bool progressPopupShown = false;
+
     public: // - Fusion Properties - 
 
 
