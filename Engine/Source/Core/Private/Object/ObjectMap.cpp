@@ -40,6 +40,11 @@ namespace CE
 		return objects.Exists([=](const Ref<Object>& obj) { return obj != nullptr && obj->GetUuid() == uuid; });
 	}
 
+	bool ObjectMap::ObjectExists(Ref<Object> subObject) const
+	{
+		return objects.Exists(subObject);
+	}
+
 	bool ObjectMap::ObjectExists(const Name& objectName) const
 	{
 		return objects.Exists([=](const Ref<Object>& obj) { return obj != nullptr && obj->GetName() == objectName; });

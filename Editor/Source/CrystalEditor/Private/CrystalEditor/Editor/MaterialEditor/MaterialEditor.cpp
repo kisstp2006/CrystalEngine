@@ -168,6 +168,16 @@ namespace CE::Editor
 
     void MaterialEditor::OnAssetDeleted(const CE::Name& bundlePath)
     {
+        AssetRegistry* assetRegistry = AssetRegistry::Get();
+        if (AssetData* assetData = assetRegistry->GetPrimaryAssetByPath(bundlePath))
+        {
+
+        }
+        else
+        {
+
+        }
+
         if (targetMaterial == nullptr)
             return;
         Ref<Bundle> materialBundle = targetMaterial->GetBundle();

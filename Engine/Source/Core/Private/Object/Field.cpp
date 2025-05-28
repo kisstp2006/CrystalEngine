@@ -493,6 +493,23 @@ namespace CE
 		return "";
 	}
 
+	Ref<Object> FieldType::GetFieldObjectValue(void* instance)
+	{
+		if (!IsObjectField())
+			return nullptr;
+
+		if (IsStrongRefCounted())
+		{
+			return GetFieldValue<Ref<Object>>(instance);
+		}
+		if (IsWeakRefCounted())
+		{
+			return GetFieldValue<WeakRef<Object>>(instance).Lock();
+		}
+
+		return GetFieldValue<Object*>(instance);
+	}
+
 	f64 FieldType::GetNumericFieldValue(void* instance)
 	{
 		if (GetDeclarationType() == nullptr)
@@ -594,11 +611,6 @@ namespace CE
 		else
 		{
 			SetFieldValue<Object*>(instance, object.Get());
-		}
-
-		if (instanceOwner && instanceOwner->IsObject())
-		{
-			NotifyObjectFieldUpdate((Object*)instance);
 		}
 	}
 

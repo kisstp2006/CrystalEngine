@@ -177,6 +177,8 @@ namespace CE
             }
         }
 
+    	Ref<Object> GetFieldObjectValue(void* instance);
+
         void SetFieldObjectValue(void* instance, const Ref<Object>& object);
 
 		template<typename T>

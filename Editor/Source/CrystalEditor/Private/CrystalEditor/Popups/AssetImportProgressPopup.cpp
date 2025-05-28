@@ -21,9 +21,20 @@ namespace CE::Editor
             .HAlign(HAlign::Fill)
             .VAlign(VAlign::Fill)
             (
-                FAssignNew(FLabel, label)
-                .Text("Loading \"MyAsset\"...")
-                .FontSize(12),
+                FNew(FHorizontalStack)
+                .HAlign(HAlign::Fill)
+                (
+                    FAssignNew(FLabel, leftLabel)
+                    .Text("Loading...")
+                    .FontSize(12),
+
+                    FNew(FWidget)
+                    .FillRatio(1.0f),
+
+                    FAssignNew(FLabel, rightLabel)
+                    .Text("")
+                    .FontSize(12)
+                ),
 
                 FNew(FStyledWidget)
                 .Background(Color::RGBA(16, 16, 16))
@@ -56,9 +67,11 @@ namespace CE::Editor
         {
             int totalJobs = assetProcessor->GetTotalJobs() + assetProcessor->GetImportQueueSize();
             int finishedJobs = assetProcessor->GetFinishedJobs();
+
             if (totalJobs == 0)
             {
-                label->Text("Finishing...");
+                leftLabel->Text("Finishing...");
+                rightLabel->Text("100%");
                 progressBar->FillRatio(1.0f);
                 fillerWidget->FillRatio(0.0f);
 
@@ -66,14 +79,16 @@ namespace CE::Editor
             }
             else
             {
-                label->Text(String::Format("Processing Asset \"{}/{}\"...", finishedJobs, totalJobs));
+                leftLabel->Text(String::Format("Processing Asset {}/{}...", finishedJobs, totalJobs));
+                rightLabel->Text(String::Format("{}%", finishedJobs * 100 / totalJobs));
                 progressBar->FillRatio(Math::Clamp01((f32)finishedJobs / (f32)totalJobs));
                 fillerWidget->FillRatio(1 - progressBar->FillRatio());
             }
         }
         else
         {
-            label->Text("Finishing...");
+            leftLabel->Text("Finishing...");
+            rightLabel->Text("100%");
             progressBar->FillRatio(1.0f);
             fillerWidget->FillRatio(0.0f);
 

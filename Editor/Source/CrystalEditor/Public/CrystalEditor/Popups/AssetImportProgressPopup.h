@@ -18,7 +18,7 @@ namespace CE::Editor
 
     protected: // - Internal -
 
-        Ref<FLabel> label;
+        Ref<FLabel> leftLabel, rightLabel;
         Ref<FStyledWidget> progressBar;
         Ref<FWidget> fillerWidget;
 

@@ -119,6 +119,8 @@ namespace CE
         inline Object* GetSubObject(int index) const { return attachedObjects.GetObjectAt(index); }
 		inline const ObjectMap& GetSubObjectMap() const { return attachedObjects; }
 
+    	bool HasSubObject(Ref<Object> subObject) const { return attachedObjects.ObjectExists(subObject); }
+
         // Lifecycle
 
         void AddToRoot();

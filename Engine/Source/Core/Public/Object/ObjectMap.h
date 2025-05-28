@@ -31,6 +31,8 @@ namespace CE
         
 		bool ObjectExists(Uuid uuid) const;
 
+    	bool ObjectExists(Ref<Object> subObject) const;
+
 		bool ObjectExists(const Name& objectName) const;
         
         void AddObject(Object* object);
