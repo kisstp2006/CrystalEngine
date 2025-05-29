@@ -74,6 +74,11 @@ namespace CE::Internal
 		return retVal;
 	}
 
+	RefCountControl::~RefCountControl()
+	{
+
+	}
+
 	void RefCountControl::SelfDestroy()
 	{
 		object = nullptr;

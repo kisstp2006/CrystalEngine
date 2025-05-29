@@ -175,6 +175,8 @@ namespace CE
 
     Ptr<FieldType> StructType::FindField(const Name& name)
     {
+	    ZoneScoped;
+
         CacheAllFields();
 
         LockGuard lock{ cachedFieldsMutex };
@@ -190,6 +192,8 @@ namespace CE
     bool StructType::FindFieldInstanceRelative(const Name& relativeInstancePath, const Ref<Object>& targetObject,
 	    Ptr<FieldType>& outField, void*& outInstance)
     {
+	    ZoneScoped;
+
         if (targetObject.IsNull())
         {
             return false;
@@ -204,6 +208,8 @@ namespace CE
     bool StructType::FindFieldInstanceRelative(const Name& relativeInstancePath, const Ref<Object>& targetObject,
                                                Ptr<FieldType>& outField, Ref<Object>& outObject, void*& outInstance)
     {
+	    ZoneScoped;
+
         if (targetObject.IsNull())
         {
             return false;
@@ -223,6 +229,8 @@ namespace CE
                                                Ref<Object>& outObject,
                                                void*& outInstance)
     {
+	    ZoneScoped;
+
         CacheAllFields();
 
         Array<String> split = relativePath.GetString().Split('.');

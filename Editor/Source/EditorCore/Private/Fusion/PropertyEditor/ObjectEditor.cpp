@@ -47,7 +47,7 @@ namespace CE::Editor
         // TODO: Fix this for nested struct fields
 
         String fieldNameStr = fieldPath.GetString();
-        if (fieldNameStr.Contains('[') || fieldNameStr.Contains('.'))
+        if (fieldNameStr.Contains('.') || fieldNameStr.Contains('['))
         {
             Array<String> splits;
             fieldNameStr.Split({"[", "."}, splits);

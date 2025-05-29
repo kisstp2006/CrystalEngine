@@ -87,6 +87,9 @@ namespace CE
         static IO::Path GetAbsoluteBundlePath(const Name& bundlePath);
         static Name GetBundlePath(const IO::Path& absoluteBundlePath);
 
+        static bool IsBundleLoaded(Uuid bundleUuid);
+        static Ref<Bundle> GetLoadedBundle(Uuid bundleUuid);
+
         static Ref<Bundle> LoadBundle(const Ref<Object>& outer, const Uuid& bundleUuid, const LoadBundleArgs& loadArgs = LoadBundleArgs());
 
         static Ref<Bundle> LoadBundleAbsolute(const Ref<Object>& outer, const IO::Path& absolutePath, const LoadBundleArgs& loadArgs = LoadBundleArgs());

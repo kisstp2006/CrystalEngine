@@ -187,6 +187,30 @@ namespace CE
         return nullptr;
     }
 
+    bool Bundle::IsBundleLoaded(Uuid bundleUuid)
+    {
+        LockGuard guard{ bundleRegistryMutex };
+
+        if (loadedBundlesByUuid.KeyExists(bundleUuid))
+        {
+            return loadedBundlesByUuid[bundleUuid].IsValid();
+        }
+
+        return true;
+    }
+
+    Ref<Bundle> Bundle::GetLoadedBundle(Uuid bundleUuid)
+    {
+        LockGuard guard{ bundleRegistryMutex };
+
+        if (loadedBundlesByUuid.KeyExists(bundleUuid))
+        {
+            return loadedBundlesByUuid[bundleUuid].Lock();
+        }
+
+        return nullptr;
+    }
+
     Ref<Bundle> Bundle::LoadBundle(const Ref<Object>& outer, const Uuid& bundleUuid, const LoadBundleArgs& loadArgs)
     {
         {

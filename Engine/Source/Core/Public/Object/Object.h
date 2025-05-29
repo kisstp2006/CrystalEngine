@@ -120,6 +120,7 @@ namespace CE
 		inline const ObjectMap& GetSubObjectMap() const { return attachedObjects; }
 
     	bool HasSubObject(Ref<Object> subObject) const { return attachedObjects.ObjectExists(subObject); }
+    	bool HasSubObject(Uuid subObjectUuid) const { return attachedObjects.ObjectExists(subObjectUuid); }
 
         // Lifecycle
 

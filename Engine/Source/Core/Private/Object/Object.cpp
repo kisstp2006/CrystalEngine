@@ -61,13 +61,15 @@ namespace CE
 
 	Object::~Object()
 	{
+		if (control != nullptr && control->weakReferences > 0)
+		{
+			String::IsAlphabet('a');
+		}
         delete control; control = nullptr;
 	}
 
 	void Object::UnbindAllEvents()
 	{
-		// TODO: Unbind All Events
-
 		Class* clazz = GetClass();
 
 		if (clazz->HasEventFields())

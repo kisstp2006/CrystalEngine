@@ -417,7 +417,15 @@ namespace CE
 
 		std::function<void(PathTreeNode*)> visitor = [&](PathTreeNode* node)
 		{
+			if (!node)
+				return;
+
 			Name curPath = node->GetFullPath();
+
+			for (int i = (int)node->children.GetSize() - 1; i >= 0; --i)
+			{
+				visitor(node->children[i]);
+			}
 
 			if (node->nodeType == PathTreeNodeType::Directory)
 			{
@@ -426,11 +434,6 @@ namespace CE
 			else if (node->nodeType == PathTreeNodeType::Asset)
 			{
 				DeleteAssetEntry(curPath);
-			}
-
-			for (PathTreeNode* child : node->children)
-			{
-				visitor(child);
 			}
 		};
 
@@ -846,11 +849,22 @@ namespace CE
 		if (!cachedAssetsByPath.KeyExists(bundlePath))
 			return;
 
+		Uuid bundleUuid = {};
+
+		if (cachedPrimaryAssetByPath.KeyExists(bundlePath) && cachedPrimaryAssetByPath[bundlePath] != nullptr)
+		{
+			bundleUuid = cachedPrimaryAssetByPath[bundlePath]->bundleUuid;
+		}
+
 		for (IAssetRegistryListener* listener : listeners)
 		{
 			if (listener != nullptr)
 			{
 				listener->OnAssetDeleted(bundlePath);
+				if (Bundle::IsBundleLoaded(bundleUuid))
+				{
+					
+				}
 			}
 		}
 
@@ -938,13 +952,13 @@ namespace CE
 		cachedPathTree.RemovePath(bundlePath);
 		cachedPrimaryAssetByPath.Remove(bundlePath);
 
-		for (IAssetRegistryListener* listener : listeners)
+		/*for (IAssetRegistryListener* listener : listeners)
 		{
 			if (listener != nullptr)
 			{
 				listener->OnAssetPathTreeUpdated(cachedPathTree);
 			}
-		}
+		}*/
 	}
 
 	void AssetRegistry::HandleFileAction(IO::WatchID watchId, IO::Path directory, const String& fileName, IO::FileAction fileAction, const String& oldFileName)

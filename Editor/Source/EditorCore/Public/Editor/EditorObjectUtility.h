@@ -25,7 +25,7 @@ namespace CE
         static Ref<EditorObjectUtility> Get();
 
         //! Remove references of 'object' from searchRoot's and its sub-object's fields.
-        int RemoveObjectReference(Ref<Object> object, Ref<Object> searchRoot);
+        int RemoveObjectReference(Ref<Object> searchRoot, Delegate<bool(Ref<Object>)> predicate);
 
     };
     

@@ -36,6 +36,8 @@ namespace CE
 
 		private:
 
+			~RefCountControl();
+
 			void SelfDestroy();
 
 			enum ObjectState : int

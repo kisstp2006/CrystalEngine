@@ -29,9 +29,11 @@ namespace CE
         return instance.Lock();
     }
 
-    int EditorObjectUtility::RemoveObjectReference(Ref<Object> target, Ref<Object> searchRoot)
+    int EditorObjectUtility::RemoveObjectReference(Ref<Object> searchRoot, Delegate<bool(Ref<Object>)> predicate)
     {
-        if (!target || !searchRoot)
+        ZoneScoped;
+
+        if (!predicate.IsValid() || !searchRoot)
             return 0;
 
         int refCount = 0;
@@ -41,14 +43,18 @@ namespace CE
             Ref<Object> subObject = searchRoot->GetSubObject(i);
             if (subObject)
             {
-                refCount += RemoveObjectReference(target, subObject);
+                refCount += RemoveObjectReference(subObject, predicate);
             }
         }
 
-        if (searchRoot->HasSubObject(target))
+        for (int i = searchRoot->GetSubObjectCount() - 1; i >= 0; i--)
         {
-            searchRoot->DetachSubobject(target.Get());
-            refCount++;
+            Ref<Object> subObject = searchRoot->GetSubObject(i);
+            if (subObject && predicate(subObject))
+            {
+                searchRoot->DetachSubobject(subObject.Get());
+                refCount++;
+            }
         }
 
         // TODO: complete this
@@ -66,13 +72,15 @@ namespace CE
 
             if (curField->IsObjectField())
             {
-                Ref<Object> value = curField->GetFieldObjectValue(curInstance);
-                if (value == target)
+                if (Ref<Object> value = curField->GetFieldObjectValue(curInstance))
                 {
-                    curField->SetFieldObjectValue(curInstance, nullptr);
-                    curObject->OnFieldChanged(curFieldPath);
+                    if (predicate(value))
+                    {
+                        curField->SetFieldObjectValue(curInstance, nullptr);
+                        curObject->OnFieldChanged(curFieldPath);
 
-                    refCount++;
+                        refCount++;
+                    }
                 }
             }
             else if (curField->IsArrayField())
@@ -90,7 +98,7 @@ namespace CE
             }
             else if (curField->IsStructField())
             {
-                StructType* structType = (StructType*)curField->GetDeclarationType();
+                auto structType = (StructType*)curField->GetDeclarationType();
 
                 for (int i = 0; i < structType->GetFieldCount(); ++i)
                 {
@@ -108,6 +116,8 @@ namespace CE
         for (int i = 0; i < clazz->GetFieldCount(); ++i)
         {
             Ptr<FieldType> field = clazz->GetFieldAt(i);
+            if (!field->IsObjectField() && !field->IsStructField() && !field->IsArrayField())
+                continue;
 
             visitor(searchRoot, field->GetName().GetString());
         }

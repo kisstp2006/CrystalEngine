@@ -114,6 +114,7 @@ namespace CE::Editor
     private:
 
         Ref<AssetEditorRegistry> editorRegistry;
+        Ref<EditorObjectUtility> editorObjectUtility;
     };
     
 } // namespace CE::Editor

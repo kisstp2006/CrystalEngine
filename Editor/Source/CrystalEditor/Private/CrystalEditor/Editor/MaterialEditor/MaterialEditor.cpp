@@ -168,18 +168,30 @@ namespace CE::Editor
 
     void MaterialEditor::OnAssetDeleted(const CE::Name& bundlePath)
     {
-        AssetRegistry* assetRegistry = AssetRegistry::Get();
-        if (AssetData* assetData = assetRegistry->GetPrimaryAssetByPath(bundlePath))
-        {
-
-        }
-        else
-        {
-
-        }
-
         if (targetMaterial == nullptr)
             return;
+
+        AssetRegistry* assetRegistry = AssetRegistry::Get();
+        Ref<EditorObjectUtility> objectUtility = EditorObjectUtility::Get();
+
+        if (AssetData* assetData = assetRegistry->GetPrimaryAssetByPath(bundlePath))
+        {
+            Uuid bundleUuid = assetData->bundleUuid;
+            if (Bundle::IsBundleLoaded(bundleUuid))
+            {
+                objectUtility->RemoveObjectReference(targetMaterial, [&](Ref<Object> object) -> bool
+                {
+                    if (!object)
+                        return false;
+                    if (Ref<Bundle> ownerBundle = object->GetBundle(); ownerBundle->GetUuid() == bundleUuid)
+                    {
+                        return true;
+                    }
+                    return false;
+                });
+            }
+        }
+
         Ref<Bundle> materialBundle = targetMaterial->GetBundle();
 
         if (!materialBundle || materialBundle->GetBundlePath() != bundlePath)

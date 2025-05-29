@@ -258,7 +258,7 @@ namespace CE::Editor
             }),
 
             NewMenuItem()
-            .Text("Import Asset")
+            .Text("Import Asset(s)")
             .Icon(FBrush("/Editor/Assets/Icons/Import"))
             .OnClick([this]
             {

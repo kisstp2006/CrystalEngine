@@ -8,12 +8,16 @@ namespace CE::Editor
     void EditorCoreModule::StartupModule()
     {
     	editorRegistry = CreateObject<AssetEditorRegistry>(nullptr, "AssetEditorRegistry");
+    	editorObjectUtility = CreateObject<EditorObjectUtility>(nullptr, "EditorObjectUtility");
     }
 
     void EditorCoreModule::ShutdownModule()
     {
     	editorRegistry->BeginDestroy();
     	editorRegistry = nullptr;
+
+    	editorObjectUtility->BeginDestroy();
+    	editorObjectUtility = nullptr;
 
 		if (ProjectManager::TryGet())
 		{
