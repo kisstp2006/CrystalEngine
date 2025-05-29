@@ -57,8 +57,6 @@ namespace CE
             }
         }
 
-        // TODO: complete this
-
         std::function<void(Ref<Object>, String)> visitor = [&](Ref<Object> curObject, String curFieldPath)
         {
             if (!curObject || curFieldPath.IsEmpty())
