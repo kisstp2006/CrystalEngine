@@ -21,7 +21,7 @@ namespace CE::Vulkan
 
 	void VulkanRHIModule::ShutdownModule()
 	{
-        delete RHI::gDynamicRHI;
+        delete RHI::gDynamicRHI; RHI::gDynamicRHI = nullptr;
 	}
 
 	void VulkanRHIModule::RegisterTypes()
