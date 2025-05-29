@@ -16,7 +16,7 @@ namespace CE::Vulkan
 
 	void VulkanRHIModule::StartupModule()
 	{
-        //RHI::gDynamicRHI = new VulkanRHI();
+        
 	}
 
 	void VulkanRHIModule::ShutdownModule()
