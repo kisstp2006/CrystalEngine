@@ -57,6 +57,10 @@ namespace CE::Editor
                 {
                     string = string.GetSubstring(2);
                 }
+                else if (string.StartsWith("."))
+                {
+                    string = string.GetSubstring(1);
+                }
                 [fileTypes addObject:[[NSString alloc] initWithCString:string.GetCString()]];
             }
         }
@@ -73,5 +77,52 @@ namespace CE::Editor
 
         return result;
     }
+
+    Array<IO::Path> MacEditorPlatform::ShowMultiFileSelectionDialog(const IO::Path& defaultPath, const Array<FileType>& inFileTypes)
+    {
+        Array<IO::Path> results{};
+        NSOpenPanel* panel = [NSOpenPanel openPanel];
+        [panel setCanChooseDirectories:NO];
+        [panel setCanChooseFiles:YES];
+        [panel setCanCreateDirectories:YES];
+        [panel setAllowsMultipleSelection:YES];
+        [panel setTitle:@"Select file"];
+
+        NSMutableArray<NSString*>* fileTypes = [[NSMutableArray<NSString*> alloc] init];
+
+        for (const auto& fileType : inFileTypes)
+        {
+            for (const auto& extension : fileType.extensions)
+            {
+                String string = extension;
+                if (string.StartsWith("*."))
+                {
+                    string = string.GetSubstring(2);
+                }
+                else if (string.StartsWith("."))
+                {
+                    string = string.GetSubstring(1);
+                }
+                [fileTypes addObject:[[NSString alloc] initWithCString:string.GetCString()]];
+            }
+        }
+
+        [panel setAllowedFileTypes:fileTypes];
+
+        NSInteger ret = [panel runModal];
+
+        if (ret == NSModalResponseOK)
+        {
+            NSArray<NSURL*>* urls = [panel URLs];
+            for (NSURL* url in urls)
+            {
+                String path = [[url path] UTF8String];
+                results.Add(path);
+            }
+        }
+
+        return results;
+    }
+
 
 } // namespace CE::Editor
