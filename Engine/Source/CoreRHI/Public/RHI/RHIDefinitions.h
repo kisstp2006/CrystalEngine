@@ -5,11 +5,12 @@
 namespace CE::RHI
 {
 
-	/// Only Vulkan is supported
+	
     enum class GraphicsBackend
     {
         None,
         Vulkan,
+        Metal
     };
 
     enum class ResourceType
