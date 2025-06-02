@@ -6,6 +6,7 @@
 namespace CE::Metal
 {
     class Device;
+    class CommandQueue;
 
     class MetalRHI : public RHI::DynamicRHI
     {

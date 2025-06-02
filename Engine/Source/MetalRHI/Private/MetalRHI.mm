@@ -35,20 +35,25 @@ namespace CE::Metal
 
     void MetalRHI::PreShutdown()
     {
-        device->PreShutdown();
+        if (device)
+        {
+            device->PreShutdown();
+        }
     }
 
     void MetalRHI::Shutdown()
     {
-        device->Shutdown();
+        if (device)
+        {
+            device->Shutdown();
+        }
         
         delete device; device = nullptr;
     }
 
     void* MetalRHI::GetNativeHandle()
     {
-        // TODO
-        return nullptr;
+        return this;
     }
 
     RHI::Scope* MetalRHI::CreateScope(const ScopeDescriptor& desc)
@@ -104,7 +109,7 @@ namespace CE::Metal
 
     RHI::Fence* MetalRHI::CreateFence(bool initiallySignalled)
     {
-        return nullptr;
+        return new Metal::Fence(device, initiallySignalled);
     }
 
     void MetalRHI::DestroyFence(RHI::Fence* fence)
@@ -114,7 +119,13 @@ namespace CE::Metal
 
     RHI::CommandList* MetalRHI::AllocateCommandList(RHI::CommandQueue* associatedQueue, CommandListType commandListType)
     {
-        return nullptr;
+        if (associatedQueue == nullptr)
+            return nullptr;
+        
+        auto queue = (Metal::CommandQueue*)associatedQueue;
+        id<MTLCommandQueue> mtlQueue = queue->GetMtlQueue();
+        
+        return new Metal::CommandList(device, mtlQueue, commandListType);
     }
 
     Array<RHI::CommandList*> MetalRHI::AllocateCommandLists(u32 count,

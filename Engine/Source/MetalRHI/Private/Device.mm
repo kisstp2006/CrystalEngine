@@ -18,6 +18,8 @@ namespace CE::Metal
         mtlDevice = MTLCreateSystemDefaultDevice();
         
         isInitialized = true;
+        
+        primaryQueue = new CommandQueue(this, RHI::HardwareQueueClassMask::All);
     }
 
     void Device::PreShutdown()
@@ -27,6 +29,8 @@ namespace CE::Metal
 
     void Device::Shutdown()
     {
+        delete primaryQueue; primaryQueue = nullptr;
+        
         mtlDevice = nil;
     }
 }
