@@ -112,19 +112,69 @@ namespace CE::Metal
     {
         id<MTLBlitCommandEncoder> blitEncoder = [mtlCommandBuffer blitCommandEncoder];
         
-        // TODO
+        auto srcBuffer = (Metal::Buffer*)region.srcBuffer;
+        u32 width = region.dstTexture->GetWidth();
+        auto texture = (Metal::Texture*)region.dstTexture;
+        
+        u64 bytesPerRow = texture->GetWidth(region.mipSlice) * texture->GetBitsPerPixel() / 8;
+        u64 bytesPerImage = bytesPerRow * texture->GetHeight(region.mipSlice);
+        
+        for (int layer = region.baseArrayLayer; layer < region.baseArrayLayer + region.layerCount; layer++)
+        {
+            [blitEncoder copyFromBuffer:srcBuffer->GetMtlBuffer()
+                           sourceOffset:region.bufferOffset
+                      sourceBytesPerRow:bytesPerRow
+                    sourceBytesPerImage:bytesPerImage
+                             sourceSize:MTLSizeMake(texture->GetWidth(region.mipSlice), texture->GetHeight(region.mipSlice), texture->GetDepth(region.mipSlice))
+                              toTexture:texture->GetMtlTexture()
+                       destinationSlice:region.mipSlice
+                       destinationLevel:layer
+                      destinationOrigin:MTLOriginMake(0, 0, 0)];
+        }
         
         [blitEncoder endEncoding];
     }
 
     void CommandList::CopyTextureRegion(const TextureToBufferCopy& region)
     {
+        id<MTLBlitCommandEncoder> blitEncoder = [mtlCommandBuffer blitCommandEncoder];
         
+        auto srcTexture = (Metal::Texture*)region.srcTexture;
+        auto dstBuffer = (Metal::Buffer*)region.dstBuffer;
+        
+        u64 bytesPerRow = srcTexture->GetWidth(region.mipSlice) * srcTexture->GetBitsPerPixel() / 8;
+        u64 bytesPerImage = bytesPerRow * srcTexture->GetHeight(region.mipSlice);
+        
+        for (int layer = region.baseArrayLayer; layer < region.baseArrayLayer + region.layerCount; layer++)
+        {
+            [blitEncoder copyFromTexture:srcTexture->GetMtlTexture()
+                             sourceSlice:region.mipSlice
+                             sourceLevel:layer
+                            sourceOrigin:MTLOriginMake(0, 0, 0)
+                              sourceSize:MTLSizeMake(srcTexture->GetWidth(region.mipSlice), srcTexture->GetHeight(region.mipSlice), srcTexture->GetDepth(region.mipSlice))
+                                toBuffer:dstBuffer->GetMtlBuffer()
+                       destinationOffset:region.bufferOffset
+                  destinationBytesPerRow:bytesPerRow
+                destinationBytesPerImage:bytesPerImage];
+        }
+        
+        [blitEncoder endEncoding];
     }
 
     void CommandList::CopyBufferRegion(const BufferCopy& copy)
     {
+        id<MTLBlitCommandEncoder> blitEncoder = [mtlCommandBuffer blitCommandEncoder];
         
+        auto srcBuffer = (Metal::Buffer*)copy.srcBuffer;
+        auto dstBuffer = (Metal::Buffer*)copy.dstBuffer;
+        
+        [blitEncoder copyFromBuffer:srcBuffer->GetMtlBuffer()
+                       sourceOffset:copy.srcOffset
+                           toBuffer:dstBuffer->GetMtlBuffer()
+                  destinationOffset:copy.dstOffset
+                               size:copy.totalByteSize];
+        
+        [blitEncoder endEncoding];
     }
 
     void CommandList::RegisterFence(Fence* fence)

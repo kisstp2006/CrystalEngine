@@ -52,6 +52,7 @@ namespace CE::Metal
         storageMode = memoryHeap->GetStorageMode();
         
         MTLResourceOptions options = 0;
+        
         switch (memoryHeap->GetStorageMode()) {
             case MTLStorageModeShared:
                 options = MTLResourceStorageModeShared;
@@ -147,12 +148,35 @@ namespace CE::Metal
 
     void Buffer::ReadData(u8** outData, u64* outDataSize)
     {
+        if (!outData)
+            return;
         
+        if (IsHostAccessible())
+        {
+            if (outDataSize)
+                *outDataSize = bufferSize;
+            *outData = (u8*)malloc(bufferSize);
+            memcpy(*outData, [mtlBuffer contents], bufferSize);
+        }
+        else
+        {
+            ReadDataFromGPU(outData, outDataSize);
+        }
     }
 
     void Buffer::ReadData(void* data)
     {
+        if (!data)
+            return;
         
+        if (IsHostAccessible())
+        {
+            memcpy(data, [mtlBuffer contents], bufferSize);
+        }
+        else
+        {
+            ReadDataFromGPU(data);
+        }
     }
 
     void Buffer::UploadDataToGPU(const BufferData& data)
@@ -177,6 +201,57 @@ namespace CE::Metal
         [cmdBuffer commit];
         
         [cmdBuffer waitUntilCompleted];
+    }
+
+    void Buffer::ReadDataFromGPU(u8** outData, u64* outDataSize)
+    {
+        if (outData == nullptr)
+            return;
+        if (mtlBuffer == nil)
+            return;
+        
+        id<MTLBuffer> stagingBuffer = [device->GetHandle() newBufferWithLength:bufferSize options:MTLResourceStorageModeShared];
+        
+        CommandQueue* primaryQueue = device->GetPrimaryQueue();
+        
+        id<MTLCommandBuffer> cmdBuffer = [primaryQueue->GetMtlQueue() commandBuffer];
+        id<MTLBlitCommandEncoder> blitEncoder = [cmdBuffer blitCommandEncoder];
+        
+        [blitEncoder copyFromBuffer:mtlBuffer sourceOffset:0 toBuffer:stagingBuffer destinationOffset:0 size:bufferSize];
+        
+        [blitEncoder endEncoding];
+        [cmdBuffer commit];
+        
+        [cmdBuffer waitUntilCompleted];
+        
+        if (outDataSize)
+            *outDataSize = bufferSize;
+        
+        memcpy(*outData, [stagingBuffer contents], bufferSize);
+    }
+
+    void Buffer::ReadDataFromGPU(void* data)
+    {
+        if (data == nullptr)
+            return;
+        if (mtlBuffer == nil)
+            return;
+        
+        id<MTLBuffer> stagingBuffer = [device->GetHandle() newBufferWithLength:bufferSize options:MTLResourceStorageModeShared];
+        
+        CommandQueue* primaryQueue = device->GetPrimaryQueue();
+        
+        id<MTLCommandBuffer> cmdBuffer = [primaryQueue->GetMtlQueue() commandBuffer];
+        id<MTLBlitCommandEncoder> blitEncoder = [cmdBuffer blitCommandEncoder];
+        
+        [blitEncoder copyFromBuffer:mtlBuffer sourceOffset:0 toBuffer:stagingBuffer destinationOffset:0 size:bufferSize];
+        
+        [blitEncoder endEncoding];
+        [cmdBuffer commit];
+        
+        [cmdBuffer waitUntilCompleted];
+        
+        memcpy(data, [stagingBuffer contents], bufferSize);
     }
     
 } // namespace CE::Metal

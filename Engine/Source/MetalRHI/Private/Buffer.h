@@ -26,10 +26,15 @@ namespace CE::Metal
         
         void ReadData(void* data) override;
         
+        id<MTLBuffer> GetMtlBuffer() const { return mtlBuffer; }
 
     private:
         
         void UploadDataToGPU(const BufferData& data);
+        
+        void ReadDataFromGPU(u8** outData, u64* outDataSize);
+        
+        void ReadDataFromGPU(void* data);
         
         Device* device = nullptr;
         

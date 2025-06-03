@@ -141,7 +141,7 @@ namespace CE::Metal
 
     RHI::DeviceLimits* MetalRHI::GetDeviceLimits()
     {
-        return nullptr;
+        return device->GetDeviceLimits();
     }
 
     RHI::RenderTarget* MetalRHI::CreateRenderTarget(const RHI::RenderTargetLayout& rtLayout)

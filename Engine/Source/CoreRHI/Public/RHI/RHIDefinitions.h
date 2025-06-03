@@ -210,7 +210,7 @@ namespace CE::RHI
 		/// @brief Use as depth-only attachment.
 		Depth = BIT(4),
 		/// @brief Use as a subpass input.
-		SubpassInput = BIT(5),
+		SubpassInput = BIT(5)
     };
     ENUM_CLASS_FLAGS(TextureBindFlags);
 

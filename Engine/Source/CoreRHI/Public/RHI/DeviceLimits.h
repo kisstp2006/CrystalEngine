@@ -10,10 +10,15 @@ namespace CE::RHI
         virtual ~DeviceLimits() = default;
 
     public:
-
-        inline bool IsFormatSupported(RHI::Format format, RHI::TextureBindFlags bindFlags)
+        
+        bool IsFormatSupported(RHI::Format format)
         {
-            return (imageFormatSupport[format].bindFlags & bindFlags) == bindFlags;
+            return imageFormatSupport.KeyExists(format) && imageFormatSupport[format].bindFlags != RHI::TextureBindFlags::None;
+        }
+
+        bool IsFormatSupported(RHI::Format format, RHI::TextureBindFlags bindFlags)
+        {
+            return imageFormatSupport.KeyExists(format) && ((imageFormatSupport[format].bindFlags & bindFlags) == bindFlags);
         }
 
         inline bool IsFormatSupported(RHI::Format format, RHI::TextureBindFlags bindFlags, RHI::FilterMode filterMode)

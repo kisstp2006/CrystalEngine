@@ -17,6 +17,8 @@ namespace CE::Metal
     {
         mtlDevice = MTLCreateSystemDefaultDevice();
         
+        deviceLimits = new DeviceLimits(this);
+        
         isInitialized = true;
         
         primaryQueue = new CommandQueue(this, RHI::HardwareQueueClassMask::All);
@@ -30,6 +32,8 @@ namespace CE::Metal
     void Device::Shutdown()
     {
         delete primaryQueue; primaryQueue = nullptr;
+        
+        delete deviceLimits; deviceLimits = nullptr;
         
         mtlDevice = nil;
     }

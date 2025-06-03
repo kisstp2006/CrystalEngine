@@ -25,6 +25,8 @@ namespace CE::Metal
         
         CommandQueue* GetPrimaryQueue() const { return primaryQueue; }
         
+        DeviceLimits* GetDeviceLimits() const { return deviceLimits; }
+        
     private:
         
         MetalRHI* rhi = nullptr;
@@ -36,6 +38,7 @@ namespace CE::Metal
         
         id<MTLDevice> mtlDevice = nil;
         
+        DeviceLimits* deviceLimits = nullptr;
     };
 
 }
