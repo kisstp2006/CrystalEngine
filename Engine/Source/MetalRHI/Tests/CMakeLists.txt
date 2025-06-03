@@ -16,4 +16,6 @@ ce_add_test(${PROJECT_NAME}
         ${SRCS}
     BUILD_DEPENDENCIES
         TARGETS Config
+        PRIVATE
+            CE::CoreShader
 )

@@ -11,6 +11,10 @@
 #include "Texture.h"
 #include "TextureView.h"
 
+#include "ShaderModule.h"
+
+#include "RenderTarget.h"
+
 #include "CommandQueue.h"
 #include "CommandList.h"
 #include "Fence.h"

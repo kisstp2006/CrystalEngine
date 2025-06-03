@@ -22,6 +22,8 @@ namespace CE::Metal
         isInitialized = true;
         
         primaryQueue = new CommandQueue(this, RHI::HardwareQueueClassMask::All);
+        
+        
     }
 
     void Device::PreShutdown()

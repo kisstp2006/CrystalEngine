@@ -70,6 +70,7 @@ if(${PAL_TRAIT_VULKAN_SUPPORTED})
             "spirv-cross-cpp$<${PAL_PLATFORM_IS_WINDOWS}:$<$<CONFIG:Debug>:d>>"
             "spirv-cross-glsl$<${PAL_PLATFORM_IS_WINDOWS}:$<$<CONFIG:Debug>:d>>"
             "spirv-cross-hlsl$<${PAL_PLATFORM_IS_WINDOWS}:$<$<CONFIG:Debug>:d>>"
+            "spirv-cross-msl$<${PAL_PLATFORM_IS_WINDOWS}:$<$<CONFIG:Debug>:d>>"
     )
 
     get_target_property(dxc_lib_path Vulkan::dxc_lib IMPORTED_LOCATION_RELEASE)

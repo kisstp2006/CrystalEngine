@@ -1,6 +1,7 @@
 
 #include "CoreApplication.h"
 #include "MetalRHI.h"
+#include "CoreShader.h"
 
 #include "MetalRHITest.h"
 
@@ -21,6 +22,7 @@ static void WindowTestBegin()
     ModuleManager::Get().LoadModule("CoreMedia");
     ModuleManager::Get().LoadModule("CoreRHI");
     ModuleManager::Get().LoadModule("MetalRHI");
+    ModuleManager::Get().LoadModule("CoreShader");
 
     auto app = PlatformApplication::Get();
     app->Initialize();
@@ -66,12 +68,49 @@ static void WindowTestEnd()
     delete app;
     app = nullptr;
 
+    ModuleManager::Get().UnloadModule("CoreShader");
     ModuleManager::Get().UnloadModule("MetalRHI");
     ModuleManager::Get().UnloadModule("CoreRHI");
     ModuleManager::Get().UnloadModule("CoreMedia");
     ModuleManager::Get().UnloadModule("CoreApplication");
     ModuleManager::Get().UnloadModule("Core");
 }
+
+constexpr const char HLSL_Test[] = R"(
+cbuffer _SceneData : register(b0, space0)
+{
+    float _TimeElapsed;
+};
+
+struct VSInput
+{
+    float3 position : POSITION;
+};
+
+struct PSInput
+{
+    float4 position : SV_POSITION;
+};
+
+#if VERTEX
+
+PSInput VertMain(VSInput input)
+{
+    PSInput o;
+    o.position = float4(input.position, 1.0 * _TimeElapsed);
+    return o;
+}
+#endif
+
+#if FRAGMENT
+
+float4 FragMain(PSInput input) : SV_TARGET
+{
+    return float4(0, 0, 0, 1);
+}
+
+#endif
+)";
 
 TEST(RHI, MetalBasic)
 {
@@ -84,6 +123,37 @@ TEST(RHI, MetalBasic)
     
     u32 width = 0;
     u32 height = 0;
+    
+    ShaderCompiler compiler{};
+
+    ShaderBuildConfig buildConfig{};
+    buildConfig.entry = "VertMain";
+    buildConfig.stage = RHI::ShaderStage::Vertex;
+    buildConfig.debugName = "VertMain";
+    
+    Array<std::wstring> vertexExtraArgs{};
+    vertexExtraArgs.AddRange({
+        L"-D", L"COMPILE=1",
+        L"-D", L"VERTEX=1",
+        L"-fspv-preserve-bindings",
+        });
+    
+    BinaryBlob vertexMsl;
+    ShaderCompiler::ErrorCode result = compiler.BuildMSL(HLSL_Test, COUNTOF(HLSL_Test), buildConfig, vertexMsl, vertexExtraArgs);
+    
+    buildConfig.entry = "FragMain";
+    buildConfig.stage = RHI::ShaderStage::Fragment;
+    buildConfig.debugName = "FragMain";
+    
+    Array<std::wstring> fragmentExtraArgs{};
+    fragmentExtraArgs.AddRange({
+        L"-D", L"COMPILE=1",
+        L"-D", L"FRAGMENT=1",
+        L"-fspv-preserve-bindings",
+        });
+    
+    BinaryBlob fragmentMsl;
+    result = compiler.BuildMSL(HLSL_Test, COUNTOF(HLSL_Test), buildConfig, fragmentMsl, fragmentExtraArgs);
     
     while (!IsEngineRequestingExit())
     {

@@ -8,6 +8,13 @@
 #   define __EMULATE_UUID
 #endif
 
+#if PLATFORM_DESKTOP
+#include <spirv_cross/spirv_msl.hpp>
+#include "spirv_cross/spirv_reflect.hpp"
+#include "spirv_cross/spirv_parser.hpp"
+#include <spirv-tools/libspirv.hpp>
+#endif
+
 #undef SIZE_T
 #include <dxc/dxcapi.h>
 
@@ -60,6 +67,92 @@ namespace CE
 	{
 		delete impl;
 	}
+
+    ShaderCompiler::ErrorCode ShaderCompiler::BuildMSL(const void* data, u32 dataSize, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
+    {
+#if !PLATFORM_MAC
+        return ERR_UnsupportedPlatform;
+#endif
+        
+        HRESULT status = 0;
+        ShaderBuildConfig& config = const_cast<ShaderBuildConfig&>(buildConfig);
+
+        CComPtr<IDxcBlobEncoding> source = nullptr;
+
+        status = impl->utils->CreateBlob(data, dataSize, DXC_CP_UTF8, &source);
+
+        if (!SUCCEEDED(status))
+        {
+            this->errorMessage = "Failed to load source file";
+            return ERR_FailedToLoadFile;
+        }
+
+        DxcBuffer buffer;
+        buffer.Ptr = source->GetBufferPointer();
+        buffer.Size = source->GetBufferSize();
+        buffer.Encoding = DXC_CP_UTF8;
+        
+        BinaryBlob spirvCode;
+
+        ErrorCode result = BuildSpirv(buffer, config, spirvCode, extraArgs);
+        if (result != ERR_Success)
+        {
+            return result;
+        }
+        
+        spirv_cross::CompilerReflection* reflection = new spirv_cross::CompilerReflection((const uint32_t*)spirvCode.GetDataPtr(), spirvCode.GetDataSize() / 4);
+        defer(&)
+        {
+            delete reflection;
+        };
+
+        auto resources = reflection->get_shader_resources();
+        
+        spirv_cross::CompilerMSL compiler((u32*)spirvCode.GetDataPtr(), spirvCode.GetDataSize() / 4);
+        
+        spirv_cross::CompilerMSL::Options mslOptions;
+#if PLATFORM_MAC
+        mslOptions.platform = spirv_cross::CompilerMSL::Options::Platform::macOS;
+#elif PLATFORM_IOS
+        mslOptions.platform = spirv_cross::CompilerMSL::Options::Platform::iOS;
+#endif
+        mslOptions.msl_version = spirv_cross::CompilerMSL::Options::make_msl_version(2, 3);
+        compiler.set_msl_options(mslOptions);
+        
+        u32 resourceIndex = 0;
+        for (auto& ubo : resources.uniform_buffers)
+        {
+            compiler.set_decoration(ubo.id, spv::DecorationBinding, resourceIndex++);
+        }
+        for (auto& ssbo : resources.storage_buffers)
+        {
+            compiler.set_decoration(ssbo.id, spv::DecorationBinding, resourceIndex++);
+        }
+        for (auto& image : resources.separate_images)
+        {
+            compiler.set_decoration(image.id, spv::DecorationBinding, resourceIndex++);
+        }
+        for (auto& image : resources.sampled_images)
+        {
+            compiler.set_decoration(image.id, spv::DecorationBinding, resourceIndex++);
+        }
+        for (auto& image : resources.storage_images)
+        {
+            compiler.set_decoration(image.id, spv::DecorationBinding, resourceIndex++);
+        }
+        for (auto& sampler : resources.separate_samplers)
+        {
+            compiler.set_decoration(sampler.id, spv::DecorationBinding, resourceIndex++);
+        }
+        
+        std::string resultStr = compiler.compile();
+        if (resultStr.empty())
+            return ERR_CompilationFailure;
+        
+        outByteCode.LoadData(resultStr.c_str(), resultStr.length() + 1); // +1 for null-terminator
+        
+        return ERR_Success;
+    }
 
 	ShaderCompiler::ErrorCode ShaderCompiler::BuildSpirv(const IO::Path& hlslPath, const ShaderBuildConfig& buildConfig, BinaryBlob& outByteCode, Array<std::wstring>& extraArgs)
 	{
