@@ -1,12 +1,68 @@
 #include "MetalRHIPrivate.h"
 
+#include "TextureFormats.inl"
+
 namespace CE::Metal
 {
+
+    inline MTLLoadAction ToMtlLoadAction(RHI::AttachmentLoadAction loadAction)
+    {
+        switch (loadAction)
+        {
+            case RHI::AttachmentLoadAction::Load:
+                return MTLLoadActionLoad;
+            case RHI::AttachmentLoadAction::Clear:
+                return MTLLoadActionClear;
+            case RHI::AttachmentLoadAction::DontCare:
+                return MTLLoadActionDontCare;
+        }
+        return MTLLoadActionDontCare;
+    }
+
+    inline MTLStoreAction ToMtlStoreAction(RHI::AttachmentStoreAction storeAction)
+    {
+        switch (storeAction)
+        {
+            case RHI::AttachmentStoreAction::Store:
+                return MTLStoreActionStore;
+            case RHI::AttachmentStoreAction::DontCare:
+                return MTLStoreActionDontCare;
+        }
+        return MTLStoreActionDontCare;
+    }
 
     RenderTarget::RenderTarget(Device* device, const RHI::RenderTargetLayout& rtLayout)
         : device(device), rtLayout(rtLayout)
     {
-        
+        for (int i = 0; i < rtLayout.subpasses.GetSize(); i++)
+        {
+            const auto& subpass = rtLayout.subpasses[i];
+            
+            MTLRenderPassDescriptor* rpDesc = [[MTLRenderPassDescriptor alloc] init];
+            
+            for (int j = 0; j < subpass.colorAttachments.GetSize(); j++)
+            {
+                u32 attachmentIdx = subpass.colorAttachments[j];
+                const auto& colorAttachment = rtLayout.attachmentLayouts[attachmentIdx];
+                
+                rpDesc.colorAttachments[j].loadAction = ToMtlLoadAction(colorAttachment.loadAction);
+                rpDesc.colorAttachments[j].storeAction = ToMtlStoreAction(colorAttachment.storeAction);
+            }
+            
+            if (!subpass.depthStencilAttachment.IsEmpty())
+            {
+                u32 attachmentIdx = subpass.depthStencilAttachment[0];
+                const auto& depthStencilAttachment = rtLayout.attachmentLayouts[attachmentIdx];
+                
+                rpDesc.depthAttachment.loadAction = ToMtlLoadAction(depthStencilAttachment.loadAction);
+                rpDesc.depthAttachment.storeAction = ToMtlStoreAction(depthStencilAttachment.storeAction);
+                
+                rpDesc.stencilAttachment.loadAction = ToMtlLoadAction(depthStencilAttachment.loadActionStencil);
+                rpDesc.stencilAttachment.storeAction = ToMtlStoreAction(depthStencilAttachment.storeActionStencil);
+            }
+            
+            [renderPassDescArray addObject:rpDesc];
+        }
     }
 
     RenderTarget::~RenderTarget()

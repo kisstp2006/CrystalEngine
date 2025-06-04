@@ -60,8 +60,11 @@ namespace CE::Metal
 
         Device* device = nullptr;
         
+        Metal::RenderTarget* curRenderTarget = nullptr;
+        
         id<MTLCommandQueue> mtlCommandQueue = nil;
         id<MTLCommandBuffer> mtlCommandBuffer = nil;
+        id<MTLRenderCommandEncoder> mtlRenderEncoder = nil;
         
         List<Fence*> fenceInstances;
         SharedMutex fenceLock;

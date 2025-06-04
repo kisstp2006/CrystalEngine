@@ -26,6 +26,8 @@ namespace CE::Metal
     void CommandList::Begin()
     {
         mtlCommandBuffer = [mtlCommandQueue commandBuffer];
+        
+        curRenderTarget = nullptr;
     }
 
     void CommandList::End()
@@ -35,12 +37,19 @@ namespace CE::Metal
 
     void CommandList::BeginRenderTarget(RHI::RenderTarget* renderTarget, RHI::RenderTargetBuffer* renderTargetBuffer, RHI::AttachmentClearValue* clearValuesPerAttachment)
     {
+        curRenderTarget = (Metal::RenderTarget*)renderTarget;
         
+        // TODO: Implement multiple subpass support
+        
+        MTLRenderPassDescriptor* rpDesc = curRenderTarget->GetSubpass(0);
+        
+        mtlRenderEncoder = [mtlCommandBuffer renderCommandEncoderWithDescriptor:rpDesc];
     }
 
     void CommandList::EndRenderTarget()
     {
-        
+        [mtlRenderEncoder endEncoding];
+        mtlRenderEncoder = nil;
     }
 
     void CommandList::ResourceBarrier(u32 count, ResourceBarrierDescriptor* barriers)

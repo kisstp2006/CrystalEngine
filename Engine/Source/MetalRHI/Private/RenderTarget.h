@@ -15,11 +15,16 @@ namespace CE::Metal
         
         void GetAttachmentFormats(Array<RHI::Format>& outColorFormats, RHI::Format& outDepthStencilFormat, u32 subpassSelection) override;
         
+        int GetSubpassCount() const { return [renderPassDescArray count]; }
+        
+        MTLRenderPassDescriptor* GetSubpass(int index) { return (MTLRenderPassDescriptor*)[renderPassDescArray objectAtIndex:index]; }
         
     private:
         
         Device* device = nullptr;
         RHI::RenderTargetLayout rtLayout{};
+        
+        NSMutableArray* renderPassDescArray = nil;
     };
     
 } // namespace CE::Metal
