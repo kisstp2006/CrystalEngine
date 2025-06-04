@@ -14,6 +14,10 @@
 #include "ShaderModule.h"
 
 #include "RenderTarget.h"
+#include "Pipeline.h"
+#include "GraphicsPipeline.h"
+#include "ComputePipeline.h"
+#include "PipelineState.h"
 
 #include "CommandQueue.h"
 #include "CommandList.h"

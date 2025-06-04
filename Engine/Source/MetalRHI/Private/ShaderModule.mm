@@ -26,5 +26,10 @@ namespace CE::Metal
             return;
         }
     }
+
+    ShaderModule::~ShaderModule()
+    {
+        mtlLibrary = nil;
+    }
     
 } // namespace CE::Metal
