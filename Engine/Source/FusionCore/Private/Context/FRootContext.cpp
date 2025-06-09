@@ -97,11 +97,6 @@ namespace CE
 
 		Ref<FWidget> hoveredWidget = nativeContext->HitTest(mousePos);
 
-    	if (hoveredWidget == nullptr && !hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top()->IsOfType<FLabel>())
-    	{
-    		String::IsAlphabet('a');
-    	}
-
 		if (!hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top() != hoveredWidget &&
 			(hoveredWidget == nullptr || !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top().Get())))
 		{
