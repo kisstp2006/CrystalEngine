@@ -39,9 +39,9 @@ namespace CE::Metal
     {
         curRenderTarget = (Metal::RenderTarget*)renderTarget;
         
-        // TODO: Implement multiple subpass support
+        curSubpass = 0;
         
-        MTLRenderPassDescriptor* rpDesc = curRenderTarget->GetSubpass(0);
+        MTLRenderPassDescriptor* rpDesc = curRenderTarget->GetSubpass(curSubpass);
         
         mtlRenderEncoder = [mtlCommandBuffer renderCommandEncoderWithDescriptor:rpDesc];
     }
@@ -50,6 +50,15 @@ namespace CE::Metal
     {
         [mtlRenderEncoder endEncoding];
         mtlRenderEncoder = nil;
+    }
+
+    void CommandList::RenderTargetNextSubPass()
+    {
+        curSubpass++;
+        
+        MTLRenderPassDescriptor* rpDesc = curRenderTarget->GetSubpass(curSubpass);
+        
+        mtlRenderEncoder = [mtlCommandBuffer renderCommandEncoderWithDescriptor:rpDesc];
     }
 
     void CommandList::ResourceBarrier(u32 count, ResourceBarrierDescriptor* barriers)

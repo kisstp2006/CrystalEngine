@@ -122,6 +122,7 @@ namespace CE::RHI
 		virtual void End() = 0;
 
 		virtual void BeginRenderTarget(RenderTarget* renderTarget, RenderTargetBuffer* renderTargetBuffer, AttachmentClearValue* clearValuesPerAttachment) = 0;
+        virtual void RenderTargetNextSubPass() = 0;
 		virtual void EndRenderTarget() = 0;
 
 		inline void SetCurrentImageIndex(u32 imageIndex)

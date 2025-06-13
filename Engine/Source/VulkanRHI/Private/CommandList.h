@@ -53,6 +53,8 @@ namespace CE::Vulkan
 
 		void BeginRenderTarget(RHI::RenderTarget* renderTarget, RHI::RenderTargetBuffer* renderTargetBuffer, RHI::AttachmentClearValue* clearValuesPerAttachment) override;
 		void EndRenderTarget() override;
+        
+        void RenderTargetNextSubPass() override;
 
 	private:
 		

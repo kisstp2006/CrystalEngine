@@ -21,6 +21,8 @@ namespace CE::Metal
         
         void EndRenderTarget() override;
         
+        void RenderTargetNextSubPass() override;
+        
         void ResourceBarrier(u32 count, ResourceBarrierDescriptor* barriers) override;
         
         void SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup* >& srgs) override;
@@ -61,6 +63,7 @@ namespace CE::Metal
         Device* device = nullptr;
         
         Metal::RenderTarget* curRenderTarget = nullptr;
+        int curSubpass = 0;
         
         id<MTLCommandQueue> mtlCommandQueue = nil;
         id<MTLCommandBuffer> mtlCommandBuffer = nil;

@@ -720,6 +720,11 @@ namespace CE::Vulkan
 		vkCmdBeginRenderPass(commandBuffer, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}
 
+    void CommandList::RenderTargetNextSubPass()
+    {
+        vkCmdNextSubpass(commandBuffer, VK_SUBPASS_CONTENTS_INLINE);
+    }
+
 	void CommandList::EndRenderTarget()
 	{
 		currentPass = nullptr;
