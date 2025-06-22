@@ -27,14 +27,16 @@ namespace CE
 			if (!childContext->IsOfType<FNativeContext>())
 				continue;
 
-			TickNativeContextInput(static_cast<FNativeContext*>(childContext.Get()));
+			TickNativeContextInput(CastTo<FNativeContext>(childContext));
         }
-
     }
 
-	void FRootContext::TickNativeContextInput(FNativeContext* nativeContext)
+	void FRootContext::TickNativeContextInput(Ref<FNativeContext> nativeContext)
 	{
 		ZoneScoped;
+
+		// Root context should only have one native context as its child.
+		// The child native context can then have multiple children native contexts as different windows.
 
 		if (nativeContext == nullptr || !IsRootContext())
 			return;
@@ -54,6 +56,7 @@ namespace CE
 		Vec2 mousePos = nativeContext->ScreenToGlobalSpacePosition(screenMousePos);
 		Vec2 mouseDelta = InputManager::GetMouseDelta().ToVec2();
 		Vec2 wheelDelta = InputManager::GetMouseWheelDelta();
+
 		if (prevMousePos.GetSqrMagnitude() == 0)
 			prevMousePos = mousePos;
 		if (prevScreenMousePos.GetSqrMagnitude() == 0)
@@ -97,6 +100,28 @@ namespace CE
 
 		Ref<FWidget> hoveredWidget = nativeContext->HitTest(mousePos);
 
+		Ref<FWidget> dropTarget = nullptr;
+
+		if (draggedWidget != nullptr)
+		{
+			dropTarget = nativeContext->HitTest(mousePos, false);
+
+			if (dropTarget)
+			{
+				dropTarget->Focus();
+			}
+		}
+
+		while (dropTarget != nullptr && !dropTarget->SupportsDropTarget())
+		{
+			dropTarget = dropTarget->GetParent();
+		}
+
+		if (dropTarget && !dropTarget->SupportsDropTarget())
+		{
+			dropTarget = nullptr;
+		}
+
 		if (!hoveredWidgetStack.IsEmpty() && hoveredWidgetStack.Top() != hoveredWidget &&
 			(hoveredWidget == nullptr || !hoveredWidget->ParentExistsRecursive(hoveredWidgetStack.Top().Get())))
 		{
@@ -114,7 +139,7 @@ namespace CE
 				event.sender = hoveredWidgetStack.Top().Get();
 				event.Reset();
 
-				if (event.sender->SupportsMouseEvents() && event.sender->GetContext() != nullptr)
+				if (event.sender.IsValid() && event.sender->SupportsMouseEvents() && event.sender->GetContext() != nullptr)
 				{
 					if (event.sender->GetContext() != nativeContext)
 					{
@@ -245,18 +270,23 @@ namespace CE
 				dragEvent.wheelDelta = wheelDelta;
 				dragEvent.isInside = true;
 				dragEvent.keyModifiers = keyModifierStates;
+				dragEvent.dropTarget = dropTarget;
 
 				dragEvent.sender = draggedWidget.Get();
 				if (hoveredWidgetStack.NotEmpty())
 					dragEvent.sender = hoveredWidgetStack.Top().Get();
 				dragEvent.draggedWidget = draggedWidget.Get();
 
-				if (draggedWidget->GetContext() != nativeContext)
+				if (Ref<FFusionContext> draggedWidgetContext = draggedWidget->GetContext())
 				{
-					dragEvent.mousePosition = draggedWidget->GetContext()->ScreenToGlobalSpacePosition(screenMousePos);
-					dragEvent.prevMousePosition = draggedWidget->GetContext()->ScreenToGlobalSpacePosition(prevScreenMousePos);
+					if (draggedWidgetContext != nativeContext)
+					{
+						dragEvent.mousePosition = draggedWidgetContext->ScreenToGlobalSpacePosition(screenMousePos);
+						dragEvent.prevMousePosition = draggedWidgetContext->ScreenToGlobalSpacePosition(prevScreenMousePos);
+					}
 				}
 
+				bool isValid = draggedWidget.IsValid();
 				draggedWidget->HandleEvent(&dragEvent);
 
 				// Cancel dragging if any of the FDragEvent's are not consumed by the dragged widget
@@ -540,6 +570,7 @@ namespace CE
 					dragEvent.buttons = (MouseButtonMask)BIT((int)mouseButton);
 					dragEvent.keyModifiers = keyModifierStates;
 					dragEvent.isInside = false;
+					dragEvent.dropTarget = dropTarget;
 
 					if (hoveredWidgetStack.NotEmpty())
 					{

@@ -64,6 +64,8 @@ namespace CE
         SystemCursor GetCursor();
         void PopCursor();
 
+        void DispatchOnMainThread(const Delegate<void(void)>& execute);
+
         CMImage LoadImageAsset(const Name& assetPath);
         int LoadImageResource(const IO::Path& resourcePath, const Name& imageName);
 
@@ -100,9 +102,21 @@ namespace CE
             const SubClass<FWindow>& windowClass, 
             const PlatformWindowInfo& info = {});
 
-        template<typename TWindow> requires TIsBaseClassOf<FWindow, TWindow>::Value
+        template<typename TWindow> requires TIsBaseClassOf<FWindow, TWindow>::Value and (!TIsSameType<FWindow, TWindow>::Value)
         Ref<TWindow> CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height,
+            SubClass<TWindow> windowClass,
             const PlatformWindowInfo& info = {})
+        {
+            if (windowClass == nullptr)
+            {
+                windowClass = TWindow::StaticClass();
+			}
+            return (Ref<TWindow>)CreateNativeWindow(windowName, title, width, height, static_cast<SubClass<FWindow>>(windowClass.GetClassType()), info);
+        }
+
+        template<typename TWindow> requires TIsBaseClassOf<FWindow, TWindow>::Value and (!TIsSameType<FWindow, TWindow>::Value)
+        Ref<TWindow> CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height,
+                                        const PlatformWindowInfo& info = {})
         {
             return (Ref<TWindow>)CreateNativeWindow(windowName, title, width, height, TWindow::StaticClass(), info);
         }
@@ -131,6 +145,9 @@ namespace CE
 
         int curImageIndex = 0;
         bool isExposed = false;
+
+        SharedMutex mainThreadDispatcherLock;
+        Array<Delegate<void(void)>> mainThreadDispatcher;
 
         FIELD()
         Ref<FRootContext> rootContext = nullptr;

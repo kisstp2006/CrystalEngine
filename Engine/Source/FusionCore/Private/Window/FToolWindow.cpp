@@ -1,4 +1,4 @@
-#include "Fusion.h"
+#include "FusionCore.h"
 
 namespace CE
 {
@@ -22,6 +22,12 @@ namespace CE
 
         //minimizeIcon->Background(minimizeIcon->Background().WithTint(tintColor));
         minimizeButton->SetInteractionEnabled(interactable);
+    }
+
+    void FToolWindow::SetWindowContent(FWidget& contentWidget)
+    {
+        this->content->RemoveAllChildren();
+        this->content->AddChild(contentWidget);
     }
 
     void FToolWindow::Construct()
@@ -81,7 +87,7 @@ namespace CE
                                 .ControlType(FWindowControlType::Minimize)
                                 .OnClicked([this]
                                     {
-                                        static_cast<FNativeContext*>(GetContext())->Minimize();
+                                        CastTo<FNativeContext>(GetContext())->Minimize();
                                     })
                                 .Name("WindowMinimizeButton")
                                 .Style("Button.WindowControl"),
@@ -90,7 +96,7 @@ namespace CE
                                 .ControlType(FWindowControlType::Maximize)
                                 .OnClicked([this]
                                     {
-                                        FNativeContext* nativeContext = static_cast<FNativeContext*>(GetContext());
+                                        Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext());
                                         if (nativeContext->IsMaximized())
                                         {
                                             nativeContext->Restore();

@@ -158,13 +158,19 @@ namespace CE
                 displayIndex = SDL_GetWindowDisplayIndex(mainWindow->handle);
             }
         }
-        
-        if (displayIndex < 0)
-        {
-            displayIndex = 0;
-        }
-		
-        handle = SDL_CreateWindow(title.GetCString(), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex), width, height, flags);
+
+		displayIndex = Math::Max(displayIndex, 0);
+
+		int x = SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex);
+		int y = SDL_WINDOWPOS_CENTERED_DISPLAY(displayIndex);
+
+		if (!info.openCentered)
+		{
+			x = info.openPos.x;
+			y = info.openPos.y;
+		}
+
+        handle = SDL_CreateWindow(title.GetCString(), x, y, width, height, flags);
 	}
 
 	void SDLPlatformWindow::GetWindowSize(u32* outWidth, u32* outHeight)
@@ -248,7 +254,7 @@ namespace CE
         PlatformWindowMisc::SetupBorderlessWindow(this, borderless);
 	}
 
-	void SDLPlatformWindow::SetInputFocus()
+	void SDLPlatformWindow::RaiseWindow()
 	{
 		SDL_RaiseWindow(handle);
 		//SDL_SetWindowInputFocus(handle);
@@ -350,6 +356,11 @@ namespace CE
 	String SDLPlatformWindow::GetTitle()
 	{
 		return SDL_GetWindowTitle(handle);
+	}
+
+	int SDLPlatformWindow::GetZOrder()
+	{
+		return PlatformWindowMisc::GetWindowZOrder(this);
 	}
 
 	u32 SDLPlatformWindow::GetWindowDpi()

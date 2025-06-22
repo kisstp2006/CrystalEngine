@@ -1,4 +1,4 @@
-#include "Fusion.h"
+#include "FusionCore.h"
 
 namespace CE
 {
@@ -34,7 +34,7 @@ namespace CE
     {
         this->controlType = type;
 
-        FFusionContext* ctx = GetContext();
+        Ref<FFusionContext> ctx = GetContext();
 
         FBrush iconImage = FBrush();
         switch (type)

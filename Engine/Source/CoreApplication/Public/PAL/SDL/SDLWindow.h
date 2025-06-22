@@ -15,6 +15,10 @@ namespace CE
 		virtual WindowHandle GetOSNativeHandle() override;
         virtual String GetTitle() override;
 
+        virtual int GetZOrder() override;
+
+        SDL_Window* GetSdlHandle() const { return handle; }
+
         u32 GetWindowDpi() override;
 
         void Show() override;
@@ -41,7 +45,7 @@ namespace CE
 
 		virtual void SetResizable(bool resizable) override;
         virtual void SetBorderless(bool borderless) override;
-        virtual void SetInputFocus() override;
+        virtual void RaiseWindow() override;
 
         virtual bool IsBorderless() override;
         virtual bool IsMinimized() override;

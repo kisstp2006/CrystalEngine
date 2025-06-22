@@ -3,7 +3,7 @@
 namespace CE
 {
     CLASS()
-    class FUSION_API FToolWindow : public FWindow
+    class FUSIONCORE_API FToolWindow : public FWindow
     {
         CE_CLASS(FToolWindow, FWindow)
     public:
@@ -14,6 +14,8 @@ namespace CE
 
         void SetMaximizeButton(bool interactable);
         void SetMinimizeButton(bool interactable);
+
+        void SetWindowContent(FWidget& content) override;
 
     protected:
 
