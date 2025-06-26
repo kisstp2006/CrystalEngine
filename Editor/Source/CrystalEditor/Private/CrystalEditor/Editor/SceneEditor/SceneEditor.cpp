@@ -139,15 +139,6 @@ namespace CE::Editor
                 {
                     const RPI::ModelLodSubMesh& subMesh = lodAsset->GetSubMesh(i);
                     Ref<CE::Material> builtinMaterial = carMesh->GetBuiltinMaterial(subMesh.materialIndex);
-                    //builtinMaterial->SetShader(standardShader);
-
-                    //builtinMaterial->SetProperty("_AlbedoTex", plasticAlbedoTex);
-                    //builtinMaterial->SetProperty("_NormalTex", plasticNormalTex);
-                    //builtinMaterial->SetProperty("_MetallicTex", plasticMetallicTex);
-                    //builtinMaterial->SetProperty("_RoughnessTex", plasticRoughnessTex);
-                    //builtinMaterial->ApplyProperties();
-
-                    //meshComponent->SetMaterial(aluminumMaterial, 0, i);
                     meshComponent->SetMaterial(builtinMaterial.Get(), 0, subMesh.materialIndex);
                 }
             }
@@ -276,7 +267,7 @@ namespace CE::Editor
     }
 
 
-    void SceneEditor::OnSelectionChanged(FItemSelectionModel* selectionModel)
+    void SceneEditor::OnActorSelectionChanged(FItemSelectionModel* selectionModel)
     {
         const auto& selection = selectionModel->GetSelection();
 
@@ -333,7 +324,7 @@ namespace CE::Editor
 
         viewportTab->GetViewport()->SetName("SceneEditorViewport");
 
-        sceneOutlinerTab->treeView->SelectionModel()->OnSelectionChanged(FUNCTION_BINDING(this, OnSelectionChanged));
+        sceneOutlinerTab->treeView->SelectionModel()->OnSelectionChanged(FUNCTION_BINDING(this, OnActorSelectionChanged));
     }
 
     void SceneEditor::ConstructMenuBar()

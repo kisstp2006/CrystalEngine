@@ -37,7 +37,7 @@ namespace CE::Editor
         void OnAssetUnloaded(Uuid bundleUuid) override;
 
         FUNCTION()
-        void OnSelectionChanged(FItemSelectionModel* selectionModel);
+        void OnActorSelectionChanged(FItemSelectionModel* selectionModel);
 
         FSplitBox* rootSplitBox = nullptr;
 
