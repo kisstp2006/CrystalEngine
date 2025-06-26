@@ -15,8 +15,19 @@ namespace CE::Editor
 
         Title("Material");
 
-        (*content)
-        .Child(
+        minorDockspace->AddDockWindow(
+            FAssignNew(EditorViewportTab, viewportTab)
+        );
+
+        viewportTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Right,
+            FAssignNew(MaterialDetailsTab, detailsTab)
+        );
+
+        viewportTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Bottom,
+            FAssignNew(AssetBrowser, assetBrowserTab)
+        );
+
+        /*Child(
             FAssignNew(FSplitBox, rootSplitBox)
             .Direction(FSplitDirection::Horizontal)
             .HAlign(HAlign::Fill)
@@ -53,7 +64,7 @@ namespace CE::Editor
                 .FillRatio(0.4f)
             )
         )
-    	.Padding(Vec4(0, 5, 0, 0));
+    	.Padding(Vec4(0, 5, 0, 0));*/
 
         toolBar->Content(
             EditorToolBar::NewImageButton("/Editor/Assets/Icons/Save")
@@ -243,7 +254,7 @@ namespace CE::Editor
 
         if (auto existingEditor = materialEditorsBySourceAssetUuid[assetData->assetUuid].Lock())
         {
-            crystalEditorWindow->SelectTab(existingEditor.Get());
+            crystalEditorWindow->SelectActiveEditor(existingEditor);
             existingEditor->SetMaterial(material);
             return existingEditor;
         }
@@ -253,8 +264,8 @@ namespace CE::Editor
 
         editor->SetMaterial(material);
 
-        crystalEditorWindow->AddDockTab(editor.Get());
-        crystalEditorWindow->SelectTab(editor.Get());
+        crystalEditorWindow->GetDockspace()->AddDockWindow(editor);
+        crystalEditorWindow->SelectActiveEditor(editor);
 
         return editor;
     }
@@ -311,8 +322,6 @@ namespace CE::Editor
         sphereMeshComponent->SetMaterial(material.Get(), 0, 0);
 
         detailsTab->SetupEditor(material);
-
-        UpdateDockspaceTabWell();
     }
 }
 

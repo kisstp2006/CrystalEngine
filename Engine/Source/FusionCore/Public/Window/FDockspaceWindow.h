@@ -18,16 +18,18 @@ namespace CE
 
     protected: // - Internal -
 
-        FStyledWidget* borderWidget = nullptr;
-        FOverlayStack* rootBox = nullptr;
-        FImage* maximizeIcon = nullptr;
-        FImage* minimizeIcon = nullptr;
-        Ref<FTitleBar> titleBar;
-        FHorizontalStack* titleBarContainer = nullptr;
-        FStyledWidget* projectLabelParent = nullptr;
-        FLabel* projectLabel = nullptr;
+        virtual void OnClickClose() {}
 
-        FImage* logo = nullptr;
+        FStyledWidget* borderWidget = nullptr;
+        //FOverlayStack* rootBox = nullptr;
+        //FImage* maximizeIcon = nullptr;
+        //FImage* minimizeIcon = nullptr;
+        //Ref<FTitleBar> titleBar;
+        //FHorizontalStack* titleBarContainer = nullptr;
+        //FStyledWidget* projectLabelParent = nullptr;
+        //FLabel* projectLabel = nullptr;
+
+        //FImage* logo = nullptr;
         FWindowControlButton* minimizeButton = nullptr;
         FWindowControlButton* maximizeButton = nullptr;
         FWindowControlButton* closeButton = nullptr;

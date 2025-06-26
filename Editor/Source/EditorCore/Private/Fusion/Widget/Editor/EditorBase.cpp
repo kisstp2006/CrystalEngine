@@ -5,7 +5,7 @@ namespace CE::Editor
 
     EditorBase::EditorBase()
     {
-
+        m_AllowedDockspaces = FDockspaceFilter().WithDockTypeMask(FDockTypeMask::Major);
     }
 
     void EditorBase::Construct()
@@ -30,7 +30,7 @@ namespace CE::Editor
             {
                 KeyModifier ctrlMod = KeyModifier::Ctrl;
 #if PLATFORM_MAC
-                ctrlMod = KeyModifier::Gui;
+                ctrlMod = KeyModifier::Cmd;
 #endif
 
                 if (EnumHasFlag(keyEvent->modifiers, ctrlMod))
@@ -78,7 +78,6 @@ namespace CE::Editor
         if (this->bundleUuid == bundleUuid)
         {
             Title(newName.GetString());
-            UpdateDockspaceTabWell();
         }
     }
 
@@ -103,9 +102,23 @@ namespace CE::Editor
     void EditorBase::SetAssetDirty(bool dirty)
     {
         isAssetDirty = dirty;
-        ShowAsterisk(isAssetDirty);
 
-        UpdateDockspaceTabWell();
+        String title = Title();
+
+        if (isAssetDirty != title.EndsWith("*"))
+        {
+	        if (isAssetDirty)
+            {
+                title += "*";
+            }
+            else
+            {
+                title.RemoveAt(title.GetLength() - 1);
+            }
+
+			Title(title);
+        }
+
     }
 }
 

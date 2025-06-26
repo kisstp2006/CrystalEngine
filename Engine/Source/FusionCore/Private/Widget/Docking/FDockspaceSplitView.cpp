@@ -39,8 +39,8 @@ namespace CE
 
                     FAssignNew(FSplitBox, splitBox)
                     .SplitterBackground(Color::Clear())
-                    .SplitterSize(7.5f)
-                    .SplitterDrawRatio(0.5f)
+                    .SplitterSize(7.0f)
+                    .SplitterDrawRatio(1.0f)
                     .HAlign(HAlign::Fill)
                     .FillRatio(1.0f)
                 ),
@@ -85,6 +85,11 @@ namespace CE
             return nullptr;
 
         return tabbedDockWindows[index];
+    }
+
+    int FDockspaceSplitView::GetTabbedDockWindowCount()
+    {
+        return tabbedDockWindows.GetSize();
     }
 
     Ref<FDockTabItem> FDockspaceSplitView::GetDockTabItem(int index)
@@ -200,12 +205,14 @@ namespace CE
 		}
     }
 
-    void FDockspaceSplitView::AddDockWindowSplit(FDockingHintPosition splitPosition, Ref<FDockWindow> dockWindow)
+    void FDockspaceSplitView::AddDockWindowSplit(FDockingHintPosition splitPosition, Ref<FDockWindow> dockWindow, f32 splitRatio)
     {
         if (!IsSingular() || splitBox->GetChildCount() != 1)
             return;
         if (splitPosition != FDockingHintPosition::Center && !CanBeSplit(dockWindow))
 			return;
+
+		splitRatio = Math::Clamp(splitRatio, 0.05f, 0.95f);
 
         if (splitPosition == FDockingHintPosition::Center)
         {
@@ -221,12 +228,12 @@ namespace CE
 
         splitBox->AddChild(
             FAssignNew(FDockspaceSplitView, split1)
-            .FillRatio(0.5f)
+            .FillRatio(1.0f - splitRatio)
         );
 
         splitBox->AddChild(
             FAssignNew(FDockspaceSplitView, split2)
-            .FillRatio(0.5f)
+            .FillRatio(splitRatio)
         );
 
         childrenSplitViews.AddRange({ split1, split2 });
@@ -287,6 +294,11 @@ namespace CE
         SetDockingPreviewEnabled(false, splitPosition);
     }
 
+    void FDockspaceSplitView::AddDockWindowSplit(FDockingHintPosition splitPosition, FDockWindow& dockWindow, f32 splitRatio)
+    {
+        AddDockWindowSplit(splitPosition, &dockWindow, splitRatio);
+    }
+
     void FDockspaceSplitView::AddDockWindow(Ref<FDockWindow> dockWindow)
     {
         if (!CanBeDocked(dockWindow) || tabbedDockWindows.Exists(dockWindow))
@@ -294,6 +306,8 @@ namespace CE
 
         tabbedDockWindows.Add(dockWindow);
         tabWell->UpdateTabWell();
+
+        dockWindow->ownerDockspaceSplitView = this;
 
         if (tabbedDockWindows.GetSize() == 1)
         {
@@ -322,8 +336,6 @@ namespace CE
 
         tabWellParent->Enabled(true);
         tabWell->UpdateTabWell();
-
-        // TODO: Handle multiple split docks
 
         RemoveAllContent();
 
@@ -454,7 +466,7 @@ namespace CE
         return nullptr;
     }
 
-    bool FDockspaceSplitView::RemoveDockItem(Ref<FDockTabItem> dockTabItem)
+    bool FDockspaceSplitView::RemoveDockItemInternal(Ref<FDockTabItem> dockTabItem)
     {
         if (!dockTabItem)
             return false;
@@ -478,6 +490,53 @@ namespace CE
         UpdateTabs();
 
         return true;
+    }
+
+    bool FDockspaceSplitView::RemoveDockItem(Ref<FDockTabItem> dockTabItem)
+    {
+        if (!dockTabItem)
+            return false;
+
+        if (Ref<FDockspace> dockspace = GetDockspace())
+        {
+            int index = tabWell->GetTabIndex(dockTabItem);
+            if (index < 0 || index >= tabbedDockWindows.GetSize())
+                return false;
+
+            Ref<FDockWindow> dockWindow = tabbedDockWindows[index];
+            if (!dockWindow)
+                return false;
+
+            if (selectedTab == dockTabItem)
+            {
+                selectedTab = nullptr;
+            }
+
+            tabWell->RemoveTabItem(dockTabItem);
+            tabbedDockWindows.RemoveAt(index);
+
+            UpdateTabs();
+
+            int neighborIndex = index - 1;
+            neighborIndex = Math::Clamp<int>(neighborIndex, 0, tabbedDockWindows.GetSize() - 1);
+
+            if (selectedTab == nullptr && neighborIndex < tabWell->GetTabCount() && neighborIndex >= 0)
+            {
+                SetActiveTab(tabWell->GetTabItem(neighborIndex));
+            }
+
+            if (tabbedDockWindows.IsEmpty())
+            {
+                if (Ref<FDockspaceSplitView> parentSplit = this->parentSplitView.Lock())
+                {
+                    parentSplit->RemoveChildSplitView(this);
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     void FDockspaceSplitView::OnPaintDockingPreview(FPainter* painter)

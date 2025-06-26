@@ -2,6 +2,7 @@
 
 namespace CE
 {
+    
     CLASS()
     class FUSIONCORE_API FDockWindow : public FWindow
     {
@@ -10,16 +11,24 @@ namespace CE
 
         FDockWindow();
 
+		virtual ~FDockWindow();
+
         void Construct() override;
+
+        void OnBeginDestroy() override;
 
     public: // - Public API -
 
+		Ref<FDockspaceSplitView> GetDockspaceSplitView() { return ownerDockspaceSplitView.Lock(); }
+
+		Ref<FDockspace> GetDockspace() { return ownerDockspace.Lock(); }
 
     protected: // - Internal -
 
         void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
         WeakRef<FDockspace> ownerDockspace;
+		WeakRef<FDockspaceSplitView> ownerDockspaceSplitView;
         Ref<FDockTabItem> item;
 
     public: // - Fusion Properties -
@@ -31,6 +40,7 @@ namespace CE
 
         FUSION_WIDGET;
         friend class FDockTabWell;
+        friend class FDockspaceSplitView;
     };
     
 }
