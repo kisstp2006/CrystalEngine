@@ -26,7 +26,7 @@ https://discord.gg/TXGWUrFarx
 
 ## Docking Demo
 
-![](./Screenshots/EditorDockingDemo.mp4)
+<video src="./Screenshots/EditorDockingDemo.mp4" controls></video>
 
 ## Requirements
 
