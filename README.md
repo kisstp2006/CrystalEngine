@@ -12,6 +12,22 @@ A WIP cross-platform Vulkan game engine with PBR rendering, Directed Acyclic Fra
 Join discord server here:
 https://discord.gg/TXGWUrFarx
 
+## 🚀 Key Highlights
+
+- 🔧 **Cross-platform Vulkan game engine** supporting Windows, macOS (Apple Silicon), and Linux.
+- 🎨 **Fusion UI framework** — a fully custom-built, **DPI-aware**, cross-platform **declarative** C++ UI system (no ImGui or Qt), used for both runtime and editor UIs.
+- 🧩 **Advanced docking system** — Fusion supports nested vertical/horizontal splits and tabbed views.
+- 🎨 **Fusion** supports features like drawing images, gradients, custom transformations, data binding, and many more.
+- 🛠️ **Directed Acyclic FrameGraph-based GPU scheduler** with automatic resource tracking and dependencies.
+- 💡 **HLSL shader support** for Vulkan via DxCompiler.
+- 📦 Multi-threaded **asset processing pipeline** with binary asset generation and automatic dependency tracking.
+- 🔍 Custom-built automatic **C++ reflection**, **serialization**, and **runtime object system** — no third-party metadata libraries.
+- 🖼️ Forward PBR render pipeline with CubeMap IBLs.
+
+## Docking Demo
+
+[](./Screenshots/EditorDockingDemo.mp4)
+
 ## Requirements
 
 The engine and editor compiles and runs on **Windows (x64)**, Mac (Apple Silicon) and Linux (Ubuntu).
@@ -31,25 +47,11 @@ git submodule update --init --recursive
 
 Please look at the [Build.md](./Docs/Build.md) to know the steps & dependencies required to build.
 
-## Features
-
-- Layered engine architecture with cross platform support.
-- Use HLSL to write shaders for Vulkan.
-- Forward PBR rendering with CubeMap IBL.
-- Directional shadow maps.
-- Multi-threaded job system, used in Asset Processing.
-- Asset processing to generate binary assets for use by engine.
-- Automatic C++ runtime reflection generation.
-- Object serialization: Custom binary format and JSON.
-- Frame graph based GPU scheduling with automatic resource dependencies.
-- **Fusion** framework for declarative GUI apps with text rendering.
-- **Fusion** uses the engine's builtin renderer instead of 3rd party imgui frameworks.
-
 ## Layered Architecture
 
 The engine is divided into different layers as shown below, and each layer can have multiple modules. Left side is for standalone build and right side is for editor builds.
 
-![](./Screenshots/LayerArchitecture.jpg)
+[](./Screenshots/LayerArchitecture.jpg)
 
 ### Core layer
 All modules inside the core layer are at the low level of the engine.
