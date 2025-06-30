@@ -62,6 +62,8 @@ namespace CE
 
         // - State API -
 
+        void SetDebugName(const CE::Name& name);
+
         void Begin();
         void End();
 
@@ -335,6 +337,7 @@ namespace CE
 
         RHI::DrawListTag drawListTag = RHI::DrawListTag::NullValue;
 
+		CE::Name debugName;
         u32 numFrames = 0;
         int curImageIndex = 0;
         bool pixelPerfect = true;

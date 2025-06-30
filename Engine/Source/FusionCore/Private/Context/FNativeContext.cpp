@@ -18,6 +18,11 @@ namespace CE
 		}
 	}
 
+	void FNativeContext::OnAfterConstruct()
+	{
+		Super::OnAfterConstruct();
+	}
+
 	FNativeContext* FNativeContext::Create(PlatformWindow* platformWindow, const String& name, FFusionContext* parentContext)
 	{
 		ZoneScoped;
@@ -77,6 +82,7 @@ namespace CE
 
 		//renderer = CreateObject<FusionRenderer>(this, "FusionRenderer");
 		renderer2 = CreateObject<FusionRenderer2>(this, "FusionRenderer2");
+		renderer2->SetDebugName(GetName());
 
 		UpdateViewConstants();
 

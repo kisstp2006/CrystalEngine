@@ -105,8 +105,15 @@ namespace CE
             currentSize = Vec2i(512, 512);
         }
 
+		bool isFirstTime = true;
+
         for (int i = 0; i < frames.GetSize(); ++i)
         {
+            if (frames[i] != nullptr)
+            {
+                isFirstTime = false;
+            }
+
             delete frames[i]; frames[i] = nullptr;
 
             RPI::RPISystem::Get().QueueDestroy(frameViews[i]); frameViews[i] = nullptr;
@@ -147,6 +154,11 @@ namespace CE
         {
             textureDescriptor.texture.name = GetName().GetString() + " FrameBuffer " + i;
             frames[i] = new RPI::Texture(textureDescriptor);
+
+            if (isFirstTime)
+            {
+                frames[i]->TransitionResourceTo(RHI::ResourceState::Undefined, RHI::ResourceState::FragmentShaderResource);
+            }
 
             textureViewDescriptor.texture = frames[i]->GetRhiTexture();
             frameViews[i] = gDynamicRHI->CreateTextureView(textureViewDescriptor);

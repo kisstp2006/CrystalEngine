@@ -34,6 +34,8 @@ namespace CE::RPI
 
         u32 GetDepth() const { return depth; }
 
+        void TransitionResourceTo(RHI::ResourceState fromState, RHI::ResourceState toState);
+
     protected:
 
         RHI::Texture* texture = nullptr;

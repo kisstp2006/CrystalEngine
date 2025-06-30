@@ -22,6 +22,8 @@ namespace CE
 
 		virtual ~FNativeContext();
 
+		void OnAfterConstruct() override;
+
 		static FNativeContext* Create(PlatformWindow* platformWindow, const String& name, FFusionContext* parentContext = nullptr);
 
 		PlatformWindow* GetPlatformWindow() const { return platformWindow; }

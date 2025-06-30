@@ -179,6 +179,8 @@ namespace CE
                 {
                     for (RHI::DrawPacket* drawPacket : drawPacketsPerImage[i])
                     {
+                        drawPacket->drawItems[0].debugName = debugName;
+
                         drawPacket->drawItems[0].vertexBufferViews[0] = RHI::VertexBufferView(quadsBuffer[i],
                                                                                               0,
                                                                                               vertexArray.GetCount() * sizeof(FVertex),
@@ -389,6 +391,11 @@ namespace CE
         footprint += drawDataBuffer.GetBuffer(0)->GetBufferSize() * numFrames;
 
         return footprint;
+    }
+
+    void FusionRenderer2::SetDebugName(const CE::Name& name)
+    {
+		this->debugName = name;
     }
 
     void FusionRenderer2::Begin()
