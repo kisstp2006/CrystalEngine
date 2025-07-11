@@ -90,6 +90,13 @@ namespace CE::Editor
                 woodMaterial->ApplyProperties();
             }
 
+			CE::Material* arrowMaterial = CreateObject<CE::Material>(scene, "ArrowMaterial");
+            arrowMaterial->SetShader(standardShader.Get());
+            {
+                arrowMaterial->SetProperty("_Albedo", Color::White());
+                arrowMaterial->ApplyProperties();
+			}
+
             StaticMesh* sphereMesh = CreateObject<StaticMesh>(scene, "SphereMesh");
             {
                 RPI::ModelAsset* sphereModel = CreateObject<RPI::ModelAsset>(sphereMesh, "SphereModel");
@@ -175,6 +182,20 @@ namespace CE::Editor
                 meshComponent->SetLocalScale(Vec3(10, 0.1f, 10));
                 meshComponent->SetMaterial(woodMaterial, 0, 0);
             }
+
+            if (Ref<StaticMesh> arrowMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Editor/Assets/Models/SM_Editor_Arrow"))
+        	{
+		        StaticMeshActor* arrowActor = CreateObject<StaticMeshActor>(scene, "ArrowMesh");
+            	scene->AddActor(arrowActor);
+	            {
+		        	StaticMeshComponent* meshComponent = arrowActor->GetMeshComponent();
+		        	meshComponent->SetStaticMesh(arrowMesh);
+		        	meshComponent->SetLocalPosition(Vec3(0, 0, 5));
+		        	meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
+		        	meshComponent->SetLocalScale(Vec3(1, 1, 1));
+					meshComponent->SetMaterial(arrowMaterial, 0, 0);
+	            }
+	        }
 
             DirectionalLight* lightActor = CreateObject<DirectionalLight>(scene, "Sun");
             scene->AddActor(lightActor);
@@ -265,7 +286,6 @@ namespace CE::Editor
     {
 
     }
-
 
     void SceneEditor::OnActorSelectionChanged(FItemSelectionModel* selectionModel)
     {

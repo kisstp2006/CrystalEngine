@@ -392,8 +392,6 @@ namespace CE
 		rebuildFrameGraph = false;
 		recompileFrameGraph = true;
 
-		// TODO: Implement multi scene support, and also multi-viewport support
-
 		RPI::RPISystem::Get().SimulationTick(curImageIndex);
 		RPI::RPISystem::Get().RenderTick(curImageIndex);
 
@@ -477,7 +475,6 @@ namespace CE
 											viewport->RecreateFrameBuffer();
 										}
 
-										//frameBuffer[i] = viewport->GetFrame(i)->GetRhiTexture();
 										frameBuffer[i] = viewport->GetFrameView(i);
 									}
 
