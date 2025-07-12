@@ -3,7 +3,7 @@
 namespace CE
 {
     CLASS()
-    class FUSIONCORE_API FDockspaceWindow : public FWindow
+    class FUSIONCORE_API FDockspaceWindow : public FWindow, public ApplicationMessageHandler
     {
         CE_CLASS(FDockspaceWindow, FWindow)
     protected:
@@ -12,11 +12,17 @@ namespace CE
 
         void Construct() override;
 
+        void OnBeforeDestroy() override;
+
     public: // - Public API -
 
         Ref<FDockspace> GetDockspace() const { return dockspace; }
 
     protected: // - Internal -
+
+        void OnWindowMaximized(PlatformWindow* window) override;
+        void OnWindowRestored(PlatformWindow* window) override;
+		void OnWindowMinimized(PlatformWindow* window) override;
 
         virtual void OnClickClose() {}
 

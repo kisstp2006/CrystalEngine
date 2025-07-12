@@ -14,6 +14,8 @@ namespace CE
 
         const bool isMac = PlatformMisc::GetCurrentPlatform() == PlatformName::Mac;
 
+        PlatformApplication::Get()->AddMessageHandler(this);
+
         Child(
             FAssignNew(FStyledWidget, borderWidget)
             .Background(FBrush(Color::RGBA(36, 36, 36)))
@@ -116,6 +118,47 @@ namespace CE
 
         dockspace->SetTabWellWindowHitTest(true);
     }
-    
+
+    void FDockspaceWindow::OnBeforeDestroy()
+    {
+        PlatformApplication::Get()->RemoveMessageHandler(this);
+
+	    Super::OnBeforeDestroy();
+
+
+    }
+
+    void FDockspaceWindow::OnWindowMaximized(PlatformWindow* window)
+    {
+	    if (Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext()))
+        {
+            if (nativeContext->GetPlatformWindow() == window)
+            {
+                borderWidget->Padding(Vec4(1, 1, 1, 1) * 6.0f);
+			}
+		}
+    }
+
+    void FDockspaceWindow::OnWindowRestored(PlatformWindow* window)
+    {
+        if (Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext()))
+        {
+            if (nativeContext->GetPlatformWindow() == window)
+            {
+                borderWidget->Padding(Vec4(1, 1, 1, 1) * 2.0f);
+            }
+        }
+    }
+
+    void FDockspaceWindow::OnWindowMinimized(PlatformWindow* window)
+    {
+        if (Ref<FNativeContext> nativeContext = CastTo<FNativeContext>(GetContext()))
+        {
+            if (nativeContext->GetPlatformWindow() == window)
+            {
+                borderWidget->Padding(Vec4(1, 1, 1, 1) * 2.0f);
+            }
+        }
+    }
 }
 
