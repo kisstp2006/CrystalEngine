@@ -86,6 +86,8 @@ namespace CE::Editor
 		{
 			if (!progressPopupShown)
 			{
+				progressPopupShown = true;
+
 				Vec2 windowSize = GetComputedSize();
 				Vec2 popupSize = Vec2(650, 100);
 				Vec2 popupPos = (windowSize - popupSize) * 0.5f;
