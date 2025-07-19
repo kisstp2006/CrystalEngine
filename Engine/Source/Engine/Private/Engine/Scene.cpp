@@ -45,6 +45,11 @@ namespace CE
 
 	void CE::Scene::Tick(f32 delta)
 	{
+		if (rpiScene)
+		{
+			rpiScene->SetName(GetName());
+		}
+
 		for (Actor* actor : actors)
 		{
 			if (!actor->IsSelfEnabled())
@@ -53,21 +58,12 @@ namespace CE
 			actor->Tick(delta);
 		}
 
-		const auto& viewports = rendererSubsystem->GetAllViewports();
-
 		for (CameraComponent* camera : cameras)
 		{
 			if (!camera->IsEnabledInHierarchy())
 				continue;
 
-			for (FGameWindow* viewport : viewports)
-			{
-				if (viewport->GetScene() == rpiScene)
-				{
-					camera->windowSize = viewport->GetComputedSize().ToVec2i();
-					break;
-				}
-			}
+			camera->windowSize = rpiScene->GetPrimaryViewportSize();
 
 			camera->TickCamera();
 		}

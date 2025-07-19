@@ -24,6 +24,8 @@ namespace CE
 
     	void AddScene(CE::Scene* scene);
 
+		void EnqueueSceneRenderer(Ref<SceneRenderer> sceneRenderer);
+
 		void AddCallbacks(ISceneSubsystemCallbacks* callbacks);
 		void RemoveCallbacks(ISceneSubsystemCallbacks* callbacks);
 
@@ -43,6 +45,9 @@ namespace CE
 		
 		FIELD()
 		Array<CE::Scene*> otherScenes{};
+
+		FIELD()
+		Array<Ref<SceneRenderer>> sceneRenderers;
 
     private:
 

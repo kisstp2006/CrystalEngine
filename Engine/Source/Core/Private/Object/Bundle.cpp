@@ -105,7 +105,7 @@ namespace CE
         }
         else if (bundleNameStr.StartsWith("/Temp/") || bundleNameStr == "/Temp")
         {
-            return gProjectPath / (bundleNameStr.GetSubstring(1) + ".temp");
+            return gProjectPath / bundleNameStr.GetSubstring(1);
         }
 
         if (bundleNameStr[0] != '/')
@@ -270,7 +270,7 @@ namespace CE
     {
         if (!absolutePath.Exists())
         {
-            CE_LOG(Error, All, "Bundle::LoadFromDisk(): Bundle doesn't exist at path {}", absolutePath);
+            //CE_LOG(Error, All, "Bundle::LoadFromDisk(): Bundle doesn't exist at path {}", absolutePath);
             outResult = BundleLoadResult::BundleNotFound;
             return nullptr;
         }
