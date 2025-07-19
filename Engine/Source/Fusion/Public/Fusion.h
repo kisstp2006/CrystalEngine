@@ -47,3 +47,4 @@
 #include "Widget/FExpandableSection.h"
 #include "Widget/FColorPicker.h"
 
+#include "Application/FusionStandaloneApplication.h"

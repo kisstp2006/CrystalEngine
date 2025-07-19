@@ -1,24 +1,20 @@
 #pragma once
 
-#include "Fusion.h"
-#include "VulkanRHI.h"
-
-#include "TestWidgets.h"
-
-using namespace CE;
-
-namespace WidgetTests
+namespace CE
 {
-	class RendererSystem : public ApplicationMessageHandler
-	{
-		CE_NO_COPY(RendererSystem)
-	public:
 
-		static RendererSystem& Get()
-		{
-			static RendererSystem instance{};
-			return instance;
-		}
+    class FUSION_API FusionStandaloneApplication : public ApplicationMessageHandler
+    {
+    public:
+        FusionStandaloneApplication();
+
+        virtual ~FusionStandaloneApplication();
+
+		void Run(Ref<FWindow> mainWindow, u32 width, u32 height, const PlatformWindowInfo& windowInfo);
+
+    private:
+
+		void SetupDefaultStyle();
 
 		void Init();
 		void Shutdown();
@@ -38,39 +34,18 @@ namespace WidgetTests
 		void OnWindowCreated(PlatformWindow* window) override;
 		void OnWindowExposed(PlatformWindow* window) override;
 
-	private:
-
-		RendererSystem() {}
-
-	public:
-
 		HashMap<u64, Vec2i> windowSizesById;
 		RHI::FrameScheduler* scheduler = nullptr;
 
 		bool rebuildFrameGraph = true;
 		bool recompileFrameGraph = true;
 		int curImageIndex = 0;
+		f32 deltaTime = 0;
+		clock_t previousTime = {};
 
 		RHI::DrawListContext drawList{};
-	};
-
-	CLASS()
-	class FusionTestWindow : public MajorDockspaceWindow
-	{
-		CE_CLASS(FusionTestWindow, MajorDockspaceWindow)
-	public:
-
-		FusionTestWindow();
-
-		void Construct() override;
-
-	private:
-
-		FUSION_WIDGET;
-	};
-
-
-
-}
-
-#include "FusionTest.rtti.h"
+		CE::JobManager* jobManager = nullptr;
+		CE::JobContext* jobContext = nullptr;
+    };
+    
+} // namespace CE
