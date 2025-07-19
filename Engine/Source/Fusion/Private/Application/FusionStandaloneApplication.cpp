@@ -18,111 +18,22 @@ namespace CE
 	void FusionStandaloneApplication::Run(Ref<FWindow> mainWindow, u32 width, u32 height,
 		const PlatformWindowInfo& windowInfo)
 	{
-		auto app = PlatformApplication::Get();
+		
+	}
 
-		/*PlatformWindowInfo windowInfo{};
-		windowInfo.fullscreen = windowInfo.hidden = windowInfo.maximised = windowInfo.resizable = false;
-		windowInfo.resizable = true;
-		windowInfo.hidden = true;
-		windowInfo.windowFlags = PlatformWindowFlags::DestroyOnClose;*/
-
-		f32 scaleFactor = GetDefaults<FusionApplication>()->GetDefaultScalingFactor();
-
-#if PLATFORM_MAC
-		u32 w = width, h = height;
-#elif PLATFORM_LINUX
-		u32 w = width * scaleFactor, h = height * scaleFactor;
-#elif PLATFORM_WINDOWS
-		u32 w = width, h = height;
-#endif
-
-		PlatformWindow* window = app->InitMainWindow("MainWindow", w, h, windowInfo);
-		window->SetBorderless(true);
-
-		InputManager::Get().Initialize(app);
-
+	void FusionStandaloneApplication::CreateRHI()
+	{
 		RHI::gDynamicRHI = new Vulkan::VulkanRHI();
-
-		RHI::gDynamicRHI->Initialize();
-		RHI::gDynamicRHI->PostInitialize();
-
-		RHI::FrameSchedulerDescriptor schedulerDesc{};
-		schedulerDesc.numFramesInFlight = 2;
-		RHI::FrameScheduler::Create(schedulerDesc);
-
-		RPI::RPISystem::Get().Initialize();
-
-		FusionApplication* fApp = FusionApplication::Get();
-
-		FusionInitInfo initInfo = {};
-		initInfo.assetLoader = nullptr;
-		fApp->Initialize(initInfo);
-
-		JobManagerDesc desc{};
-		desc.defaultTag = JOB_THREAD_WORKER;
-		desc.totalThreads = 0; // auto set optimal number of threads
-		desc.threads.Resize(4, { .threadName = "FusionThread", .tag = JOB_THREAD_FUSION });
-
-		jobManager = new JobManager("JobSystemManager", desc);
-		jobContext = new JobContext(jobManager);
-		JobContext::PushGlobalContext(jobContext);
-
-		Logger::Initialize();
-
-		PlatformApplication::Get()->AddMessageHandler(this);
-
-		scheduler = RHI::FrameScheduler::Get();
-
-		SetupDefaultStyle();
-
-		FRootContext* rootContext = FusionApplication::Get()->GetRootContext();
-
-		FNativeContext* nativeContext = FNativeContext::Create(window, "TestWindow", rootContext);
-		rootContext->AddChildContext(nativeContext);
-
-		nativeContext->SetOwningWidget(mainWindow.Get());
-
-		auto exposedTick = [&]
-			{
-				FusionApplication::Get()->SetExposed();
-
-				FusionApplication::Get()->Tick();
-
-				Render();
-			};
-
-		DelegateHandle handle = PlatformApplication::Get()->AddTickHandler(exposedTick);
-
-		window->Show();
-
-		int frameCounter = 0;
-
-		while (!IsEngineRequestingExit())
-		{
-			auto curTime = clock();
-			deltaTime = (f32)(curTime - previousTime) / CLOCKS_PER_SEC;
-
-			FusionApplication::Get()->ResetExposed();
-
-			// App & Input Tick
-			PlatformApplication::Get()->Tick();
-			InputManager::Get().Tick();
-
-			Render();
-
-			previousTime = curTime;
-			frameCounter++;
-		}
 	}
 
 	void FusionStandaloneApplication::SetupDefaultStyle()
 	{
-		FusionApplication* app = FusionApplication::Get();
-		FStyleManager* styleManager = app->GetStyleManager();
+		FusionApplication* fApp = FusionApplication::Get();
+		FStyleManager* styleManager = fApp->GetStyleManager();
 
-		FRootContext* rootContext = FusionApplication::Get()->GetRootContext();
+		FRootContext* rootContext = fApp->GetRootContext();
 
-		FStyleSet* rootStyle = CreateObject<FStyleSet>(rootContext, "RootStyleSet");
+		rootStyle = CreateObject<FStyleSet>(rootContext, "RootStyleSet");
 		styleManager->RegisterStyleSet(rootStyle->GetName(), rootStyle);
 		rootContext->SetDefaultStyleSet(rootStyle);
 
