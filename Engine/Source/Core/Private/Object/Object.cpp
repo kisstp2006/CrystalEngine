@@ -50,6 +50,25 @@ namespace CE
 		}
 	}
 
+	void ObjectListener::TriggerEdit(Uuid object, const Name& fieldName)
+	{
+		Array<IObjectUpdateListener*> listenerArray;
+
+		{
+			LockGuard lock{ mutex };
+
+			if (!listeners.KeyExists(object))
+				return;
+
+			listenerArray = listeners[object];
+		}
+
+		for (IObjectUpdateListener* listener : listenerArray)
+		{
+			listener->OnObjectFieldEdited(object, fieldName);
+		}
+	}
+
 	Object::Object() : name("Object"), uuid(Uuid::Random())
     {
         control = new Internal::RefCountControl();
@@ -857,7 +876,10 @@ namespace CE
 
     void Object::OnFieldEdited(const Name& fieldName)
     {
+		if (EnumHasFlag(objectFlags, OF_InsideConstructor))
+			return;
 
+		ObjectListener::TriggerEdit(GetUuid(), fieldName);
     }
 
     Object* Object::CreateDefaultSubobject(ClassType* classType, const String& name, ObjectFlags flags)

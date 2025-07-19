@@ -107,7 +107,21 @@ namespace CE
     {
 	    Super::OnFieldEdited(fieldName);
 
-        if (fieldName.GetString().Contains("materials"))
+		thread_local String materialsFieldName = "materials";
+
+        if (fieldName.GetString().Contains(materialsFieldName))
+        {
+            SetMaterialDirty(true);
+        }
+    }
+
+    void MeshComponent::OnFieldChanged(const Name& fieldName)
+    {
+	    Super::OnFieldChanged(fieldName);
+
+        thread_local String materialsFieldName = "materials";
+
+        if (fieldName.GetString().Contains(materialsFieldName))
         {
             SetMaterialDirty(true);
         }

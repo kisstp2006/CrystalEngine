@@ -273,7 +273,7 @@ namespace CE::Editor
 	    {
             const Array<u8>& arrayValue = field->GetFieldValue<Array<u8>>(instance);
             auto arrayInstance = (void*)arrayValue.GetData();
-            String arrayElementFieldPath = String::Format("{}[{}]", field->GetName(), i);
+            String arrayElementFieldPath = String::Format("{}[{}]", relativeFieldPath, i);
 	        String fieldNameFormat = "Index {}";
 
             if (i >= elementEditors.GetSize())
@@ -282,6 +282,26 @@ namespace CE::Editor
                 PropertyEditor* propertyEditor = PropertyEditorRegistry::Get()->Create(arrayElements[i], objectEditor);
 
                 propertyEditor->SetIndentationLevel(GetIndentationLevel() + 1);
+
+                Ref<Object> elementTarget = target;
+                if (TypeInfo* underlyingType = field->GetUnderlyingType())
+                {
+	                if (underlyingType->IsObject())
+	                {
+		                if (field->IsStrongRefCounted())
+		                {
+                            elementTarget = field->GetArrayElementValueAt<Ref<Object>>(i, instance);
+		                }
+                        else if (field->IsWeakRefCounted())
+                        {
+                            elementTarget = field->GetArrayElementValueAt<WeakRef<Object>>(i, instance).Lock();
+                        }
+                        else
+                        {
+                            elementTarget = field->GetArrayElementValueAt<Object*>(i, instance);
+                        }
+	                }
+                }
 
                 propertyEditor->InitTarget({ target }, arrayElementFieldPath);
 

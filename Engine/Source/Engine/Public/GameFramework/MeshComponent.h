@@ -46,6 +46,8 @@ namespace CE
 
 		void OnFieldEdited(const Name& fieldName) override;
 
+		void OnFieldChanged(const Name& fieldName) override;
+
 	protected:
 
 		//! @brief Materials per LOD mesh

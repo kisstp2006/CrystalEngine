@@ -56,11 +56,62 @@ namespace CE::Editor
 
 	    for (PropertyEditor* propertyEditor : propertyEditors)
 	    {
+            if (propertyEditor->IsOfType<ArrayPropertyEditor>())
+            {
+                if (fieldPath.GetString().Contains(propertyEditor->GetRelativeFieldPath().GetString()))
+                {
+                    propertyEditor->UpdateValue();
+                }
+                continue;
+            }
+
             if (propertyEditor->relativeFieldPath.GetString().Contains(fieldNameStr))
             {
 	            propertyEditor->UpdateValue();
             }
 	    }
+    }
+
+    void ObjectEditor::OnObjectFieldEdited(Uuid objectUuid, const CE::Name& fieldPath)
+    {
+        if (!targetObjectUuids.Exists(objectUuid))
+            return;
+
+        // TODO: Fix this for nested struct fields
+
+        String fieldNameStr = fieldPath.GetString();
+        if (fieldNameStr.Contains('.') || fieldNameStr.Contains('['))
+        {
+            Array<String> splits;
+            fieldNameStr.Split({ "[", "." }, splits);
+            fieldNameStr = splits[0];
+        }
+
+        for (PropertyEditor* propertyEditor : propertyEditors)
+        {
+            if (propertyEditor->IsOfType<ArrayPropertyEditor>())
+            {
+                if (fieldPath.GetString().Contains(propertyEditor->GetRelativeFieldPath().GetString()))
+                {
+                    propertyEditor->UpdateValue();
+                }
+                continue;
+            }
+
+			EditorField* editorField = propertyEditor->GetEditorField();
+            if (editorField == nullptr)
+				continue;
+			if (!editorField->IsBound())
+				continue;
+
+            if (editorField->IsOfType<ObjectEditorField>())
+            {
+                if (propertyEditor->relativeFieldPath.GetString().Contains(fieldNameStr))
+                {
+                    propertyEditor->UpdateValue();
+                }
+            }
+        }
     }
 
     void ObjectEditor::SetSplitRatioInternal(f32 ratio, FSplitBox* excluding)

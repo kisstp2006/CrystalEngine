@@ -9,6 +9,7 @@ namespace CE
         virtual ~IObjectUpdateListener() {}
 
         virtual void OnObjectFieldChanged(Uuid object, const Name& fieldName) {}
+        virtual void OnObjectFieldEdited(Uuid object, const Name& fieldName) {}
     };
 
     class CORE_API ObjectListener
@@ -24,6 +25,7 @@ namespace CE
     private:
 
         static void Trigger(Uuid object, const Name& fieldName);
+        static void TriggerEdit(Uuid object, const Name& fieldName);
 
         static SharedRecursiveMutex mutex;
         static HashMap<Uuid, Array<IObjectUpdateListener*>> listeners;

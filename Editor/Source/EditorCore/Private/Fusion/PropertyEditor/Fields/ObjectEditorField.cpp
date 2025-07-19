@@ -345,6 +345,7 @@ namespace CE::Editor
             else
             {
                 field->SetFieldValue<Ref<Object>>(instance, asset);
+                target->OnFieldEdited(relativeFieldPath);
             }
         }
         else if (field->IsWeakRefCounted())
@@ -359,6 +360,7 @@ namespace CE::Editor
             else
             {
                 field->SetFieldValue<WeakRef<Object>>(instance, asset);
+                target->OnFieldEdited(relativeFieldPath);
             }
         }
         else
@@ -373,6 +375,7 @@ namespace CE::Editor
             else
             {
                 field->SetFieldValue<Object*>(instance, asset.Get());
+                target->OnFieldEdited(relativeFieldPath);
             }
         }
 
