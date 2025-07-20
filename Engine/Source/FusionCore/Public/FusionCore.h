@@ -52,6 +52,7 @@ namespace CE
 #include "FusionDefines.h"
 #include "Exception/FusionException.h"
 #include "Font/FFontAtlas.h"
+#include "Font/FSDFFontAtlas.h"
 #include "Font/FFontManager.h"
 
 #include "Event/FEvent.h"

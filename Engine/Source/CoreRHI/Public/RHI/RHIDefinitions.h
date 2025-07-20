@@ -40,7 +40,8 @@ namespace CE::RHI
     {
         None,
         Buffer,
-        Texture
+        Texture,
+        TextureView
     };
 
     struct FontDesc

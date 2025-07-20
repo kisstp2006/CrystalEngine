@@ -17,6 +17,11 @@ namespace CE
     extern RawData GetFusionShader2VertJson();
     extern RawData GetFusionShader2FragJson();
 
+	extern RawData GetFusionSDFGlyphGenVert();
+	extern RawData GetFusionSDFGlyphGenFrag();
+	extern RawData GetFusionSDFGlyphGenVertJson();
+	extern RawData GetFusionSDFGlyphGenFragJson();
+
     FusionApplication::FusionApplication()
     {
         fontManager = CreateDefaultSubobject<FFontManager>("FontManager");
@@ -56,6 +61,7 @@ namespace CE
         PlatformApplication::Get()->AddMessageHandler(this);
 
         InitializeShader2();
+        InitializeSDFGlyphShader();
 
         fontManager->Init();
         imageAtlas->Init();
@@ -117,6 +123,7 @@ namespace CE
     {
         delete fusionShader; fusionShader = nullptr;
         delete fusionShader2; fusionShader2 = nullptr;
+        delete sdfGlyphShader; sdfGlyphShader = nullptr;
     }
 
     void FusionApplication::RegisterViewport(FViewport* viewport)
@@ -590,5 +597,62 @@ namespace CE
         fusionShader2->AddVariant(variantDesc);
     }
 
+    void FusionApplication::InitializeSDFGlyphShader()
+    {
+        RawData vertexShader = GetFusionSDFGlyphGenVert();
+		RawData fragmentShader = GetFusionSDFGlyphGenFrag();
+
+		String vertexShaderJson = (char*)GetFusionSDFGlyphGenVertJson().data;
+		String fragmentShaderJson = (char*)GetFusionSDFGlyphGenFragJson().data;
+
+        JValue vertexReflection{};
+        JValue fragmentReflection{};
+
+        JsonSerializer::Deserialize2(vertexShaderJson, vertexReflection);
+        JsonSerializer::Deserialize2(fragmentShaderJson, fragmentReflection);
+
+        RPI::ShaderVariantDescriptor2 variantDesc{};
+        variantDesc.interleaveVertexData = true;
+        variantDesc.shaderName = "FusionSDFGlyphGen";
+        variantDesc.entryPoints.Resize(2);
+        variantDesc.entryPoints[0] = "VertMain";
+        variantDesc.entryPoints[1] = "FragMain";
+
+        variantDesc.moduleDesc.Resize(2);
+        variantDesc.moduleDesc[0].byteCode = vertexShader.data;
+        variantDesc.moduleDesc[0].byteSize = vertexShader.dataSize;
+        variantDesc.moduleDesc[0].stage = ShaderStage::Vertex;
+        variantDesc.moduleDesc[0].name = "VertMain";
+
+        variantDesc.moduleDesc[1].byteCode = fragmentShader.data;
+        variantDesc.moduleDesc[1].byteSize = fragmentShader.dataSize;
+        variantDesc.moduleDesc[1].stage = ShaderStage::Fragment;
+        variantDesc.moduleDesc[1].name = "FragMain";
+
+        RHI::SRGVariableDescriptor fontGlyph{};
+        fontGlyph.name = "_FontGlyph";
+        fontGlyph.bindingSlot = (u32)fragmentReflection["separate_images"][0]["binding"].GetNumberValue();
+        fontGlyph.shaderStages = ShaderStage::Fragment;
+        fontGlyph.type = ShaderResourceType::Texture2D;
+
+		RHI::SRGVariableDescriptor fontGlyphSampler{};
+		fontGlyphSampler.name = "_FontGlyphSampler";
+		fontGlyphSampler.bindingSlot = (u32)fragmentReflection["separate_samplers"][0]["binding"].GetNumberValue();
+		fontGlyphSampler.shaderStages = ShaderStage::Fragment;
+		fontGlyphSampler.type = ShaderResourceType::SamplerState;
+
+        variantDesc.reflectionInfo.FindOrAdd(SRGType::PerMaterial)
+            .TryAdd(fontGlyph)
+            .TryAdd(fontGlyphSampler);
+
+        variantDesc.reflectionInfo.vertexInputs.Add("POSITION");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
+
+        variantDesc.reflectionInfo.vertexInputs.Add("TEXCOORD0");
+        variantDesc.reflectionInfo.vertexInputTypes.Add(VertexAttributeDataType::Float2);
+
+		sdfGlyphShader = new RPI::Shader();
+        sdfGlyphShader->AddVariant(variantDesc);
+    }
 } // namespace CE
 

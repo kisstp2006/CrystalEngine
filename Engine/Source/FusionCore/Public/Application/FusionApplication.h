@@ -155,6 +155,8 @@ namespace CE
 
         void InitializeShader2();
 
+        void InitializeSDFGlyphShader();
+
         void PrepareDrawList();
 
         int curImageIndex = 0;
@@ -198,6 +200,7 @@ namespace CE
 
         RPI::Shader* fusionShader = nullptr;
         RPI::Shader* fusionShader2 = nullptr;
+		RPI::Shader* sdfGlyphShader = nullptr;
         RHI::ShaderResourceGroupLayout perViewSrgLayout{};
         RHI::ShaderResourceGroupLayout perDrawSrgLayout{};
         RHI::ShaderResourceGroupLayout perObjectSrgLayout{};
@@ -219,6 +222,7 @@ namespace CE
         friend class FTimer;
         friend class Engine;
         friend class FGameWindow;
+		friend class FFontManager;
     };
     
 } // namespace CE

@@ -51,4 +51,5 @@ CompileCS() {
 
 CompileShader "FusionShader"
 CompileShader "FusionShader2"
+CompileShader "FusionSDFGlyphGen"
 
