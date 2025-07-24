@@ -61,7 +61,11 @@ namespace CE::Editor
             if (texture == nullptr || texture->GetRpiTexture() == nullptr)
                 continue;
 
-			// We only support Texture2D for now
+            if (texture->IsOfType<TextureCube>())
+            {
+	            // TODO: Implement CubeMap thumbnail
+            }
+
             if (!texture->IsOfType<Texture2D>())
 				continue;
 
@@ -156,8 +160,8 @@ namespace CE::Editor
                         {
                             RHI::ViewportState viewportState{};
                             viewportState.x = viewportState.y = 0;
-                            viewportState.width = rhiTexture->GetWidth();
-                            viewportState.height = rhiTexture->GetHeight();
+                            viewportState.width = outTexture->GetWidth();
+                            viewportState.height = outTexture->GetHeight();
                             viewportState.minDepth = 0;
                             viewportState.maxDepth = 1;
                             cmdList->SetViewports(1, &viewportState);
