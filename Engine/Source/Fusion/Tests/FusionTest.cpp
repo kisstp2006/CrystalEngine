@@ -4,220 +4,6 @@
 namespace WidgetTests
 {
 
-#pragma region Renderer System
-
-    void RendererSystem::Init()
-    {
-        PlatformApplication::Get()->AddMessageHandler(this);
-
-        scheduler = RHI::FrameScheduler::Get();
-    }
-
-    void RendererSystem::Shutdown()
-    {
-        PlatformApplication::Get()->RemoveMessageHandler(this);
-    }
-
-    void RendererSystem::Render()
-    {
-        FusionApplication* app = FusionApplication::TryGet();
-
-        int submittedImageIndex = -1;
-
-        if (app)
-        {
-            app->Tick();
-        }
-
-        if (IsEngineRequestingExit())
-        {
-            return;
-        }
-
-        if (rebuildFrameGraph)
-        {
-            rebuildFrameGraph = false;
-            recompileFrameGraph = true;
-
-            BuildFrameGraph();
-            submittedImageIndex = curImageIndex;
-        }
-
-        if (recompileFrameGraph)
-        {
-            recompileFrameGraph = false;
-
-            CompileFrameGraph();
-        }
-
-        if (IsEngineRequestingExit())
-        {
-            return;
-        }
-
-        auto scheduler = FrameScheduler::Get();
-
-        if (rebuildFrameGraph || recompileFrameGraph)
-        {
-            RebuildFrameGraph();
-            return;
-        }
-
-        int imageIndex = scheduler->BeginExecution();
-
-        if (imageIndex >= RHI::Limits::MaxSwapChainImageCount || rebuildFrameGraph || recompileFrameGraph)
-        {
-            RebuildFrameGraph();
-            return;
-        }
-
-        curImageIndex = imageIndex;
-
-        // ---------------------------------------------------------
-        // - Enqueue draw packets to views
-
-        if (submittedImageIndex != curImageIndex)
-        {
-            RPI::RPISystem::Get().SimulationTick(curImageIndex);
-            RPI::RPISystem::Get().RenderTick(curImageIndex);
-        }
-
-        // ---------------------------------------------------------
-        // - Submit draw lists to scopes for execution
-
-        drawList.Shutdown();
-
-        RHI::DrawListMask drawListMask{};
-        HashSet<RHI::DrawListTag> drawListTags{};
-
-        // - Setup draw list mask
-
-        if (app)
-        {
-            app->UpdateDrawListMask(drawListMask);
-        }
-
-        // - Enqueue additional draw packets
-
-        for (int i = 0; i < drawListMask.GetSize(); ++i)
-        {
-            if (drawListMask.Test(i))
-            {
-                drawListTags.Add((u8)i);
-            }
-        }
-
-        drawList.Init(drawListMask);
-
-        if (app)
-        {
-            app->EnqueueDrawPackets(drawList, curImageIndex);
-        }
-
-        drawList.Finalize();
-
-        // - Set scope draw lists
-
-        if (app) // FWidget Scopes & DrawLists
-        {
-            app->FlushDrawPackets(drawList, curImageIndex);
-        }
-
-
-        scheduler->EndExecution();
-    }
-
-    void RendererSystem::RebuildFrameGraph()
-    {
-        rebuildFrameGraph = recompileFrameGraph = true;
-    }
-
-    void RendererSystem::BuildFrameGraph()
-    {
-        rebuildFrameGraph = false;
-        recompileFrameGraph = true;
-
-        RPI::RPISystem::Get().SimulationTick(curImageIndex);
-        RPI::RPISystem::Get().RenderTick(curImageIndex);
-
-        auto scheduler = RHI::FrameScheduler::Get();
-
-        RHI::FrameAttachmentDatabase& attachmentDatabase = scheduler->GetAttachmentDatabase();
-
-        scheduler->BeginFrameGraph();
-        {
-            auto app = FusionApplication::TryGet();
-
-            if (app)
-            {
-                app->EmplaceFrameAttachments();
-
-                app->EnqueueScopes();
-            }
-        }
-        scheduler->EndFrameGraph();
-    }
-
-    void RendererSystem::CompileFrameGraph()
-    {
-        recompileFrameGraph = false;
-
-        auto scheduler = RHI::FrameScheduler::Get();
-
-        scheduler->Compile();
-
-        RHI::TransientMemoryPool* pool = scheduler->GetTransientPool();
-        RHI::MemoryHeap* imageHeap = pool->GetImagePool();
-    }
-
-
-    void RendererSystem::OnWindowRestored(PlatformWindow* window)
-    {
-        RebuildFrameGraph();
-    }
-
-    void RendererSystem::OnWindowDestroyed(PlatformWindow* window)
-    {
-        RebuildFrameGraph();
-    }
-
-    void RendererSystem::OnWindowClosed(PlatformWindow* window)
-    {
-        RebuildFrameGraph();
-    }
-
-    void RendererSystem::OnWindowResized(PlatformWindow* window, u32 newWidth, u32 newHeight)
-    {
-        RebuildFrameGraph();
-    }
-
-    void RendererSystem::OnWindowMinimized(PlatformWindow* window)
-    {
-        RebuildFrameGraph();
-    }
-
-    void RendererSystem::OnWindowCreated(PlatformWindow* window)
-    {
-        RebuildFrameGraph();
-    }
-
-    void RendererSystem::OnWindowExposed(PlatformWindow* window)
-    {
-        auto id = window->GetWindowId();
-        Vec2i windowSize = window->GetWindowSize();
-
-        if (!windowSizesById.KeyExists(id) || windowSize != windowSizesById[id])
-        {
-            RebuildFrameGraph();
-
-            scheduler->ResetFramesInFlight();
-        }
-
-        windowSizesById[id] = windowSize;
-    }
-
-#pragma endregion
-
 	FusionTestWindow::FusionTestWindow()
 	{
         m_DockspaceClass = MajorDockspace::StaticClass();
@@ -279,11 +65,35 @@ namespace WidgetTests
                         .Title(String::Format("Minor {} ({})", j, i))
                         .Background(Color::RGBA(36, 36, 36))
                         .Child(
-                            FNew(FLabel)
-                            .Text(String::Format("This is {} minor window in {} major window", j, i))
-                            .FontSize(16)
+                            FNew(FVerticalStack)
                             .HAlign(HAlign::Fill)
-                            .VAlign(VAlign::Fill)
+                            .VAlign(VAlign::Top)
+                            (
+                                FNew(FLabel)
+                                .Text(String::Format("This is {} minor window in {} major window", j, i))
+                                .FontSize(16)
+                                .HAlign(HAlign::Fill)
+                                .VAlign(VAlign::Fill),
+
+                                FNew(FTextButton)
+                                .Text(Flipped() ? "SDF, PNG" : "PNG, SDF")
+                                .OnButtonClicked([this](FButton* button, Vec2)
+                                {
+	                                Flipped(!Flipped());
+                                    ((FTextButton*)button)->Text(Flipped() ? "SDF, PNG" : "PNG, SDF");
+                                }),
+
+                                FNew(FVerticalStack)
+                                .ContentVAlign(VAlign::Top)
+                                .Margin(Vec4(0, 150, 0, 0))
+                                .Scale(Vec2(1, 1) * 15)
+                                (
+                                    FAssignNew(FLabel, label)
+                                    .FontSize(8)
+                                    .Text("Hello World!")
+                                    .HAlign(HAlign::Center)
+                                )
+                            )
                         )
                         .Name(String::Format("Minor{}_{}", j, i))
                         .HAlign(HAlign::Fill)
@@ -292,6 +102,43 @@ namespace WidgetTests
                     );
                 }
             }
+        }
+    }
+
+    void FusionTestWindow::OnPaint(FPainter* painter)
+    {
+	    Super::OnPaint(painter);
+
+        return;
+
+        String text = "quick fox jumped over last";
+
+        FixedArray<u32, 8> fontSizes = { 30, 24, 16, 13, 10, 7, 7, 7 };
+
+        auto func1 = &FPainter::DrawText;
+        auto func2 = &FPainter::DrawSDFText;
+
+        if (m_Flipped)
+        {
+            std::swap(func1, func2);
+        }
+
+        Vec2 topLeft = Vec2(25, 200);
+        for (int i = 0; i < fontSizes.GetSize(); i++)
+        {
+            painter->SetFontSize(fontSizes[i]);
+            (painter->*func1)(text, topLeft, Vec2(), FWordWrap::Normal);
+
+            topLeft.y += fontSizes[i] * 2;
+        }
+
+        Vec2 topRight = Vec2(550, 200);
+        for (int i = 0; i < fontSizes.GetSize(); i++)
+        {
+            painter->SetFontSize(fontSizes[i]);
+            (painter->*func2)(text, topRight, Vec2(), FWordWrap::Normal);
+
+            topRight.y += fontSizes[i] * 2;
         }
     }
 
