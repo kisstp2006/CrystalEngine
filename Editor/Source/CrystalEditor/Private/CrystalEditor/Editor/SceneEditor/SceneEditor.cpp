@@ -262,6 +262,7 @@ namespace CE::Editor
 
         ConstructMenuBar();
         ConstructDockspaces();
+        ConstructToolBar();
 
         LoadSandboxScene();
     }
@@ -495,5 +496,17 @@ namespace CE::Editor
             ;
     }
 
+    void SceneEditor::ConstructToolBar()
+    {
+        (*toolBar)
+            .Content(
+                EditorToolBar::NewImageButton("/Editor/Assets/Icons/Save")
+                .OnClicked(FUNCTION_BINDING(this, SaveChanges)),
+
+                EditorToolBar::NewSeparator(),
+
+                EditorToolBar::NewImageButton("/Editor/Assets/Icons/AddObject")
+			);
+    }
 }
 

@@ -44,6 +44,7 @@ namespace CE::Editor
     private:
 
         void ConstructMenuBar();
+        void ConstructToolBar();
         void ConstructDockspaces();
 
         EditorMinorDockspace* rightTop = nullptr;
