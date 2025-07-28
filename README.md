@@ -4,7 +4,7 @@ A WIP cross-platform Vulkan game engine with PBR rendering, Directed Acyclic Fra
 
 ### ⭐ Feel free to star the project to show your support!
 
-![](./Screenshots/NewEditor_Mac.png)
+![](./Screenshots/EditorScreenshot.png)
 
 
 ### Check out [Fusion widget library](./Docs/FusionWidgets.md).

@@ -109,37 +109,14 @@ namespace WidgetTests
     {
 	    Super::OnPaint(painter);
 
-        return;
+        FusionRenderer2* renderer = painter->GetRenderer();
 
-        String text = "quick fox jumped over last";
+        renderer->SetPen(FPen(Color::Green(), 2.0f));
 
-        FixedArray<u32, 8> fontSizes = { 30, 24, 16, 13, 10, 7, 7, 7 };
-
-        auto func1 = &FPainter::DrawText;
-        auto func2 = &FPainter::DrawSDFText;
-
-        if (m_Flipped)
-        {
-            std::swap(func1, func2);
-        }
-
-        Vec2 topLeft = Vec2(25, 200);
-        for (int i = 0; i < fontSizes.GetSize(); i++)
-        {
-            painter->SetFontSize(fontSizes[i]);
-            (painter->*func1)(text, topLeft, Vec2(), FWordWrap::Normal);
-
-            topLeft.y += fontSizes[i] * 2;
-        }
-
-        Vec2 topRight = Vec2(550, 200);
-        for (int i = 0; i < fontSizes.GetSize(); i++)
-        {
-            painter->SetFontSize(fontSizes[i]);
-            (painter->*func2)(text, topRight, Vec2(), FWordWrap::Normal);
-
-            topRight.y += fontSizes[i] * 2;
-        }
+        renderer->PathClear();
+        renderer->PathLineTo(Vec2(100, 200));
+        renderer->PathBezierCubicCurveTo(Vec2(200, 200), Vec2(200, 400), Vec2(400, 400));
+        renderer->PathStroke();
     }
 
 }
