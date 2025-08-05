@@ -142,7 +142,7 @@ namespace CE
             thumbnailGenerators.Add(thumbnailGen);
 
             thumbnailGen->SetAssetPaths(assetPaths);
-            thumbnailGen->onFinishEvent += [thumbnailClassId, this](Ref<AssetThumbnailGen> thumbnailGen)
+            thumbnailGen->onFinishEvent += [this](Ref<AssetThumbnailGen> thumbnailGen)
                 {
                     OnThumbnailFinished(thumbnailGen);
                 };
