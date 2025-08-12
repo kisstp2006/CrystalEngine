@@ -34,11 +34,12 @@ namespace CE
     	
     	void SetRenderPipeline(CE::RenderPipeline* renderPipeline);
     	
-		CE::RenderPipeline* GetRenderPipeline() const { return renderPipeline; }
+		CE::RenderPipeline* GetRenderPipeline() const { return renderPipeline.Get(); }
     	
     protected:
 
 		void OnFieldChanged(const Name& fieldName) override;
+		void OnFieldEdited(const Name& fieldName) override;
 
 		void Tick(f32 delta) override;
 
@@ -71,8 +72,8 @@ namespace CE
 		FIELD()
 		Vec2i windowSize = Vec2i(0, 0);
 
-    	FIELD()
-    	CE::RenderPipeline* renderPipeline = nullptr;
+    	FIELD(EditAnywhere, Category = "Rendering")
+    	Ref<CE::RenderPipeline> renderPipeline = nullptr;
 
 		RPI::ViewPtr rpiView = nullptr;
 

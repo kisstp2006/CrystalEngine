@@ -362,7 +362,8 @@ namespace CE::Editor
         bool homogenousTypes = true;
         PathTreeNodeType itemType = (PathTreeNodeType)-1;
         CE::Name fullPath = selectedItems[0]->GetFullPath();
-		IO::Path absolutePath = Bundle::GetAbsoluteBundlePath(fullPath);
+        bool isDirectory = selectedItems[0]->IsDirectory();
+		IO::Path absolutePath = isDirectory ? Bundle::GetAbsoluteDirectoryPath(fullPath) : Bundle::GetAbsoluteBundlePath(fullPath);
 
         for (AssetBrowserItem* item : selectedItems)
         {

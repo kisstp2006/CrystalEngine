@@ -224,14 +224,14 @@ namespace CE::Editor
 		if (!path.Exists())
 			return false;
 
-		std::wstring widePath = ToWString(path.GetString().Replace({ '/' }, '\\'));
-
 		if (path.IsDirectory())
 		{
+			std::wstring widePath = ToWString(path.GetString().Replace({ '/' }, '\\'));
 			ShellExecuteW(nullptr, L"open", widePath.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
 		}
 		else
 		{
+			std::wstring widePath = ToWString(path.GetString().Replace({ '/' }, '\\'));
 			std::wstring param = L"/select,\"" + widePath + L"\"";
 			ShellExecuteW(nullptr, L"open", L"explorer.exe", param.c_str(), nullptr, SW_SHOWNORMAL);
 		}

@@ -7,7 +7,7 @@ namespace CE
     {
 		canTick = true;
 
-        if (!IsDefaultInstance())
+        //if (!IsDefaultInstance())
         {
 #if PLATFORM_DESKTOP
             renderPipeline = CreateDefaultSubobject<MainRenderPipeline>("RenderPipeline");
@@ -31,7 +31,7 @@ namespace CE
         Ref<CE::Scene> scene = GetScene();
         if (scene)
         {
-            scene->RemoveRenderPipeline(this->renderPipeline);
+            scene->RemoveRenderPipeline(this->renderPipeline.Get());
         }
         
         this->renderPipeline = renderPipeline;
@@ -51,6 +51,12 @@ namespace CE
 	    Super::OnFieldChanged(fieldName);
 
         
+    }
+
+    void CameraComponent::OnFieldEdited(const Name& fieldName)
+    {
+	    Super::OnFieldEdited(fieldName);
+
     }
 
     void CameraComponent::Tick(f32 delta)
