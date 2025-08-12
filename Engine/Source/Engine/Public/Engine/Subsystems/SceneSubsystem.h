@@ -16,6 +16,8 @@ namespace CE
 
 		CE::Scene* GetActiveScene() { return activeScene; }
 
+		f32 GetTickPriority() const override;
+
 		const Array<CE::Scene*>& GetOtherScenes() const { return otherScenes; }
 
 		CE::Scene* FindRpiSceneOwner(RPI::Scene* scene);
@@ -28,6 +30,8 @@ namespace CE
 
 		void AddCallbacks(ISceneSubsystemCallbacks* callbacks);
 		void RemoveCallbacks(ISceneSubsystemCallbacks* callbacks);
+
+		void PlayActiveScene();
 
 	protected:
 

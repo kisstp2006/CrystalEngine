@@ -11,6 +11,8 @@ namespace CE::Editor
 
     void MaterialEditor::Construct()
     {
+        ZoneScoped;
+
         Super::Construct();
 
         Title("Material");
@@ -26,45 +28,6 @@ namespace CE::Editor
         viewportTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Bottom,
             FAssignNew(AssetBrowser, assetBrowserTab)
         );
-
-        /*Child(
-            FAssignNew(FSplitBox, rootSplitBox)
-            .Direction(FSplitDirection::Horizontal)
-            .HAlign(HAlign::Fill)
-            .VAlign(VAlign::Fill)
-            (
-                FNew(FSplitBox)
-                .Direction(FSplitDirection::Vertical)
-                .VAlign(VAlign::Fill)
-                .FillRatio(0.6f)
-                (
-                    FAssignNew(EditorMinorDockspace, center)
-                    .DockTabs(
-                        FAssignNew(EditorViewportTab, viewportTab)
-
-                    )
-                    .HAlign(HAlign::Fill)
-                    .FillRatio(0.6f),
-
-                    FAssignNew(EditorMinorDockspace, bottom)
-                    .DockTabs(
-                        FAssignNew(AssetBrowser, assetBrowserTab)
-
-                    )
-                    .HAlign(HAlign::Fill)
-                    .FillRatio(0.4f)
-                ),
-
-                FAssignNew(EditorMinorDockspace, right)
-                .DockTabs(
-                    FAssignNew(MaterialDetailsTab, detailsTab)
-
-                )
-                .HAlign(HAlign::Fill)
-                .FillRatio(0.4f)
-            )
-        )
-    	.Padding(Vec4(0, 5, 0, 0));*/
 
         toolBar->Content(
             EditorToolBar::NewImageButton("/Editor/Assets/Icons/Save")

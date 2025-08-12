@@ -7,6 +7,11 @@ namespace CE
 		
     }
 
+    f32 SceneSubsystem::GetTickPriority() const
+    {
+		return 1;
+    }
+
     void SceneSubsystem::Initialize()
 	{
 		Super::Initialize();
@@ -20,8 +25,6 @@ namespace CE
 
 		// TODO: Implement multi scene support later
 		
-		// Create & set an empty scene by default
-		//activeScene = CreateObject<CE::Scene>(this, TEXT("EmptyScene"));
 	}
 
 	void SceneSubsystem::PreShutdown()
@@ -115,17 +118,18 @@ namespace CE
 		callbackHandlers.Remove(callbacks);
 	}
 
+	void SceneSubsystem::PlayActiveScene()
+	{
+		if (isPlaying || !activeScene)
+			return;
+
+		isPlaying = true;
+		activeScene->OnBeginPlay();
+	}
+
 	void SceneSubsystem::Tick(f32 deltaTime)
 	{
 		Super::Tick(deltaTime);
-
-		if (!isPlaying)
-		{
-			isPlaying = true;
-
-			if (activeScene != nullptr)
-				activeScene->OnBeginPlay();
-		}
 		
 		if (activeScene != nullptr)
 		{

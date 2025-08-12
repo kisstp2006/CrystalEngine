@@ -15,6 +15,8 @@ namespace CE
         CE_CLASS(FSDFFontAtlas, Object)
     protected:
 
+        static constexpr const char* ImageNamePrefix = "__SDFFontAtlas_";
+
         FSDFFontAtlas();
         
     public:
@@ -28,11 +30,15 @@ namespace CE
         //! @brief Flushes all the changes to GPU
         void Flush(u32 imageIndex);
 
-        FFontGlyphInfo FindOrAddGlyph(u32 charCode, u32 fontSize, bool isBold, bool isItalic);
+        FFontGlyphInfo FindOrAddGlyph(u32 charCode, bool isBold, bool isItalic);
 
         RHI::ShaderResourceGroup* GetFontSrg2() const { return fontSrg2; }
 
         u32 GetAtlasSize() const;
+
+        // - Model -
+
+        MODEL_PROPERTY(Array<String>, Pages);
 
 	private:
 

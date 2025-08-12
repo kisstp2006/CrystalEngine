@@ -352,10 +352,7 @@ namespace CE
         Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
 
         Name fontFamily = currentFont.GetFamily();
-        int fontSize = currentFont.GetFontSize();
-
-        if (fontSize <= 0)
-            fontSize = 12;
+        
         if (!fontFamily.IsValid())
             fontFamily = fontManager->GetDefaultFontFamily();
 
@@ -373,10 +370,6 @@ namespace CE
         Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
 
         Name fontFamily = currentFont.GetFamily();
-        int fontSize = currentFont.GetFontSize();
-
-        if (fontSize <= 0)
-            fontSize = 12;
         if (!fontFamily.IsValid())
             fontFamily = fontManager->GetDefaultFontFamily();
 
@@ -1176,7 +1169,7 @@ namespace CE
 
         PrimReserve(4, 6);
 
-        u32 color = Color::White().ToU32();
+        u32 color = Colors::White.ToU32();
 
         drawCmdList.Last().textureSrgOverride = viewport->GetTextureSrg();
 
@@ -1219,7 +1212,7 @@ namespace CE
     {
         PrimReserve(4, 6);
 
-        u32 color = Color::White().ToU32();
+        u32 color = Colors::White.ToU32();
 
         PrimRect(quad, color, nullptr, DRAW_TextureAtlas, layerIndex);
     }
@@ -1228,7 +1221,7 @@ namespace CE
     {
         PrimReserve(4, 6);
 
-        u32 color = Color::White().ToU32();
+        u32 color = Colors::White.ToU32();
 
         PrimRect(rect, color, nullptr, DRAW_FontAtlas, layerIndex);
     }
@@ -1316,7 +1309,7 @@ namespace CE
                     for (int j = breakCharIdx + 1; j < i; j++)
                     {
                         char prevChar = text[j];
-                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, (u32)fontSize, currentFont.IsBold(), currentFont.IsItalic());
                         f32 atlasFontSize = prevGlyph.fontSize;
 
                         outQuads[j] = Rect::FromSize(
@@ -1394,7 +1387,7 @@ namespace CE
 
         const FFontMetrics& metrics = fontAtlas->GetMetrics();
 
-        const float startY = metrics.ascender * (f32)fontSize * metricsScaling;
+        const float startY = metrics.ascender * fontSize * metricsScaling;
         constexpr float startX = 0;
 
         float maxX = startX;
@@ -1427,7 +1420,7 @@ namespace CE
                 continue;
             }
 
-            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, currentFont.IsBold(), currentFont.IsItalic());
 
             const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
             const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
@@ -1444,7 +1437,7 @@ namespace CE
                     for (int j = breakCharIdx + 1; j < i; j++)
                     {
                         char prevChar = text[j];
-                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, currentFont.IsBold(), currentFont.IsItalic());
                         f32 atlasFontSize = prevGlyph.fontSize;
 
                         outQuads[j] = Rect::FromSize(
@@ -1786,7 +1779,7 @@ namespace CE
                 continue;
             }
 
-            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, currentFont.IsBold(), currentFont.IsItalic());
 
             const float glyphWidth = (f32)glyph.GetWidth() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
             const float glyphHeight = (f32)glyph.GetHeight() * (f32)fontSize / (f32)glyph.fontSize / systemDpiScaling;
@@ -1803,7 +1796,7 @@ namespace CE
                     for (int j = breakCharIdx + 1; j < i; j++)
                     {
                         char prevChar = text[j];
-                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+                        FFontGlyphInfo prevGlyph = fontAtlas->FindOrAddGlyph(prevChar, currentFont.IsBold(), currentFont.IsItalic());
                         f32 atlasFontSize = prevGlyph.fontSize;
 
                         outOffsets[j] = Vec2(curPos.x, curPos.x + (f32)prevGlyph.advance * fontSize / atlasFontSize / systemDpiScaling);
@@ -1982,7 +1975,7 @@ namespace CE
                 continue;
             }
 
-            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, fontSize, currentFont.IsBold(), currentFont.IsItalic());
+            FFontGlyphInfo glyph = fontAtlas->FindOrAddGlyph(c, currentFont.IsBold(), currentFont.IsItalic());
             if (glyph.charCode == 0)
             {
                 continue;
@@ -2045,12 +2038,14 @@ namespace CE
         }
     }
 
+    // Credit: Dear ImGui
     int FusionRenderer2::CalculateNumCircleSegments(float radius) const
     {
         const int radiusIndex = (int)(radius + 0.999999f); // ceil to never reduce accuracy
         return Math::Clamp((((((int)ceilf(Math::PI / acosf(1 - Math::Min((circleSegmentMaxError), (radius)) / (radius)))) + 1) / 2) * 2), 4, 512);
     }
 
+    // Credit: Dear ImGui
     void FusionRenderer2::PathArcToFastInternal(const Vec2& center, float radius, int sampleMin, int sampleMax, int step)
     {
         if (radius < 0.5f)
@@ -2155,10 +2150,7 @@ namespace CE
         Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();
 
         Name fontFamily = currentFont.GetFamily();
-        int fontSize = currentFont.GetFontSize();
-
-        if (fontSize <= 0)
-            fontSize = 12;
+        
         if (!fontFamily.IsValid())
             fontFamily = fontManager->GetDefaultFontFamily();
 
@@ -2356,7 +2348,7 @@ namespace CE
 
         u32 color;
         FDrawType drawType = DRAW_Geometry;
-        bool usesTextureSrgOverride = false;
+        bool requiresNewDrawCmd = false;
 
         if (currentBrush.GetBrushStyle() == FBrushStyle::Image && minMaxPos != nullptr)
         {
@@ -2403,10 +2395,35 @@ namespace CE
                     int layerIndex = -1;
                     if (String::TryParse(split[1], layerIndex) && layerIndex >= 0)
                     {
-                        FFontAtlas* fontAtlas = FusionApplication::Get()->GetFontManager()->FindFont(fontName);
-                        if (fontAtlas)
+	                    if (FFontAtlas* fontAtlas = FusionApplication::Get()->GetFontManager()->FindFont(fontName))
                         {
                             image = { .layerIndex = layerIndex, .uvMin = Vec2(0, 0), .uvMax = Vec2(1, 1), .width = fontAtlas->GetAtlasSize(), .height = fontAtlas->GetAtlasSize() };
+                        }
+                    }
+                }
+            }
+
+            if (!image.IsValid() && imageName.StartsWith(FSDFFontAtlas::ImageNamePrefix))
+            {
+                drawType = DRAW_FontAtlas;
+                // Example: __FontAtlas_Roboto_0
+                imageName.Remove(0, strlen(FSDFFontAtlas::ImageNamePrefix));
+                Array<String> split = imageName.Split('_');
+                if (split.GetSize() >= 2)
+                {
+                    String fontName = split[0];
+                    int layerIndex = -1;
+                    if (String::TryParse(split[1], layerIndex) && layerIndex >= 0)
+                    {
+                        if (Ref<FSDFFontAtlas> fontAtlas = FusionApplication::Get()->GetFontManager()->FindSDFFont(fontName))
+                        {
+                            AddDrawCmd();
+
+                            drawCmdList.Last().fontSrg = fontAtlas->GetFontSrg2();
+
+                            image = { .layerIndex = layerIndex, .uvMin = Vec2(0, 0), .uvMax = Vec2(1, 1), .width = fontAtlas->GetAtlasSize(), .height = fontAtlas->GetAtlasSize() };
+
+                            requiresNewDrawCmd = true;
                         }
                     }
                 }
@@ -2429,7 +2446,7 @@ namespace CE
 					image.uvMin = Vec2(0, 0);
 					image.uvMax = Vec2(1, 1);
 
-                    usesTextureSrgOverride = true;
+                    requiresNewDrawCmd = true;
                 }
             }
 
@@ -2754,7 +2771,7 @@ namespace CE
             drawCmdList.Last().numIndices += indexCount;
         }
 
-        if (usesTextureSrgOverride)
+        if (requiresNewDrawCmd)
         {
             AddDrawCmd();
         }

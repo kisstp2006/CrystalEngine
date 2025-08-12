@@ -14,6 +14,8 @@ namespace CE
 
 			sceneSubsystem = gEngine->GetSubsystem<SceneSubsystem>();
 			rendererSubsystem = gEngine->GetSubsystem<RendererSubsystem>();
+
+			physicsScene = CreateObject<PhysicsScene>(this, "PhysicsScene");
 		}
 	}
 
@@ -30,6 +32,11 @@ namespace CE
 		delete rpiScene; rpiScene = nullptr;
 	}
 
+	void CE::Scene::OnAfterConstruct()
+	{
+		Super::OnAfterConstruct();
+	}
+
 	void CE::Scene::OnBeginPlay()
 	{
 		if (isPlaying)
@@ -40,6 +47,11 @@ namespace CE
 		for (Actor* actor : actors)
 		{
 			actor->OnBeginPlay();
+		}
+
+		if (physicsScene)
+		{
+			physicsScene->SetSimulationEnabled(isPlaying);
 		}
 	}
 
@@ -71,6 +83,11 @@ namespace CE
 		for (CE::RenderPipeline* renderPipeline : renderPipelines)
 		{
 			renderPipeline->Tick();
+		}
+
+		if (physicsScene)
+		{
+			physicsScene->Tick(delta);
 		}
 	}
 
@@ -175,11 +192,6 @@ namespace CE
 	{
 		if (!actor)
 			return;
-
-		for (ISceneCallbacks* callbacks : sceneCallbacks)
-		{
-			callbacks->OnSceneHierarchyUpdated(this);
-		}
 		
 		std::function<void(SceneComponent*)> recursivelyAddSceneComponents = [&](SceneComponent* sceneComponent)
         {
@@ -246,6 +258,11 @@ namespace CE
 
 		recursivelyAdd(actor);
 
+		for (ISceneCallbacks* callbacks : sceneCallbacks)
+		{
+			callbacks->OnSceneHierarchyUpdated(this);
+		}
+
 		if (isPlaying && !actor->hasBegunPlaying)
 		{
 			actor->OnBeginPlay();
@@ -256,11 +273,6 @@ namespace CE
 	{
 		if (!actor)
 			return;
-
-		for (ISceneCallbacks* callbacks : sceneCallbacks)
-		{
-			callbacks->OnSceneHierarchyUpdated(this);
-		}
         
 		std::function<void(SceneComponent*)> recursivelyRemoveSceneComponents = [&](SceneComponent* sceneComponent)
         {
@@ -335,6 +347,11 @@ namespace CE
         };
 		
 		recursivelyRemove(actor);
+
+		for (ISceneCallbacks* callbacks : sceneCallbacks)
+		{
+			callbacks->OnSceneHierarchyUpdated(this);
+		}
 	}
 
 	void CE::Scene::RegisterSceneComponent(SceneComponent* sceneComponent)

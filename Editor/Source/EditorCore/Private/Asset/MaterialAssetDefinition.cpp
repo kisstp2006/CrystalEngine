@@ -15,7 +15,7 @@ namespace CE::Editor
 
     const Array<String>& MaterialAssetDefinition::GetSourceExtensions()
     {
-        thread_local Array<String> empty;
+        thread_local Array<String> empty{};
         return empty;
     }
 
@@ -31,7 +31,6 @@ namespace CE::Editor
 
     SubClass<AssetThumbnailGen> MaterialAssetDefinition::GetThumbnailGeneratorClass()
     {
-        //return nullptr;
         return MaterialAssetThumbnailGen::StaticClass();
     }
 

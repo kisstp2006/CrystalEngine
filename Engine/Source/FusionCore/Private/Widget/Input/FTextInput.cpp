@@ -61,7 +61,7 @@ namespace CE
 
         if (IsEditing() && cursorState)
         {
-            painter->SetPen(FPen(Color::White(), 1.2f));
+            painter->SetPen(FPen(Colors::White, 1.2f));
             painter->SetBrush(FBrush());
 
             f32 posX = GetCharacterMinMax(cursorPos).min;
@@ -797,7 +797,7 @@ namespace CE
 
     void FTextInputLabel::DeselectAll()
     {
-        isSelectionActive = false;
+    	isSelectionActive = false;
         MarkDirty();
     }
 
@@ -817,12 +817,12 @@ namespace CE
 			}
             inputLabel->StartEditing();
 
+            FusionApplication::Get()->GetRootContext()->SetFocusWidget(inputLabel);
+
             if (selectAll)
             {
                 inputLabel->SelectAll();
             }
-            
-            FusionApplication::Get()->GetRootContext()->SetFocusWidget(inputLabel);
         }
     }
 
@@ -862,7 +862,7 @@ namespace CE
                     .Text("")
                     .WordWrap(FWordWrap::NoWrap)
                     .FontSize(10)
-                    .Foreground(Color::White())
+                    .Foreground(Colors::White)
                     .HAlign(HAlign::Fill)
                     .VAlign(VAlign::Fill)
                 )
@@ -942,7 +942,7 @@ namespace CE
 
     void FTextInput::SetHighlightedInternal(bool highlighted)
     {
-	    if (IsHighlighted() != highlighted)
+    	if (IsHighlighted() != highlighted)
 	    {
             if (highlighted)
                 state |= FTextInputState::Highlighted;

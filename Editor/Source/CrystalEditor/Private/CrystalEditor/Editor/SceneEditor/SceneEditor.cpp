@@ -22,13 +22,64 @@ namespace CE::Editor
         assetBrowser->BrowseToAsset(path);
     }
 
+    bool SceneEditor::OpenEditor(Ref<Object> targetObject, Ref<Bundle> bundle)
+    {
+        ZoneScoped;
+
+    	if (!targetObject || !bundle)
+            return false;
+        if (!CanEdit(targetObject))
+            return false;
+
+        Ref<CE::Scene> scene = CastTo<CE::Scene>(targetObject);
+        if (!scene)
+            return false;
+
+        if (!OpenScene(scene))
+        {
+	        return false;
+        }
+
+    	Super::OpenEditor(targetObject, bundle);
+        return true;
+    }
+
+    bool SceneEditor::OpenScene(Ref<CE::Scene> scene)
+    {
+        ZoneScoped;
+
+        if (!scene)
+            return false;
+        if (!scene->GetRpiScene())
+            return false;
+
+        if (targetScene.IsValid() && targetScene->GetOuter() == this)
+        {
+            targetScene->BeginDestroy();
+        }
+
+        targetScene = scene;
+
+        EditorViewport* viewport = viewportTab->GetViewport();
+        viewport->SetScene(scene->GetRpiScene());
+
+        sceneOutlinerTab->SetScene(scene.Get());
+        detailsTab->SetSelectedActor(nullptr);
+        
+        return true;
+    }
+
     SceneEditor::SceneEditor()
     {
         m_CanBeUndocked = false;
+
+        addActorContextMenu = CreateDefaultSubobject<EditorMenuPopup>("AddActorMenu");
     }
 
     void SceneEditor::LoadSandboxScene()
     {
+        ZoneScoped;
+
         CE::Scene* scene = CreateObject<CE::Scene>(this, "SandboxScene");
         sandboxScene = scene;
 
@@ -93,7 +144,7 @@ namespace CE::Editor
 			CE::Material* arrowMaterial = CreateObject<CE::Material>(scene, "ArrowMaterial");
             arrowMaterial->SetShader(standardShader.Get());
             {
-                arrowMaterial->SetProperty("_Albedo", Color::White());
+                arrowMaterial->SetProperty("_Albedo", Colors::White);
                 arrowMaterial->ApplyProperties();
 			}
 
@@ -183,7 +234,7 @@ namespace CE::Editor
                 meshComponent->SetMaterial(woodMaterial, 0, 0);
             }
 
-            if (Ref<StaticMesh> arrowMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Editor/Assets/Models/SM_Editor_Arrow"))
+            if (Ref<StaticMesh> arrowMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Engine/Assets/Models/SM_Editor_Arrow"))
         	{
 		        StaticMeshActor* arrowActor = CreateObject<StaticMeshActor>(scene, "ArrowMesh");
             	scene->AddActor(arrowActor);
@@ -203,7 +254,7 @@ namespace CE::Editor
                 DirectionalLightComponent* directionalLight = lightActor->GetDirectionalLightComponent();
                 directionalLight->SetLocalEulerAngles(Vec3(30, 0, 0));
                 directionalLight->SetIntensity(10);
-                directionalLight->SetLightColor(Color::White());
+                directionalLight->SetLightColor(Colors::White);
             }
 
             CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
@@ -252,19 +303,26 @@ namespace CE::Editor
         Title(scene->GetName().GetString());
     }
 
+    void SceneEditor::LoadEmptyScene()
+    {
+        Ref<CE::Scene> scene = CreateObject<CE::Scene>(this, "UntitledScene");
+
+        OpenScene(scene);
+    }
+
     void SceneEditor::Construct()
     {
+        ZoneScoped;
+
         Super::Construct();
 
         Title("Scene Editor");
 
         gEngine->GetSceneSubsystem()->AddCallbacks(this);
 
-        ConstructMenuBar();
         ConstructDockspaces();
-        ConstructToolBar();
-
-        LoadSandboxScene();
+    	LoadSandboxScene();
+        //LoadEmptyScene();
     }
 
     void SceneEditor::OnBeginDestroy()
@@ -304,7 +362,6 @@ namespace CE::Editor
 
         if (selectedActors.NotEmpty())
         {
-            // TODO: Create and set object editor
             detailsTab->SetSelectedActor(selectedActors.GetLast());
         }
         else
@@ -313,9 +370,79 @@ namespace CE::Editor
         }
     }
 
+    void SceneEditor::OnClickPlay()
+    {
+        return;
+
+        gEngine->GetSceneSubsystem()->PlayActiveScene();
+        sandboxScene->GetPhysicsScene()->SetSimulationEnabled(true);
+
+        playButton->Enabled(false);
+        pauseButton->Enabled(true);
+        stopButton->Enabled(true);
+    }
+
+    void SceneEditor::OnClickPause()
+    {
+        return;
+
+        sandboxScene->GetPhysicsScene()->SetSimulationEnabled(false);
+
+        playButton->Enabled(true);
+        pauseButton->Enabled(false);
+        stopButton->Enabled(true);
+    }
+
+    void SceneEditor::OnClickStop()
+    {
+        return;
+
+        // TODO: Restore scene to original state
+
+        playButton->Enabled(true);
+        pauseButton->Enabled(false);
+        stopButton->Enabled(false);
+    }
+
+    void SceneEditor::OnClickAddActorMenuButton()
+    {
+        if (!GetContext())
+            return;
+
+        //addActorContextMenu->ClosePopup();
+        addActorContextMenu->DestroyAllItems();
+
+        (*addActorContextMenu)
+            .Content(
+                FNew(FMenuItemSeparator)
+                .Title("BASIC"),
+
+                EditorMenuPopup::NewMenuItem()
+                .Text("Actor")
+                .OnClick([this]
+                {
+	                if (targetScene)
+	                {
+                        Ref<Actor> actor = CreateObject<Actor>(targetScene.Get(), "EmptyActor");
+                        targetScene->AddActor(actor.Get());
+	                }
+                }),
+
+                FNew(FMenuItemSeparator)
+                .Title("SHAPES"),
+
+                EditorMenuPopup::NewMenuItem()
+                .Text("Sphere")
+            );
+
+        Vec2 popupPos = addActorButton->GetGlobalPosition() + Vec2(0, addActorButton->GetComputedSize().y);
+
+        GetContext()->PushLocalPopup(addActorContextMenu.Get(), popupPos, Vec2(), addActorButton->GetComputedSize());
+    }
+
     void SceneEditor::ConstructDockspaces()
     {
-		// TODO: Implement dockspaces properly
+        ZoneScoped;
 
         minorDockspace->AddDockWindow(
             FAssignNew(EditorViewportTab, viewportTab)
@@ -329,7 +456,7 @@ namespace CE::Editor
         );
 
         sceneOutlinerTab->GetDockspaceSplitView()->AddDockWindowSplit(FDockingHintPosition::Bottom,
-			FAssignNew(DetailsTab, detailsTab),
+			FAssignNew(ActorDetailsTab, detailsTab),
             0.65f
         );
 
@@ -349,6 +476,10 @@ namespace CE::Editor
 
     void SceneEditor::ConstructMenuBar()
     {
+        ZoneScoped;
+
+        Super::ConstructMenuBar();
+
         (*menuBar)
             .Content(
                 FNew(FMenuItem)
@@ -464,6 +595,13 @@ namespace CE::Editor
                                 .OnClick([this]
                                 {
                                     FusionFontAtlasWindow::Show();
+                                }),
+
+                                FNew(FMenuItem)
+                                .Text("Fusion SDF Font Atlas")
+                                .OnClick([this]
+                                {
+                                    FusionSDFFontAtlasWindow::Show();
                                 })
                             )
                         )
@@ -498,15 +636,35 @@ namespace CE::Editor
 
     void SceneEditor::ConstructToolBar()
     {
+        ZoneScoped;
+
+        Super::ConstructToolBar();
+
         (*toolBar)
-            .Content(
-                EditorToolBar::NewImageButton("/Editor/Assets/Icons/Save")
-                .OnClicked(FUNCTION_BINDING(this, SaveChanges)),
+        .Content(
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/Save")
+            .OnClicked(FUNCTION_BINDING(this, SaveChanges)),
 
-                EditorToolBar::NewSeparator(),
+            EditorToolBar::NewSeparator(),
 
-                EditorToolBar::NewImageButton("/Editor/Assets/Icons/AddObject")
-			);
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/AddObject")
+            .Assign(addActorButton)
+            .OnClicked(FUNCTION_BINDING(this, OnClickAddActorMenuButton))/*,
+
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/Play")
+            .Assign(playButton)
+            .OnClicked(FUNCTION_BINDING(this, OnClickPlay)),
+
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/Pause")
+            .Assign(pauseButton)
+            .OnClicked(FUNCTION_BINDING(this, OnClickPause))
+            .Enabled(false),
+
+            EditorToolBar::NewImageButton("/Editor/Assets/Icons/Stop")
+            .Assign(stopButton)
+            .OnClicked(FUNCTION_BINDING(this, OnClickStop))
+            .Enabled(false)*/
+		);
     }
 }
 

@@ -3,17 +3,23 @@
 namespace CE::Editor
 {
     CLASS()
-    class CRYSTALEDITOR_API DetailsTab : public EditorMinorDockWindow
+    class CRYSTALEDITOR_API ActorDetailsTab : public EditorDockWindow
     {
-        CE_CLASS(DetailsTab, EditorMinorDockWindow)
+        CE_CLASS(ActorDetailsTab, EditorDockWindow)
     protected:
 
-        DetailsTab();
+        ActorDetailsTab();
 
         void Construct() override;
 
         FUNCTION()
         void OnComponentSelectionChanged(ComponentTreeItem* item);
+
+        FUNCTION()
+        void OnAddComponentButtonClicked(FButton* button, Vec2 mousePos);
+
+        FUNCTION()
+        void AddNewComponent(ClassType* componentClass);
 
     public: // - Public API -
 
@@ -28,6 +34,7 @@ namespace CE::Editor
         FCompoundWidget* detailsContainer = nullptr;
         FStyledWidget* editorContainer = nullptr;
         Ref<ObjectEditor> editor = nullptr;
+        Ref<AddComponentMenu> addComponentMenu;
 
         FLabel* actorName = nullptr;
         ComponentTreeView* treeView = nullptr;
@@ -37,4 +44,4 @@ namespace CE::Editor
     
 }
 
-#include "DetailsTab.rtti.h"
+#include "ActorDetailsTab.rtti.h"

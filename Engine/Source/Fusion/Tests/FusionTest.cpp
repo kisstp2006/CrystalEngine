@@ -53,7 +53,63 @@ namespace WidgetTests
 
             if (i == 3)
             {
-                
+                treeModel = CreateObject<SceneTreeViewModel>(this, "TreeViewModel");
+                treeModel->pathTree = new PathTree();
+
+                for (int k = 0; k < 8; ++k)
+                {
+	                treeModel->pathTree->AddPath(String::Format("/Engine/Assets/Textures/Noise{}", k), PathTreeNodeType::Asset);
+                }
+
+                treeModel->pathTree->AddPath("/Game/Assets/Scenes", PathTreeNodeType::Directory);
+                treeModel->pathTree->AddPath("/Game/Assets/Materials", PathTreeNodeType::Directory);
+
+                minorDockspace->AddDockWindow(
+                    FNew(FDockWindow)
+                    .AllowedDockspaces(FDockspaceFilter().WithDockTypeMask(FDockTypeMask::All))
+                    .Title("Sample Widgets")
+                    .Background(Color::RGBA(36, 36, 36))
+                    .Child(
+                        FNew(FVerticalStack)
+                        .HAlign(HAlign::Fill)
+                        .VAlign(VAlign::Fill)
+                        (
+                            FNew(FLabel)
+                            .Text(String::Format("This is {} minor window in {} major window", 1, i))
+                            .FontSize(16)
+                            .HAlign(HAlign::Fill)
+                            .VAlign(VAlign::Fill),
+
+                            FAssignNew(SceneTreeView, treeView)
+                            .Header(
+                                FNew(FTreeViewHeader)
+                                .Columns(
+                                    FNew(FTreeViewHeaderColumn)
+                                    .Title("Name")
+                                    .FillRatio(0.5f),
+
+                                    FNew(FTreeViewHeaderColumn)
+                                    .Title("Type")
+                                    .FillRatio(0.5f)
+                                )
+                            )
+                            .RowHeight(25)
+                            .HAlign(HAlign::Fill)
+                            .VAlign(VAlign::Fill)
+                            .FillRatio(1.0f)
+                            .Style("TreeView")
+                            .Name("DebugTreeView")
+						)
+                    )
+                    .Name("Minor")
+                    .HAlign(HAlign::Fill)
+                    .VAlign(VAlign::Fill)
+                    .As<FDockWindow>()
+                );
+
+                treeView->ApplyStyleRecursively();
+
+                treeView->Model(treeModel);
             }
             else
             {
@@ -77,10 +133,14 @@ namespace WidgetTests
 
                                 FNew(FTextButton)
                                 .Text(Flipped() ? "SDF, PNG" : "PNG, SDF")
+                                .FontSize(10)
                                 .OnButtonClicked([this](FButton* button, Vec2)
                                 {
 	                                Flipped(!Flipped());
                                     ((FTextButton*)button)->Text(Flipped() ? "SDF, PNG" : "PNG, SDF");
+
+                                    Ref<FLabel> label = (Ref<FLabel>)CastTo<FVerticalStack>(button->GetParent())->GetChild(0);
+                                    label->FontSize(label->FontSize() + 0.5f);
                                 }),
 
                                 FNew(FVerticalStack)
@@ -88,7 +148,7 @@ namespace WidgetTests
                                 .Margin(Vec4(0, 150, 0, 0))
                                 .Scale(Vec2(1, 1) * 15)
                                 (
-                                    FAssignNew(FLabel, label)
+                                    FNew(FLabel)
                                     .FontSize(8)
                                     .Text("Hello World!")
                                     .HAlign(HAlign::Center)
@@ -103,15 +163,19 @@ namespace WidgetTests
                 }
             }
         }
+
+        dockspace->GetRootSplit()->SetActiveTab(2);
     }
 
     void FusionTestWindow::OnPaint(FPainter* painter)
     {
 	    Super::OnPaint(painter);
 
+        return;
+
         FusionRenderer2* renderer = painter->GetRenderer();
 
-        renderer->SetPen(FPen(Color::Green(), 2.0f));
+        renderer->SetPen(FPen(Colors::Green, 2.0f));
 
         renderer->PathClear();
         renderer->PathLineTo(Vec2(100, 200));

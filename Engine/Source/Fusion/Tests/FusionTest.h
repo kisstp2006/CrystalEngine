@@ -24,7 +24,8 @@ namespace WidgetTests
 
 	private:
 
-		Ref<FLabel> label;
+		Ref<SceneTreeView> treeView;
+		Ref<SceneTreeViewModel> treeModel;
 
 	public:
 

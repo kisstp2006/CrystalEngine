@@ -231,6 +231,8 @@ namespace CE::Editor
             Object* targetObject = nullptr;
         };
 
+        constexpr const char* GeneralCategoryName = "General";
+
         HashMap<CE::Name, Array<FieldData>> fieldsByCategory;
         Array<CE::Name> categories;
         HashMap<CE::Name, int> categoryOrders;
@@ -252,18 +254,14 @@ namespace CE::Editor
                     if (!field->IsEditAnywhere() || field->IsHidden())
                         continue;
 
-                    CE::Name category = "General";
+                    CE::Name category = GeneralCategoryName;
 
-                    if (!field->HasAttribute("Category"))
-                    {
-                        fieldsByCategory["General"].Add({ field, target });
-                    }
-                    else
+                    if (field->HasAttribute("Category"))
                     {
                         category = field->GetAttribute("Category").GetStringValue();
                         if (!category.IsValid())
                         {
-                            category = "General";
+                            category = GeneralCategoryName;
                         }
                     }
 
@@ -310,6 +308,8 @@ namespace CE::Editor
 
         // Create category sections
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         for (int i = 0; i < categories.GetSize(); ++i)
         {
             const CE::Name& category = categories[i];
@@ -321,6 +321,7 @@ namespace CE::Editor
 
             FAssignNew(FExpandableSection, section)
             .Title(category.GetString())
+            .TitleFontSize(fontSize + 2)
 			.ExpandableContent(
                 FAssignNew(FVerticalStack, expandContent)
             );

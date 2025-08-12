@@ -10,7 +10,11 @@ namespace CE::Editor
 
     void EditorBase::Construct()
     {
+        ZoneScoped;
+
 	    Super::Construct();
+
+        ConstructMajorDockWindow();
 
         history = CreateObject<EditorHistory>(this, "EditorHistory");
 
@@ -18,6 +22,16 @@ namespace CE::Editor
         {
             SetAssetDirty(true);
         });
+
+        ConstructMenuBar();
+        ConstructToolBar();
+
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
+        if (menuBar)
+        {
+            menuBar->SetFontSizeRecursively(fontSize);
+        }
     }
 
     void EditorBase::HandleEvent(FEvent* event)
@@ -130,6 +144,8 @@ namespace CE::Editor
 
     void EditorBase::SaveChanges()
     {
+        ZoneScoped;
+
         if (!bundle)
             return;
 

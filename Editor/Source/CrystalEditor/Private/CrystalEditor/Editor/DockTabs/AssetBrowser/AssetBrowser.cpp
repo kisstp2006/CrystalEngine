@@ -12,10 +12,14 @@ namespace CE::Editor
     {
         Super::Construct();
 
+        ConstructMinorDockWindow();
+
         if (Ref<ThumbnailSystem> thumbnailSystem = ThumbnailSystem::Get())
         {
             thumbnailSystem->AddThumbnailListener(this);
         }
+
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
 
         (*this)
         .Title("Assets")
@@ -83,7 +87,7 @@ namespace CE::Editor
 
                                 FNew(FLabel)
                                 .Text("Add")
-                                .FontSize(9)
+                                .FontSize(fontSize - 1)
                             )
                         ),
 
@@ -102,7 +106,7 @@ namespace CE::Editor
 
                         FNew(FTextButton)
                         .Text("Settings")
-                        .FontSize(9)
+                        .FontSize(fontSize - 1)
                         .DropDownMenu(
                             FNew(FMenuPopup)
                             .Content(
@@ -160,7 +164,7 @@ namespace CE::Editor
                     (
                         FAssignNew(FLabel, statusBarLabel)
                         .Text("")
-                        .FontSize(10)
+                        .FontSize(fontSize)
                     )
                 )
             )
@@ -347,11 +351,14 @@ namespace CE::Editor
     {
         breadCrumbsContainer->QueueDestroyAllChildren();
 
+        const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
+
         if (currentPath == "/")
         {
             breadCrumbsContainer->AddChild(
                 FNew(FTextButton)
                 .Text("/")
+                .FontSize(fontSize)
                 .Interactable(false)
                 .Style("Button.Icon")
                 .Padding(Vec4(1, 1, 1, 1) * 5.0f)
@@ -371,6 +378,7 @@ namespace CE::Editor
             breadCrumbsContainer->AddChild(
                 FNew(FTextButton)
                 .Text("/")
+                .FontSize(fontSize)
                 .Interactable(false)
                 .Style("Button.Icon")
                 .Padding(Vec4(1, 1, 1, 1) * 5.0f)
@@ -381,6 +389,7 @@ namespace CE::Editor
             breadCrumbsContainer->AddChild(
                 FNew(FTextButton)
                 .Text(split[i])
+                .FontSize(fontSize)
                 .OnClicked([pathIterator, this]
                 {
                     SetCurrentPath(pathIterator);
@@ -584,8 +593,7 @@ namespace CE::Editor
         if (assetType == nullptr)
             return false;
 
-        if (assetType == CE::Scene::StaticClass())
-            return false;
+        const bool isScene = assetType->IsSubclassOf(CE::Scene::StaticClass());
 
         // Most other asset types
         String assetTypeName = assetType->GetName().GetLastComponent();

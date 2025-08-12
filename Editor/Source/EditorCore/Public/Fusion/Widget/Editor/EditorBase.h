@@ -3,9 +3,9 @@
 namespace CE::Editor
 {
     CLASS(Abstract)
-    class EDITORCORE_API EditorBase : public EditorMajorDockWindow, IAssetRegistryListener
+    class EDITORCORE_API EditorBase : public EditorDockWindow, IAssetRegistryListener
     {
-        CE_CLASS(EditorBase, EditorMajorDockWindow)
+        CE_CLASS(EditorBase, EditorDockWindow)
     protected:
 
         EditorBase();
@@ -17,6 +17,9 @@ namespace CE::Editor
         void OnBeginDestroy() override;
 
         void OnAssetRenamed(Uuid bundleUuid, const CE::Name& oldName, const CE::Name& newName, const CE::Name& newPath) override;
+
+        virtual void ConstructMenuBar() {}
+        virtual void ConstructToolBar() {}
 
     public: // - Public API -
 
