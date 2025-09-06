@@ -72,6 +72,7 @@ namespace CE::RPI
 	{
 		AddFeatureProcessor<RPI::StaticMeshFeatureProcessor>();
 		AddFeatureProcessor<RPI::DirectionalLightFeatureProcessor>();
+		AddFeatureProcessor<RPI::LocalLightFeatureProcessor>();
 	}
 
 	void Scene::AddView(SceneViewTag viewTag, ViewPtr view)
@@ -125,7 +126,7 @@ namespace CE::RPI
 		return viewsByTag[viewTag].views;
 	}
 
-	void Scene::Simulate(f32 currentTime)
+	void Scene::Simulate(f32 currentTime, u32 imageIndex)
 	{
 		ZoneScoped;
 
@@ -216,7 +217,7 @@ namespace CE::RPI
 
 		for (FeatureProcessor* fp : featureProcessors)
 		{
-			fp->Simulate({});
+			fp->Simulate({ .imageIndex = imageIndex });
 		}
 	}
 

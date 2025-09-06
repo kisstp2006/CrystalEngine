@@ -230,23 +230,40 @@ namespace CE::Editor
                 StaticMeshComponent* meshComponent = groundActor->GetMeshComponent();
                 meshComponent->SetStaticMesh(cubeMesh);
                 meshComponent->SetLocalPosition(Vec3(0, -1, 5));
-                meshComponent->SetLocalScale(Vec3(10, 0.1f, 10));
+                meshComponent->SetLocalScale(Vec3(50, 0.1f, 50));
                 meshComponent->SetMaterial(woodMaterial, 0, 0);
             }
 
-            if (Ref<StaticMesh> arrowMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Engine/Assets/Models/SM_Editor_Arrow"))
-        	{
-		        StaticMeshActor* arrowActor = CreateObject<StaticMeshActor>(scene, "ArrowMesh");
-            	scene->AddActor(arrowActor);
-	            {
-		        	StaticMeshComponent* meshComponent = arrowActor->GetMeshComponent();
-		        	meshComponent->SetStaticMesh(arrowMesh);
-		        	meshComponent->SetLocalPosition(Vec3(0, 0, 5));
-		        	meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
-		        	meshComponent->SetLocalScale(Vec3(1, 1, 1));
-					meshComponent->SetMaterial(arrowMaterial, 0, 0);
-	            }
+            if (true)
+            {
+                carActor->SetEnabled(false);
+                chairActor->SetEnabled(false);
+            }
+
+            if (false)
+	        {
+		        if (Ref<StaticMesh> arrowMesh = assetManager->LoadAssetAtPath<StaticMesh>("/Engine/Assets/Models/SM_Editor_Arrow"))
+		        {
+		        	StaticMeshActor* arrowActor = CreateObject<StaticMeshActor>(scene, "ArrowMesh");
+		        	scene->AddActor(arrowActor);
+			        {
+		        		StaticMeshComponent* meshComponent = arrowActor->GetMeshComponent();
+		        		meshComponent->SetStaticMesh(arrowMesh);
+		        		meshComponent->SetLocalPosition(Vec3(0, 0, 5));
+		        		meshComponent->SetLocalEulerAngles(Vec3(0, 0, 0));
+		        		meshComponent->SetLocalScale(Vec3(1, 1, 1));
+		        		meshComponent->SetMaterial(arrowMaterial, 0, 0);
+			        }
+		        }
 	        }
+
+            CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
+            scene->AddActor(camera);
+
+            CameraComponent* cameraComponent = camera->GetCameraComponent();
+            cameraComponent->SetLocalPosition(Vec3(0, 5, -5));
+            cameraComponent->SetLocalEulerAngles(Vec3(35, 0, 0));
+            cameraComponent->SetFieldOfView(60);
 
             DirectionalLight* lightActor = CreateObject<DirectionalLight>(scene, "Sun");
             scene->AddActor(lightActor);
@@ -257,12 +274,36 @@ namespace CE::Editor
                 directionalLight->SetLightColor(Colors::White);
             }
 
-            CameraActor* camera = CreateObject<CameraActor>(scene, "Camera");
-            camera->GetCameraComponent()->SetLocalPosition(Vec3(0, 0, 0));
-            scene->AddActor(camera);
+            lightActor->SetEnabled(false);
 
-            CameraComponent* cameraComponent = camera->GetCameraComponent();
-            cameraComponent->SetFieldOfView(60);
+            constexpr int NumLights = 9;
+            constexpr std::array<Vec3, NumLights> LightPos = { Vec3(-2, 0, -2), Vec3(0, 0, -2), Vec3(2, 0, -2),
+	            Vec3(-2, 0, 0), Vec3(0, 0, 0), Vec3(2, 0, 0),
+	            Vec3(-2, 0, 2), Vec3(0, 0, 2), Vec3(2, 0, 2) };
+            constexpr std::array<Color, NumLights> LightColors = { Colors::Red, Colors::Green, Colors::Blue,
+                Colors::Yellow, Colors::Cyan, Colors::Magenta,
+				Colors::White, Colors::Orange, Colors::Purple };
+			constexpr float Separation = 3.0f;
+			constexpr Vec2i LightGrid = Vec2i(16, 16);
+			int lightIndex = 0;
+            
+            for (int x = -LightGrid.x / 2; x <= LightGrid.x / 2; ++x)
+            {
+                for (int y = -LightGrid.y / 2; y <= LightGrid.y / 2; ++y)
+                {
+                    PointLight* pointLight = CreateObject<PointLight>(scene, "PointLight");
+                    scene->AddActor(pointLight);
+                    {
+                        Ref<PointLightComponent> pointLightComponent = pointLight->GetPointLightComponent();
+                        pointLightComponent->SetLocalPosition(Vec3(x * Separation, -0.5f, y * Separation + 5));
+                        pointLightComponent->SetRange(2.0f);
+                        pointLightComponent->SetLightColor(LightColors[lightIndex]);
+                        pointLightComponent->SetIntensity(25);
+                    }
+
+					lightIndex = (lightIndex + 1) % NumLights;
+                }
+			}
 
             StaticMeshActor* skyboxActor = CreateObject<StaticMeshActor>(scene, "SkyboxActor");
             scene->AddActor(skyboxActor);

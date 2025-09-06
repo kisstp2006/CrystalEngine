@@ -3,7 +3,7 @@
 namespace CE::RPI
 {
 
-	ShaderVariant::ShaderVariant(const ShaderVariantDescriptor2& desc)
+	ShaderVariant::ShaderVariant(const ShaderVariantDescriptor& desc)
 		: reflectionInfo(desc.reflectionInfo)
 	{
 		variantId = 0;
@@ -69,6 +69,19 @@ namespace CE::RPI
 		}
 		
 		pipelineDesc.srgLayouts = desc.reflectionInfo.srgLayouts;
+		for (auto& srgLayout : pipelineDesc.srgLayouts)
+		{
+			if (srgLayout.srgType != SRGType::PerScene &&
+				srgLayout.srgType != SRGType::PerView)
+			{
+				continue;
+			}
+
+			for (auto& variable : srgLayout.variables)
+			{
+				variable.shaderStages |= ShaderStage::Compute;
+			}
+		}
 
 		pipelineDesc.multisampleState.sampleCount = 1;
 
