@@ -311,18 +311,16 @@ namespace CE
 
     bool FusionRenderer2::IsRectClipped(const Rect& rect)
     {
+        ZoneScoped;
+
         if (!clipStack.IsEmpty())
         {
-            ZoneScoped;
+        	// CPU culling
 
-            // CPU culling
-            
-            Vec2 globalTopLeft = coordinateSpaceStack.Last().transform *
-                Matrix4x4::Translation(coordinateSpaceStack.Last().translation) *
-                Vec4(rect.min.x, rect.min.y, 0, 1);
-            Vec2 globalBottomRight = coordinateSpaceStack.Last().transform *
-                Matrix4x4::Translation(coordinateSpaceStack.Last().translation) *
-                Vec4(rect.max.x, rect.max.y, 0, 1);
+            const Matrix4x4 globalTransform = coordinateSpaceStack.Last().transform * Matrix4x4::Translation(coordinateSpaceStack.Last().translation);
+
+            Vec2 globalTopLeft = globalTransform * Vec4(rect.min.x, rect.min.y, 0, 1);
+            Vec2 globalBottomRight = globalTransform * Vec4(rect.max.x, rect.max.y, 0, 1);
 
             for (int i = clipStack.GetCount() - 1; i >= 0; --i)
             {
@@ -1142,6 +1140,8 @@ namespace CE
 
     Vec2 FusionRenderer2::DrawSDFText(const String& text, Vec2 textPos, Vec2 size, FWordWrap wordWrap)
     {
+        ZoneScoped;
+
         thread_local Array<Rect> quads{};
         const bool isFixedSize = !Math::ApproxEquals(size.x, 0.0f) && !Math::ApproxEquals(size.y, 0.0f);
 
@@ -1163,8 +1163,70 @@ namespace CE
         return finalSize;
     }
 
+    Vec2 FusionRenderer2::DrawSDFTextCached(Uuid cacheId, const String& text, Vec2 textPos, Vec2 size,
+	    FWordWrap wordWrap)
+    {
+        ZoneScoped;
+
+        if (sdfTextCache.KeyExists(cacheId))
+        {
+            const FTextCacheEntry& entry = sdfTextCache.Get(cacheId);
+            const Array<Rect>& quads = entry.quads;
+
+            const bool isFixedSize = !Math::ApproxEquals(size.x, 0.0f) && !Math::ApproxEquals(size.y, 0.0f);
+
+            if (isFixedSize && IsRectClipped(Rect::FromSize(textPos, size)))
+            {
+                return Vec2();
+            }
+
+            Vec2 finalSize = entry.finalSize;
+
+            if (!isFixedSize && IsRectClipped(Rect::FromSize(textPos, finalSize)))
+            {
+                return Vec2();
+            }
+
+            DrawSDFTextInternal(quads.GetData(), text.GetData(), text.GetLength(), currentFont, textPos);
+            return finalSize;
+        }
+        else
+        {
+            thread_local Array<Rect> quads{};
+            const bool isFixedSize = !Math::ApproxEquals(size.x, 0.0f) && !Math::ApproxEquals(size.y, 0.0f);
+
+            if (isFixedSize && IsRectClipped(Rect::FromSize(textPos, size)))
+            {
+                return Vec2();
+            }
+
+            quads.Reserve(text.GetLength());
+
+            Vec2 finalSize = CalculateSDFTextQuads(quads, text, currentFont, size.width, wordWrap);
+
+			sdfTextCache[cacheId] = FTextCacheEntry{ .cacheId = cacheId, .finalSize = finalSize, .quads = quads };
+
+            if (!isFixedSize && IsRectClipped(Rect::FromSize(textPos, finalSize)))
+            {
+                return Vec2();
+            }
+
+            DrawSDFTextInternal(quads.GetData(), text.GetData(), text.GetLength(), currentFont, textPos);
+            return finalSize;
+        }
+    }
+
+    void FusionRenderer2::ResetSDFTextCache(Uuid cacheId)
+    {
+        ZoneScoped;
+
+        sdfTextCache.Remove(cacheId);
+    }
+
     void FusionRenderer2::DrawViewport(const Rect& rect, FViewport* viewport)
     {
+        ZoneScoped;
+
         AddDrawCmd();
 
         PrimReserve(4, 6);
@@ -1210,6 +1272,8 @@ namespace CE
 
     void FusionRenderer2::DrawImageAtlas(const Rect& quad, int layerIndex)
     {
+        ZoneScoped;
+
         PrimReserve(4, 6);
 
         u32 color = Colors::White.ToU32();
@@ -1219,6 +1283,8 @@ namespace CE
 
     void FusionRenderer2::DrawFontAtlas(const Rect& rect, const Ref<FFontAtlas>& fontAtlas, int layerIndex)
     {
+        ZoneScoped;
+
         PrimReserve(4, 6);
 
         u32 color = Colors::White.ToU32();
@@ -1930,6 +1996,8 @@ namespace CE
     void FusionRenderer2::DrawSDFTextInternal(const Rect* quads, char* text, int length, const FFont& font,
 	    Vec2 textPos)
     {
+        ZoneScoped;
+
         thread_local HashSet<char> ignoreCharacters = { ' ', '\n', '\r', '\t', '\0' };
 
         Ref<FFontManager> fontManager = FusionApplication::Get()->GetFontManager();

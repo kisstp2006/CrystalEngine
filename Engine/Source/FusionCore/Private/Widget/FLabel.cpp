@@ -57,7 +57,13 @@ namespace CE
             size.x = 0;
         }
 
-        painter->DrawText(m_Text, Vec2(), size, m_WordWrap);
+        if (textCacheDirty)
+        {
+	        textCacheDirty = false;
+            painter->ResetTextCache(GetUuid());
+        }
+
+        painter->DrawTextCached(GetUuid(), m_Text, Vec2(), size, m_WordWrap);
 
         if (m_Underline.GetStyle() != FPenStyle::None && m_Underline.GetColor().a > 0.001f && 
             !m_Text.IsEmpty())
@@ -79,6 +85,20 @@ namespace CE
                 painter->DrawLine(underlineRects[i].min, underlineRects[i].max);
             }
         }
+    }
+
+    void FLabel::OnFusionPropertyModified(const CE::Name& propertyName)
+    {
+	    Super::OnFusionPropertyModified(propertyName);
+
+        static const HashSet<CE::Name> textProperties = {
+        	"Font","Text", "WordWrap", "Underline"
+        };
+
+        if (textProperties.Exists(propertyName))
+        {
+			textCacheDirty = true;
+		}
     }
 
     FLabel::Self& FLabel::FontFamily(const CE::Name& fontFamily)

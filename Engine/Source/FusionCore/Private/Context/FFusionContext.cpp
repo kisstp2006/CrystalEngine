@@ -100,7 +100,7 @@ namespace CE
 
 	void FFusionContext::DoPaint()
 	{
-
+		ZoneScoped;
 	}
 
 	void FFusionContext::TickInput()

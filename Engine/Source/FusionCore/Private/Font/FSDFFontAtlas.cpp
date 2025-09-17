@@ -299,12 +299,8 @@ namespace CE
 	        if (arrayLayerByCharCode.KeyExists(charCode))
 	        {
                 int layerIndex = arrayLayerByCharCode[charCode];
-                Ptr<FAtlasImage> atlasMip = atlasImageLayers[layerIndex];
 
-                if (atlasMip->glyphsByCharCode.KeyExists(charCode))
-                {
-					return atlasMip->glyphsByCharCode[charCode];
-                }
+                return atlasImageLayers[layerIndex]->glyphsByCharCode[charCode];
 	        }
         }
 

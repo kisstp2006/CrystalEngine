@@ -126,6 +126,9 @@ namespace CE
         Vec2 DrawText(const String& text, Vec2 textPos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
         Vec2 DrawSDFText(const String& text, Vec2 textPos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 
+        Vec2 DrawSDFTextCached(Uuid cacheId, const String& text, Vec2 textPos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+        void ResetSDFTextCache(Uuid cacheId);
+
         void DrawViewport(const Rect& rect, FViewport* viewport);
 
         void DrawImageAtlas(const Rect& rect, int layerIndex);
@@ -340,6 +343,17 @@ namespace CE
         FDrawDataArray drawDataArray;
 
         StaticArray<bool, MaxImageCount> quadUpdatesRequired{};
+
+        // - Cache -
+
+        struct FTextCacheEntry
+        {
+            Uuid cacheId;
+            Vec2 finalSize;
+            Array<Rect> quads;
+		};
+
+		HashMap<Uuid, FTextCacheEntry> sdfTextCache;
 
         // - Setup -
 

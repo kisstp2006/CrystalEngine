@@ -92,33 +92,118 @@ namespace CE
 		return result;
 	}
 
-	Matrix4x4 Matrix4x4::Multiply(const Matrix4x4& lhs, const Matrix4x4& rhs)
+	Matrix4x4 Matrix4x4::Multiply(const Matrix4x4& A, const Matrix4x4& B)
 	{
 		ZoneScoped;
 
-		Matrix4x4 result{};
+		// Optimized implementation
+		Matrix4x4 C;
+
+		const float* B0 = B.rows[0].xyzw;
+		const float* B1 = B.rows[1].xyzw;
+		const float* B2 = B.rows[2].xyzw;
+		const float* B3 = B.rows[3].xyzw;
+
+		// Row 0
+		{
+			const float a0 = A.rows[0].xyzw[0], a1 = A.rows[0].xyzw[1];
+			const float a2 = A.rows[0].xyzw[2], a3 = A.rows[0].xyzw[3];
+			float* d = C.rows[0].xyzw;
+			d[0] = a0 * B0[0] + a1 * B1[0] + a2 * B2[0] + a3 * B3[0];
+			d[1] = a0 * B0[1] + a1 * B1[1] + a2 * B2[1] + a3 * B3[1];
+			d[2] = a0 * B0[2] + a1 * B1[2] + a2 * B2[2] + a3 * B3[2];
+			d[3] = a0 * B0[3] + a1 * B1[3] + a2 * B2[3] + a3 * B3[3];
+		}
+		// Row 1
+		{
+			const float a0 = A.rows[1].xyzw[0], a1 = A.rows[1].xyzw[1];
+			const float a2 = A.rows[1].xyzw[2], a3 = A.rows[1].xyzw[3];
+			float* d = C.rows[1].xyzw;
+			d[0] = a0 * B0[0] + a1 * B1[0] + a2 * B2[0] + a3 * B3[0];
+			d[1] = a0 * B0[1] + a1 * B1[1] + a2 * B2[1] + a3 * B3[1];
+			d[2] = a0 * B0[2] + a1 * B1[2] + a2 * B2[2] + a3 * B3[2];
+			d[3] = a0 * B0[3] + a1 * B1[3] + a2 * B2[3] + a3 * B3[3];
+		}
+		// Row 2
+		{
+			const float a0 = A.rows[2].xyzw[0], a1 = A.rows[2].xyzw[1];
+			const float a2 = A.rows[2].xyzw[2], a3 = A.rows[2].xyzw[3];
+			float* d = C.rows[2].xyzw;
+			d[0] = a0 * B0[0] + a1 * B1[0] + a2 * B2[0] + a3 * B3[0];
+			d[1] = a0 * B0[1] + a1 * B1[1] + a2 * B2[1] + a3 * B3[1];
+			d[2] = a0 * B0[2] + a1 * B1[2] + a2 * B2[2] + a3 * B3[2];
+			d[3] = a0 * B0[3] + a1 * B1[3] + a2 * B2[3] + a3 * B3[3];
+		}
+		// Row 3
+		{
+			const float a0 = A.rows[3].xyzw[0], a1 = A.rows[3].xyzw[1];
+			const float a2 = A.rows[3].xyzw[2], a3 = A.rows[3].xyzw[3];
+			float* d = C.rows[3].xyzw;
+			d[0] = a0 * B0[0] + a1 * B1[0] + a2 * B2[0] + a3 * B3[0];
+			d[1] = a0 * B0[1] + a1 * B1[1] + a2 * B2[1] + a3 * B3[1];
+			d[2] = a0 * B0[2] + a1 * B1[2] + a2 * B2[2] + a3 * B3[2];
+			d[3] = a0 * B0[3] + a1 * B1[3] + a2 * B2[3] + a3 * B3[3];
+		}
+
+		return C;
+
+		// Naive implementation
+		/*Matrix4x4 C{};
 
 		for (int i = 0; i < 4; i++)
 		{
 			for (int j = 0; j < 4; j++)
 			{
-				result.rows[i][j] = 0;
+				C.rows[i][j] = 0;
 
 				for (int k = 0; k < 4; k++) 
 				{
-					result.rows[i][j] += lhs.rows[i][k] * rhs.rows[k][j];
+					C.rows[i][j] += A.rows[i][k] * B.rows[k][j];
 				}
 			}
 		}
 
-		return result;
+		return C;*/
 	}
 
     Vec4 Matrix4x4::Multiply(const Matrix4x4& lhs, const Vec4& rhs)
     {
 		ZoneScoped;
 
-        Vec4 result{};
+		// Optimized implementation
+		Vec4 out;
+
+		// Load vector once and reuse from registers
+		const float x = rhs.xyzw[0];
+		const float y = rhs.xyzw[1];
+		const float z = rhs.xyzw[2];
+		const float w = rhs.xyzw[3];
+
+		// Row 0
+		{
+			const float* r = lhs.rows[0].xyzw;
+			out.xyzw[0] = r[0] * x + r[1] * y + r[2] * z + r[3] * w;
+		}
+		// Row 1
+		{
+			const float* r = lhs.rows[1].xyzw;
+			out.xyzw[1] = r[0] * x + r[1] * y + r[2] * z + r[3] * w;
+		}
+		// Row 2
+		{
+			const float* r = lhs.rows[2].xyzw;
+			out.xyzw[2] = r[0] * x + r[1] * y + r[2] * z + r[3] * w;
+		}
+		// Row 3
+		{
+			const float* r = lhs.rows[3].xyzw;
+			out.xyzw[3] = r[0] * x + r[1] * y + r[2] * z + r[3] * w;
+		}
+
+		return out;
+
+		// Naive implementation
+        /*Vec4 result{};
         
         for (int i = 0; i < 4; i++)
         {
@@ -132,7 +217,7 @@ namespace CE
             result[i] = value;
         }
         
-        return result;
+        return result;*/
     }
 
 	Matrix4x4 Matrix4x4::GetTranspose(const Matrix4x4& mat)
@@ -154,6 +239,8 @@ namespace CE
 
 	Quat Matrix4x4::ToQuat() const
 	{
+		ZoneScoped;
+
 		float trace = rows[0][0] + rows[1][1] + rows[2][2];
 		Quat q;
 
@@ -224,6 +311,8 @@ namespace CE
 
 	void Matrix4x4::Decompose(Vec3& outTranslation, Quat& outRotation, Vec3& outScale) const
 	{
+		ZoneScoped;
+
 		// 1. Extract translation (4th column)
 		outTranslation = Vec3(rows[0][3], rows[1][3], rows[2][3]);
 

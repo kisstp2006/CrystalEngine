@@ -6,13 +6,15 @@ namespace CE
     class FUSIONCORE_API FLabel : public FWidget
     {
         CE_CLASS(FLabel, FWidget)
-    public:
+    protected:
 
         FLabel();
 
         void CalculateIntrinsicSize() override;
 
         void OnPaint(FPainter* painter) override;
+
+        void OnFusionPropertyModified(const CE::Name& propertyName) override;
 
     public: // - Fusion Properties -
 
@@ -37,6 +39,7 @@ namespace CE
     protected:
 
         Array<Rect> underlineRects;
+        bool textCacheDirty = true;
 
         FUSION_WIDGET;
     };

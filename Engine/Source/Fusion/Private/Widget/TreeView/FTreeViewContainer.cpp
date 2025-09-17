@@ -17,6 +17,8 @@ namespace CE
 
     void FTreeViewContainer::OnPaint(FPainter* painter)
     {
+        ZoneScoped;
+
         Super::OnPaint(painter);
 
         if (children.IsEmpty() || !Enabled())

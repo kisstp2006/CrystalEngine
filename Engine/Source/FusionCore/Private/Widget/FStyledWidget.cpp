@@ -18,6 +18,8 @@ namespace CE
 
     void FStyledWidget::OnPaint(FPainter* painter)
     {
+        ZoneScoped;
+
         if (m_Opacity < 0.001f)
             return;
 

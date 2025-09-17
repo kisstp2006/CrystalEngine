@@ -245,8 +245,24 @@ namespace CE
 		return renderer2->DrawSDFText(text, pos, size, wordWrap);
 	}
 
+	Vec2 FPainter::DrawTextCached(Uuid cacheId, const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
+	{
+		ZoneScoped;
+
+		return renderer2->DrawSDFTextCached(cacheId, text, pos, size, wordWrap);
+	}
+
+	void FPainter::ResetTextCache(Uuid cacheId)
+	{
+		ZoneScoped;
+
+		renderer2->ResetSDFTextCache(cacheId);
+	}
+
 	bool FPainter::IsCulled(Vec2 pos, Vec2 quadSize)
 	{
+		ZoneScoped;
+
 		return renderer2->IsRectClipped(Rect::FromSize(pos, quadSize));
 	}
 

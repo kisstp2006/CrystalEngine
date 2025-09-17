@@ -65,6 +65,9 @@ namespace CE
         Vec2 DrawText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
         Vec2 DrawSDFText(const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
 
+        Vec2 DrawTextCached(Uuid cacheId, const String& text, Vec2 pos, Vec2 size = Vec2(), FWordWrap wordWrap = FWordWrap::Normal);
+		void ResetTextCache(Uuid cacheId);
+
         bool IsCulled(Vec2 pos, Vec2 quadSize);
 
     private:
