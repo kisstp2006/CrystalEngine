@@ -286,12 +286,14 @@ namespace CE::Editor
 			constexpr float Separation = 3.0f;
 			constexpr Vec2i LightGrid = Vec2i(16, 16);
 			int lightIndex = 0;
-            
+            int curLight = 0;
+
             for (int x = -LightGrid.x / 2; x <= LightGrid.x / 2; ++x)
             {
                 for (int y = -LightGrid.y / 2; y <= LightGrid.y / 2; ++y)
                 {
-                    PointLight* pointLight = CreateObject<PointLight>(scene, "PointLight");
+                    PointLight* pointLight = CreateObject<PointLight>(scene, String::Format("PointLight_{}", curLight++));
+                    //PointLight* pointLight = CreateObject<PointLight>(scene, "PointLight");
                     scene->AddActor(pointLight);
                     {
                         Ref<PointLightComponent> pointLightComponent = pointLight->GetPointLightComponent();
@@ -388,6 +390,8 @@ namespace CE::Editor
 
     void SceneEditor::OnActorSelectionChanged(FItemSelectionModel* selectionModel)
     {
+        ZoneScoped;
+
         const auto& selection = selectionModel->GetSelection();
 
         Array<Actor*> selectedActors{};

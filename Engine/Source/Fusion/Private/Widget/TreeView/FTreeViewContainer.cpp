@@ -204,6 +204,27 @@ namespace CE
         Super::HandleEvent(event);
     }
 
+    FTreeViewContainer::Self& FTreeViewContainer::NormalizedScrollY(f32 value)
+    {
+        value = Math::Clamp01(value);
+
+        Vec2 translation = Translation();
+        translation.y = -value * (totalRowHeight - computedSize.y);
+        if (totalRowHeight < computedSize.y)
+        {
+            translation.y = 0;
+        }
+        Translation(translation);
+        return *this;
+    }
+
+    f32 FTreeViewContainer::NormalizedScrollY()
+    {
+        if (totalRowHeight < computedSize.y - 1)
+            return 0;
+        return -Translation().y / (totalRowHeight - computedSize.y);
+    }
+
     void FTreeViewContainer::OnModelUpdate()
     {
         if (treeView == nullptr || treeView->m_Model == nullptr || !treeView->m_Model->IsReady())
@@ -216,6 +237,7 @@ namespace CE
         int childIndex = 0;
         f32 curPosY = 0;
         f32 scrollY = -Translation().y;
+		f32 scrollViewHeight = GetParent()->GetComputedSize().y;
         int globalRowIdx = 0;
 
         if (treeView->header)
@@ -224,9 +246,15 @@ namespace CE
         }
 
         rowCache.Clear();
+        globalRowIndexCache.Clear();
 
         Delegate<void(const FModelIndex&, int)> visitor = [&](const FModelIndex& parent, int indentLevel) -> void
-            {
+			{
+				if (GetName() == "DebugContainer")
+				{
+                    String::IsAlphabet('a');
+				}
+
                 int rowCount = model->GetRowCount(parent);
                 if (rowCount == 0)
                     return;
@@ -251,15 +279,17 @@ namespace CE
                     f32 topY = curPosY;
                     f32 bottomY = curPosY + rowHeight;
 
-                    if (bottomY < scrollY)
+					globalRowIndexCache[globalRowIdx] = index;
+
+                    if (bottomY + rowHeight < scrollY)
                     {
-                        //curPosY += rowHeight; // We are above the scroll view
-                        //globalRowIdx++;
-                        //continue;
+                        curPosY += rowHeight; // We are above the scroll view
+                        globalRowIdx++;
+                        continue;
                     }
-                    else if (topY > scrollY + computedSize.y)
+                    else if (topY - rowHeight > scrollY + scrollViewHeight)
                     {
-                        //break; // We are below the scroll view
+                        break; // We are below the scroll view
                     }
 
                     FTreeViewRow* rowWidget = nullptr;
@@ -277,6 +307,7 @@ namespace CE
 
                     rowWidget->SetParent(this);
                     rowWidget->index = index;
+					rowWidget->globalRowIdx = globalRowIdx;
                     rowWidget->Enabled(true);
                     rowWidget->isAlternate = (globalRowIdx % 2 != 0);
                     rowWidget->treeView = treeView;
@@ -299,8 +330,8 @@ namespace CE
                         headerCount = treeView->header->GetColumnCount();
                     }
 
-                    f32 availWidth = treeView->GetComputedSize().width - 
-                        treeView->Padding().left - treeView->Padding().right - 
+                    f32 availWidth = treeView->GetComputedSize().width -
+                        treeView->Padding().left - treeView->Padding().right -
                         Margin().left - Margin().right;
 
                     for (int c = 0; c < headerCount && c < rowWidget->GetCellCount(); ++c)
@@ -308,29 +339,29 @@ namespace CE
                         f32 minWidth = availWidth / Math::Min<f32>(headerCount, rowWidget->GetCellCount());
                         if (treeView->header)
                         {
-	                        minWidth = treeView->header->GetColumn(c)->GetComputedSize().x;
+                            minWidth = treeView->header->GetColumn(c)->GetComputedSize().x;
                         }
                         rowWidget->Visible(true);
 
                         FTreeViewCell& cell = *rowWidget->GetCell(c);
 
                         cell
-							.ArrowVisible(treeView->m_ExpandableColumn == c && childrenCount > 0)
-							.ArrowEnabled(treeView->m_ExpandableColumn == c)
-							.ArrowExpanded(expandedRows.Exists(index))
-							.OnToggleExpansion([index, this]
-							{
-                                if (!expandedRows.Exists(index))
+                            .ArrowVisible(treeView->m_ExpandableColumn == c && childrenCount > 0)
+                            .ArrowEnabled(treeView->m_ExpandableColumn == c)
+                            .ArrowExpanded(expandedRows.Exists(index))
+                            .OnToggleExpansion([index, this]
                                 {
-	                                expandedRows.Add(index);
-                                }
-                                else
-                                {
-                                    expandedRows.Remove(index);
-                                }
-                                MarkLayoutDirty();
-							})
-                        ;
+                                    if (!expandedRows.Exists(index))
+                                    {
+                                        expandedRows.Add(index);
+                                    }
+                                    else
+                                    {
+                                        expandedRows.Remove(index);
+                                    }
+                                    MarkLayoutDirty();
+                                })
+                            ;
 
                         if (treeView->m_ExpandableColumn == c && indentLevel > 0)
                         {
@@ -375,27 +406,6 @@ namespace CE
         MarkDirty();
     }
 
-    FTreeViewContainer::Self& FTreeViewContainer::NormalizedScrollY(f32 value)
-    {
-        value = Math::Clamp01(value);
-
-        Vec2 translation = Translation();
-        translation.y = -value * (totalRowHeight - computedSize.y);
-        if (totalRowHeight < computedSize.y)
-        {
-            translation.y = 0;
-        }
-        Translation(translation);
-        return *this;
-    }
-
-    f32 FTreeViewContainer::NormalizedScrollY()
-    {
-        if (totalRowHeight < computedSize.y - 1)
-            return 0;
-        return -Translation().y / (totalRowHeight - computedSize.y);
-    }
-
     void FTreeViewContainer::CalculateIntrinsicSize()
     {
         ZoneScoped;
@@ -404,6 +414,11 @@ namespace CE
         {
             Super::CalculateIntrinsicSize();
             return;
+        }
+
+        if (GetName() == "DebugContainer")
+        {
+            String::IsAlphabet('a');
         }
 
         intrinsicSize.width = m_Padding.left + m_Padding.right;
@@ -417,6 +432,8 @@ namespace CE
 
         Delegate<void(const FModelIndex&)> visitor = [&](const FModelIndex& parent) -> void
             {
+                ZoneScoped;
+
                 int rowCount = model->GetRowCount(parent);
                 if (rowCount == 0)
                     return;
@@ -497,12 +514,18 @@ namespace CE
             return;
         }
 
+        if (GetName() == "DebugContainer")
+        {
+            String::IsAlphabet('a');
+        }
+
         f32 scrollY = -Translation().y;
 
         f32 remainingSize = 0;
         Vec2 curPos = Vec2(m_Padding.left, m_Padding.top);
         Vec2 availableSize = computedSize - Vec2(m_Padding.left + m_Padding.right,
             m_Padding.top + m_Padding.bottom);
+        bool isFirst = true;
 
         for (int i = 0; i < children.GetCount(); ++i)
         {
@@ -510,6 +533,23 @@ namespace CE
 
 	        if (!child->Enabled())
                 continue;
+
+            if (isFirst)
+            {
+				isFirst = false;
+
+                if (treeView->m_RowHeightDelegate.IsValid())
+                {
+                    for (int j = 0; j < child->globalRowIdx; j++)
+                    {
+						// TODO: Add rowHeight for all rows above this one.
+                    }
+                }
+                else
+                {
+					curPos.y += child->globalRowIdx * treeView->m_RowHeight;
+                }
+            }
 
             f32 rowHeight = 0;
             if (!treeView->m_RowHeightDelegate.IsValid())

@@ -1373,6 +1373,8 @@ namespace CE
 
 	void Object::OnAfterConstructInternal()
 	{
+		ZoneScoped;
+
 		// The parent should not be pending!
 		if (outer != nullptr && EnumHasFlag(outer->objectFlags, OF_SubobjectPending))
 		{

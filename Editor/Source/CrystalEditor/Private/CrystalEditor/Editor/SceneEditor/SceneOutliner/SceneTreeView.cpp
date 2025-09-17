@@ -13,19 +13,22 @@ namespace CE::Editor
         Super::Construct();
         
         (*this)
-			.GenerateRowDelegate(MemberDelegate(&Self::GenerateRow, this))
+		.GenerateRowDelegate(MemberDelegate(&Self::GenerateRow, this))
+        .AutoHeight(true)
             ;
+
+        container->Name("DebugContainer");
 
         Style("TreeView");
     }
 
     FTreeViewRow& SceneTreeView::GenerateRow()
     {
-        FTreeViewRow& row = FNew(FTreeViewRow);
-
         const f32 fontSize = GetDefaults<EditorConfigs>()->GetFontSize();
 
-        row.Cells(
+        return
+    	FNew(FTreeViewRow)
+    	.Cells(
             FNew(FTreeViewCell)
             .Text("Name")
             .ArrowEnabled(true)
@@ -37,8 +40,6 @@ namespace CE::Editor
             .Foreground(Color::RGBA(255, 255, 255, 140))
             .ArrowEnabled(false)
         );
-
-        return row;
     }
 
 }

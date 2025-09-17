@@ -43,6 +43,10 @@ namespace CE
                     FAssignNew(FScrollBox, scrollBox)
                     .VerticalScroll(true)
                     .HorizontalScroll(false)
+                    .OnScrollValueChanged([this](FScrollBox*)
+                    {
+                        container->OnModelUpdate();
+                    })
                     .OnBackgroundClicked([this](FScrollBox*)
                     {
                         ClearSelection();

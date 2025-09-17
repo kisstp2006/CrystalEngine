@@ -94,6 +94,8 @@ namespace CE
 
 	Vec2 FPainter::CalculateTextSize(const String& text, const FFont& font, f32 width, FWordWrap wordWrap)
 	{
+		ZoneScoped;
+
 		thread_local Array<Rect> quads{};
 #if USE_SDF
 		return renderer2->CalculateSDFTextQuads(quads, text, font, width, wordWrap);
@@ -105,6 +107,8 @@ namespace CE
 	Vec2 FPainter::CalculateCharacterOffsets(Array<Vec2>& outOffsets, const String& text,
 		const FFont& font, f32 width, FWordWrap wordWrap)
 	{
+		ZoneScoped;
+
 #if USE_SDF
 		return renderer2->CalculateSDFCharacterOffsets(outOffsets, text, font, width, wordWrap);
 #else
@@ -115,6 +119,8 @@ namespace CE
 	Vec2 FPainter::CalculateTextQuads(Array<Rect>& outRects, const String& text, const FFont& font, f32 width,
 		FWordWrap wordWrap)
 	{
+		ZoneScoped;
+
 #if USE_SDF
 		return renderer2->CalculateSDFTextQuads(outRects, text, font, width, wordWrap);
 #else
@@ -124,6 +130,8 @@ namespace CE
 
 	FFontMetrics FPainter::GetFontMetrics(const FFont& font)
 	{
+		ZoneScoped;
+
 #if USE_SDF
 		return renderer2->GetSDFFontMetrics(font);
 #else
@@ -133,6 +141,8 @@ namespace CE
 
 	bool FPainter::DrawShape(const Rect& rect, const FShape& shape)
 	{
+		ZoneScoped;
+
 		bool isDrawn = false;
 
 		Rect fillRect = rect;
@@ -178,21 +188,29 @@ namespace CE
 
 	void FPainter::DrawViewport(const Rect& rect, FViewport* viewport)
 	{
+		ZoneScoped;
+
 		renderer2->DrawViewport(rect, viewport);
 	}
 
 	bool FPainter::DrawRect(const Rect& rect)
 	{
+		ZoneScoped;
+
 		return DrawShape(rect, FShapeType::Rect);
 	}
 
 	bool FPainter::DrawCircle(const Rect& rect)
 	{
+		ZoneScoped;
+
 		return DrawShape(rect, FShapeType::Circle);
 	}
 
 	bool FPainter::DrawRoundedRect(const Rect& rect, const Vec4& cornerRadius)
 	{
+		ZoneScoped;
+
 		FShape shape = FShapeType::RoundedRect;
 		shape.SetCornerRadius(cornerRadius);
 		return DrawShape(rect, shape);
@@ -200,6 +218,8 @@ namespace CE
 
 	bool FPainter::DrawLine(const Vec2& startPos, const Vec2& endPos)
 	{
+		ZoneScoped;
+
 		renderer2->PathClear();
 		renderer2->PathLineTo(startPos);
 		renderer2->PathLineTo(endPos);
@@ -209,6 +229,8 @@ namespace CE
 
 	Vec2 FPainter::DrawText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
 	{
+		ZoneScoped;
+
 #if USE_SDF
 		return renderer2->DrawSDFText(text, pos, size, wordWrap);
 #else
@@ -218,6 +240,8 @@ namespace CE
 
 	Vec2 FPainter::DrawSDFText(const String& text, Vec2 pos, Vec2 size, FWordWrap wordWrap)
 	{
+		ZoneScoped;
+
 		return renderer2->DrawSDFText(text, pos, size, wordWrap);
 	}
 

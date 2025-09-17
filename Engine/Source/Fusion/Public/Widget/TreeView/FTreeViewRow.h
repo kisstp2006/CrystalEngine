@@ -37,6 +37,7 @@ namespace CE
         FHorizontalStack* contentStack = nullptr;
 
         FModelIndex index{};
+        int globalRowIdx = -1;
         bool isAlternate = false;
         bool isHovered = false;
         FTreeView* treeView = nullptr;

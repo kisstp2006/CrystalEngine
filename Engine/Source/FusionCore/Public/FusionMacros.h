@@ -27,6 +27,7 @@
 		PropertyType m_##PropertyName = {};\
 	public:\
 		Self& PropertyName(PropertyType const& value) {\
+			ZoneScoped;\
 			if constexpr (TEquitable<PropertyType>::Value)\
 			{\
 				if (TEquitable<PropertyType>::AreEqual(this->m_##PropertyName, value))\
@@ -49,9 +50,11 @@
 	__FUSION_PROPERTY(PropertyType, PropertyName, DirtyFunc)\
 	PropertyBinding<PropertyType> m_##PropertyName##Binding{};\
 	void Update_##PropertyName(CE::Object* modifyingObject = nullptr) {\
+		ZoneScoped;\
 		if (m_##PropertyName##Binding.read.IsBound() && this != modifyingObject) PropertyName(m_##PropertyName##Binding.read());\
 	}\
 	Self& Bind_##PropertyName(const PropertyBindingRequest<PropertyType>& request) {\
+		ZoneScoped;\
 		m_##PropertyName##Binding.read = request.read;\
 		m_##PropertyName##Binding.write = request.write;\
 		request.onModifiedExternally.Bind(FUNCTION_BINDING(this, Update_##PropertyName));\
@@ -62,11 +65,6 @@
 #define FUSION_DATA_PROPERTY(PropertyType, PropertyName, ...) __FUSION_DATA_PROPERTY(PropertyType, PropertyName, MarkDirty())
 
 #define FUSION_DATA_LAYOUT_PROPERTY(PropertyType, PropertyName, ...) __FUSION_DATA_PROPERTY(PropertyType, PropertyName, MarkLayoutDirty())
-
-#define BIND_PROPERTY(modelPtr, propertyName, getter, setter) {\
-		getter, setter,\
-		modelPtr->On##propertyName##Updated()\
-	}
 
 #define BIND_PROPERTY_RW(modelPtr, propertyName) CE::PropertyBindingRequest<std::remove_cvref_t<TFunctionTraits<decltype(&std::remove_cvref_t<decltype(*modelPtr)>::Get##propertyName)>::ReturnType>>(\
 	FUNCTION_BINDING(model, Get##propertyName),\

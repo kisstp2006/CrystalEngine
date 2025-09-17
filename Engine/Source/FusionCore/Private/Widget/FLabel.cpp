@@ -10,6 +10,8 @@ namespace CE
 
     void FLabel::CalculateIntrinsicSize()
     {
+        ZoneScoped;
+
         Ref<FFusionContext> context = GetContext();
         if (!context)
         {
@@ -41,6 +43,8 @@ namespace CE
 
     void FLabel::OnPaint(FPainter* painter)
     {
+        ZoneScoped;
+
 	    Super::OnPaint(painter);
 
         painter->SetFont(m_Font);

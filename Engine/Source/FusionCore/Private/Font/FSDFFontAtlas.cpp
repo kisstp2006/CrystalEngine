@@ -294,8 +294,19 @@ namespace CE
     FFontGlyphInfo FSDFFontAtlas::FindOrAddGlyph(u32 charCode, bool isBold, bool isItalic)
     {
         ZoneScoped;
-        char __text[2] = { (char)charCode, 0 };
-        ZoneText(__text, 1);
+
+        {
+	        if (arrayLayerByCharCode.KeyExists(charCode))
+	        {
+                int layerIndex = arrayLayerByCharCode[charCode];
+                Ptr<FAtlasImage> atlasMip = atlasImageLayers[layerIndex];
+
+                if (atlasMip->glyphsByCharCode.KeyExists(charCode))
+                {
+					return atlasMip->glyphsByCharCode[charCode];
+                }
+	        }
+        }
 
         if (!arrayLayerByCharCode.KeyExists(charCode))
         {
@@ -310,23 +321,25 @@ namespace CE
             return {};
         }
 
-        int layerIndex = arrayLayerByCharCode[charCode];
-        Ptr<FAtlasImage> atlasMip = atlasImageLayers[layerIndex];
+	    {
+		    int layerIndex = arrayLayerByCharCode[charCode];
+        	Ptr<FAtlasImage> atlasMip = atlasImageLayers[layerIndex];
 
-        if (!atlasMip->glyphsByCharCode.KeyExists(charCode))
-        {
-            static Array<u32> charSet{};
-            charSet.Resize(1);
-            charSet[0] = charCode;
-            AddGlyphs(charSet, isBold, isItalic);
-        }
+        	if (!atlasMip->glyphsByCharCode.KeyExists(charCode))
+        	{
+        		static Array<u32> charSet{};
+        		charSet.Resize(1);
+        		charSet[0] = charCode;
+        		AddGlyphs(charSet, isBold, isItalic);
+        	}
 
-        if (!atlasMip->glyphsByCharCode.KeyExists(charCode))
-        {
-            return {};
-        }
+        	if (!atlasMip->glyphsByCharCode.KeyExists(charCode))
+        	{
+        		return {};
+        	}
 
-        return atlasMip->glyphsByCharCode[charCode];
+        	return atlasMip->glyphsByCharCode[charCode];
+	    }
     }
 
     void FSDFFontAtlas::AddGlyphs(const Array<u32>& charSet, bool isBold, bool isItalic)

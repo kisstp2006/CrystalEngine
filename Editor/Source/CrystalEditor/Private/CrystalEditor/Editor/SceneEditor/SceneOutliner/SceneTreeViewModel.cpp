@@ -17,6 +17,8 @@ namespace CE
 
     FModelIndex SceneTreeViewModel::GetIndex(u32 row, u32 column, const FModelIndex& parent)
     {
+        ZoneScoped;
+
         if (!scene)
             return {};
 
@@ -37,6 +39,8 @@ namespace CE
 
     FModelIndex SceneTreeViewModel::GetParent(const FModelIndex& index)
     {
+        ZoneScoped;
+
         Actor* actor = index.GetData().GetValue<Actor*>();
         if (!actor)
             return {};
@@ -64,6 +68,8 @@ namespace CE
 
     FModelIndex SceneTreeViewModel::FindIndex(Actor* actor)
     {
+        ZoneScoped;
+
         if (!actor || !actor->GetScene())
             return {};
 
@@ -92,6 +98,8 @@ namespace CE
 
     u32 SceneTreeViewModel::GetRowCount(const FModelIndex& parent)
     {
+        ZoneScoped;
+
         if (!scene)
             return {};
 
@@ -114,6 +122,8 @@ namespace CE
 
     void SceneTreeViewModel::SetData(u32 row, FWidget& rowWidget, const FModelIndex& parent)
     {
+        ZoneScoped;
+
         if (!scene)
             return;
         FTreeViewRow* rowCast = Object::CastTo<FTreeViewRow>(&rowWidget);
