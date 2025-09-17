@@ -69,8 +69,6 @@ namespace CE
             u32 atlasSize = 0;
             Array<RowSegment> rows;
 
-            HashMap<CharCode, FFontGlyphInfo> glyphsByCharCode;
-
             RPI::Texture* sourceTexture = nullptr;
 
             bool TryInsertGlyphRect(Vec2i glyphSize, int padding, int& outX, int& outY);
@@ -100,6 +98,7 @@ namespace CE
         RPI::Texture* sourceImage = nullptr;
 
         HashMap<CharCode, int> arrayLayerByCharCode;
+        HashMap<CharCode, FFontGlyphInfo> glyphsByCharCode;
 
         RPI::Shader* sdfGlyphShader = nullptr;
 

@@ -44,6 +44,8 @@ namespace CE
 
 	void FPainter::PushOpacity(f32 opacity)
 	{
+		ZoneScoped;
+
 		renderer2->PushOpacity(opacity);
 	}
 

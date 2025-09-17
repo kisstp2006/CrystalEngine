@@ -106,6 +106,8 @@ namespace CE
 
     void FCompoundWidget::OnPaint(FPainter* painter)
     {
+        ZoneScoped;
+
 	    Super::OnPaint(painter);
 
         if (!isCulled && m_Child && m_Child->Enabled() && m_Child->Visible())

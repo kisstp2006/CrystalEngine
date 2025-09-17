@@ -296,11 +296,10 @@ namespace CE
         ZoneScoped;
 
         {
-	        if (arrayLayerByCharCode.KeyExists(charCode))
+            auto it = glyphsByCharCode.Find(charCode);
+	        if (it != glyphsByCharCode.End())
 	        {
-                int layerIndex = arrayLayerByCharCode[charCode];
-
-                return atlasImageLayers[layerIndex]->glyphsByCharCode[charCode];
+                return it->second;
 	        }
         }
 
@@ -321,7 +320,7 @@ namespace CE
 		    int layerIndex = arrayLayerByCharCode[charCode];
         	Ptr<FAtlasImage> atlasMip = atlasImageLayers[layerIndex];
 
-        	if (!atlasMip->glyphsByCharCode.KeyExists(charCode))
+        	if (!glyphsByCharCode.KeyExists(charCode))
         	{
         		static Array<u32> charSet{};
         		charSet.Resize(1);
@@ -329,12 +328,12 @@ namespace CE
         		AddGlyphs(charSet, isBold, isItalic);
         	}
 
-        	if (!atlasMip->glyphsByCharCode.KeyExists(charCode))
+        	if (!glyphsByCharCode.KeyExists(charCode))
         	{
         		return {};
         	}
 
-        	return atlasMip->glyphsByCharCode[charCode];
+        	return glyphsByCharCode[charCode];
 	    }
     }
 
@@ -379,7 +378,7 @@ namespace CE
             FT_ULong charCode = charSet[i];
             char c = charCode;
 
-            if (atlasMip->glyphsByCharCode.KeyExists(charCode))
+            if (glyphsByCharCode.KeyExists(charCode))
             {
                 continue;
             }
@@ -472,7 +471,7 @@ namespace CE
                 }
             }
 
-			atlasMip->glyphsByCharCode[charCode] = glyph;
+			glyphsByCharCode[charCode] = glyph;
 
             for (int j = 0; j < flushRequiredPerImage.GetSize(); ++j)
             {

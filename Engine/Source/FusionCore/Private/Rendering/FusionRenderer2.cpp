@@ -686,11 +686,15 @@ namespace CE
 
     void FusionRenderer2::PushOpacity(f32 opacity)
     {
+        ZoneScoped;
+
         opacityStack.Insert(opacity);
     }
 
     void FusionRenderer2::PopOpacity()
     {
+        ZoneScoped;
+
         opacityStack.RemoveLast();
     }
 
@@ -717,6 +721,8 @@ namespace CE
 
     void FusionRenderer2::PathClear()
     {
+        ZoneScoped;
+
         path.RemoveAll();
 
         pathMax = Vec2(NumericLimits<f32>::Min(), NumericLimits<f32>::Min());
@@ -899,6 +905,8 @@ namespace CE
 
     bool FusionRenderer2::PathFill(bool antiAliased)
     {
+        ZoneScoped;
+
         if (IsRectClipped(Rect(pathMin, pathMax)))
         {
             PathClear();

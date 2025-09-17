@@ -834,6 +834,8 @@ namespace CE
 
     void FTextInput::OnPaintContent(FPainter* painter)
     {
+        ZoneScoped;
+
         Super::OnPaintContent(painter);
 
         m_OnBeforeTextPaint(painter);
