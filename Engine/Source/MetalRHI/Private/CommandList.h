@@ -68,9 +68,12 @@ namespace CE::Metal
         id<MTLCommandQueue> mtlCommandQueue = nil;
         id<MTLCommandBuffer> mtlCommandBuffer = nil;
         id<MTLRenderCommandEncoder> mtlRenderEncoder = nil;
+        id<MTLComputeCommandEncoder> mtlComputeEncoder = nil;
         
         List<Fence*> fenceInstances;
         SharedMutex fenceLock;
+        
+        StaticArray<Metal::ShaderResourceGroup*, RHI::Limits::Pipeline::MaxShaderResourceGroupCount> boundSRGs{};
         
     };
     

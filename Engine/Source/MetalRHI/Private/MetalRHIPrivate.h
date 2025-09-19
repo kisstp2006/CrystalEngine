@@ -19,6 +19,8 @@
 #include "ComputePipeline.h"
 #include "PipelineState.h"
 
+#include "ShaderResourceGroup.h"
+
 #include "CommandQueue.h"
 #include "CommandList.h"
 #include "Fence.h"

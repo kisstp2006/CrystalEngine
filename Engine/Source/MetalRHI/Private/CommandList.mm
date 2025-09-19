@@ -63,12 +63,109 @@ namespace CE::Metal
 
     void CommandList::ResourceBarrier(u32 count, ResourceBarrierDescriptor* barriers)
     {
-        
+        if (count == 0)
+            return;
+
+        for (int i = 0; i < count; i++)
+        {
+            const RHI::ResourceBarrierDescriptor& barrierInfo = barriers[i];
+            if (barrierInfo.resource == nullptr)
+                continue;
+            
+            MTLResourceUsage usage = 0;
+            MTLRenderStages stages = MTLRenderStageVertex | MTLRenderStageFragment;
+            
+            switch (barrierInfo.toState)
+            {
+                case RHI::ResourceState::General:
+                    usage = MTLResourceUsageRead | MTLResourceUsageWrite;
+                    break;
+                case RHI::ResourceState::CopyDestination:
+                    usage = MTLResourceUsageWrite;
+                    break;
+                case RHI::ResourceState::CopySource:
+                    usage = MTLResourceUsageRead;
+                    break;
+                case RHI::ResourceState::DepthWrite:
+                    usage = MTLResourceUsageRead | MTLResourceUsageWrite;
+                    break;
+                case RHI::ResourceState::DepthRead:
+                    usage = MTLResourceUsageRead;
+                    break;
+                case RHI::ResourceState::FragmentShaderResource:
+                    usage = MTLResourceUsageRead | MTLResourceUsageWrite;
+                    stages = MTLRenderStageFragment;
+                    break;
+                case RHI::ResourceState::NonFragmentShaderResource:
+                    usage = MTLResourceUsageRead | MTLResourceUsageWrite;
+                    stages = MTLRenderStageVertex;
+                    break;
+                case RHI::ResourceState::ColorOutput:
+                    usage = MTLResourceUsageWrite;
+                    stages = MTLRenderStageFragment;
+                    break;
+                case RHI::ResourceState::VertexBuffer:
+                    usage = MTLResourceUsageRead;
+                    stages = MTLRenderStageVertex;
+                    break;
+                case RHI::ResourceState::IndexBuffer:
+                    usage = MTLResourceUsageRead;
+                    stages = MTLRenderStageVertex;
+                    break;
+                case RHI::ResourceState::ConstantBuffer:
+                    usage = MTLResourceUsageRead;
+                    break;
+                case RHI::ResourceState::Present:
+                    usage = MTLResourceUsageRead;
+                    break;
+                case RHI::ResourceState::ShaderWrite:
+                    usage = MTLResourceUsageRead | MTLResourceUsageWrite;
+                    break;
+                case RHI::ResourceState::BlitSource:
+                    usage = MTLResourceUsageRead;
+                    break;
+                case RHI::ResourceState::BlitDestination:
+                    usage = MTLResourceUsageWrite;
+                    break;
+            }
+            
+            RHI::DeviceObjectType resourceType = barrierInfo.resource->GetDeviceObjectType();
+            if (resourceType == RHI::DeviceObjectType::Texture)
+            {
+                Metal::Texture* texture = (Metal::Texture*)barrierInfo.resource;
+                
+                if (mtlRenderEncoder != nil && texture != nullptr)
+                {
+                    [mtlRenderEncoder useResource:texture->GetMtlTexture() usage:usage stages:stages];
+                }
+                else if (mtlComputeEncoder != nil && texture != nullptr)
+                {
+                    [mtlComputeEncoder useResource:texture->GetMtlTexture() usage:usage];
+                }
+            }
+            else if (resourceType == RHI::DeviceObjectType::Buffer)
+            {
+                Metal::Buffer* buffer = (Metal::Buffer*)barrierInfo.resource;
+                
+                if (mtlRenderEncoder != nil && buffer != nullptr)
+                {
+                    [mtlRenderEncoder useResource:buffer->GetMtlBuffer() usage:usage stages:stages];
+                }
+                else if (mtlComputeEncoder != nil && buffer != nullptr)
+                {
+                    [mtlComputeEncoder useResource:buffer->GetMtlBuffer() usage:usage];
+                }
+            }
+        }
     }
 
     void CommandList::SetShaderResourceGroups(const ArrayView<RHI::ShaderResourceGroup*>& srgs)
     {
-        
+        for (auto rhiSrg : srgs)
+        {
+            auto srg = (Vulkan::ShaderResourceGroup*)rhiSrg;
+            boundSRGs[(int)srg->GetSRGType()] = srg;
+        }
     }
 
     void CommandList::ClearShaderResourceGroups()
