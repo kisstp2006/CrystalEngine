@@ -107,11 +107,11 @@ namespace CE::Editor
             .windowFlags = PlatformWindowFlags::DestroyOnClose
         };
 
-        Ref<FusionImageAtlasWindow> window = (Ref<FusionImageAtlasWindow>)FusionApplication::Get()->CreateNativeWindow(
+        Ref<FusionImageAtlasWindow> window = Object::CastTo<FusionImageAtlasWindow>(FusionApplication::Get()->CreateNativeWindow(
             "FusionImageAtlasWindow", 
             "Fusion Image Atlas",
             800, 600,
-            Self::StaticClass(), info);
+            Self::StaticClass(), info));
 
         instance = window;
 

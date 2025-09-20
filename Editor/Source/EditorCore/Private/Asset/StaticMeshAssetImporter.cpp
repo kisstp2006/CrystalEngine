@@ -44,7 +44,7 @@ namespace CE::Editor
 
 			if (object->IsOfType<StaticMesh>())
 			{
-				Ref<StaticMesh> staticMesh = static_cast<Ref<StaticMesh>>(object);
+				Ref<StaticMesh> staticMesh = Object::CastTo<StaticMesh>(object);
 				meshUuid = staticMesh->GetUuid();
 
 				if (staticMesh->GetSubObjectCount() >= 1 &&

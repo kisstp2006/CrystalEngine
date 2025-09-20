@@ -180,7 +180,7 @@ namespace CE
 			Ref<Object> object = bundle->LoadObject(assetData->assetUuid);
 			if (object.IsValid() && object->IsOfType(classType))
 			{
-				assets.Add((Ref<Asset>)object);
+				assets.Add(CastTo<Asset>(object));
 			}
 		}
 
@@ -272,7 +272,7 @@ namespace CE
 		if (!object || !object->IsOfType<Asset>())
 			return nullptr;
 		
-		return (Ref<Asset>)object;
+		return CastTo<Asset>(object);
 	}
 
 	RHI::Texture* AssetManager::LoadTextureAtPath(const Name& path)

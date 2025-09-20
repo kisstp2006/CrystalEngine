@@ -19,7 +19,7 @@ namespace CE
         template<class T> requires TIsBaseClassOf<FWidget, T>::Value
         Ref<T> FindChildByName(const CE::Name& name)
         {
-            return (Ref<T>)FindChildByName(name, T::StaticClass());
+            return Object::CastTo<T>(FindChildByName(name, T::StaticClass()));
         }
 
         void SetContextRecursively(FFusionContext* context) override;

@@ -194,7 +194,7 @@ namespace CE::Editor
 
 		Super::OpenEditor(targetObject, bundle);
 
-        Ref<CE::Material> material = (Ref<CE::Material>)targetObject;
+        Ref<CE::Material> material = Object::CastTo<CE::Material>(targetObject);
         if (this->targetMaterial == material)
             return true;
 

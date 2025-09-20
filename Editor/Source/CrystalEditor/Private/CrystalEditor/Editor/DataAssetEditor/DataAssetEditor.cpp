@@ -48,7 +48,7 @@ namespace CE::Editor
 
         Super::OpenEditor(targetObject, bundle);
 
-        Ref<CE::DataAsset> dataAsset = (Ref<CE::DataAsset>)targetObject;
+        Ref<CE::DataAsset> dataAsset = Object::CastTo<CE::DataAsset>(targetObject);
         if (this->targetAsset == dataAsset)
             return true;
 

@@ -133,11 +133,11 @@ namespace CE::Editor
             .windowFlags = PlatformWindowFlags::DestroyOnClose
         };
 
-        Ref<FusionFontAtlasWindow> window = (Ref<FusionFontAtlasWindow>)FusionApplication::Get()->CreateNativeWindow(
+        Ref<FusionFontAtlasWindow> window = Object::CastTo<FusionFontAtlasWindow>(FusionApplication::Get()->CreateNativeWindow(
             "FusionFontAtlasWindow", 
             "Fusion Font Atlas",
             800, 600,
-            Self::StaticClass(), info);
+            Self::StaticClass(), info));
 
         instance = window;
 

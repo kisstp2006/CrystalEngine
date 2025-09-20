@@ -93,7 +93,7 @@ namespace CE
 	{
 		SIZE_T operator()(const T& value) const
 		{
-			return CE::template GetHash(value);
+			return CE::template GetHash<T>(value);
 		}
 	};
 

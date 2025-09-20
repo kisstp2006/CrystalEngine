@@ -128,14 +128,14 @@ namespace CE
             {
                 windowClass = TWindow::StaticClass();
 			}
-            return (Ref<TWindow>)CreateNativeWindow(windowName, title, width, height, static_cast<SubClass<FWindow>>(windowClass.GetClassType()), info);
+            return Object::CastTo<TWindow>(CreateNativeWindow(windowName, title, width, height, static_cast<SubClass<FWindow>>(windowClass.GetClassType()), info));
         }
 
         template<typename TWindow> requires TIsBaseClassOf<FWindow, TWindow>::Value and (!TIsSameType<FWindow, TWindow>::Value)
         Ref<TWindow> CreateNativeWindow(const Name& windowName, const String& title, u32 width, u32 height,
                                         const PlatformWindowInfo& info = {})
         {
-            return (Ref<TWindow>)CreateNativeWindow(windowName, title, width, height, TWindow::StaticClass(), info);
+            return Object::CastTo<TWindow>(CreateNativeWindow(windowName, title, width, height, TWindow::StaticClass(), info));
         }
 
         ScriptEvent<void(FGameWindow*)> onRenderViewportDestroyed;

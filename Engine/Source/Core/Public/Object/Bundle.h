@@ -115,7 +115,7 @@ namespace CE
         template<typename TObject>
         Ref<TObject> LoadObject()
         {
-            return (Ref<TObject>)LoadObject(TObject::StaticClass());
+            return CastTo<TObject>(LoadObject(TObject::StaticClass()));
         }
 
         void SetObjectUuid(const Ref<Object>& object, const Uuid& uuid);

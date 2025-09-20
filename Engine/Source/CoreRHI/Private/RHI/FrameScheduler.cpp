@@ -59,6 +59,7 @@ namespace CE::RHI
 		if (frameGraph->presentSwapChains.NotEmpty())
 		{
 			numFramesInFlight = frameGraph->presentSwapChains[0]->GetImageCount();
+			numFramesInFlight = Math::Min(numFramesInFlight, RHI::Limits::MaxSwapChainImageCount);
 		}
 
         FrameGraphCompileRequest compileRequest{};

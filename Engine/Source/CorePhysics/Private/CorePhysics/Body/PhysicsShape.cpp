@@ -2,6 +2,9 @@
 
 namespace CE
 {
+    ShapeSettings::ShapeSettings(Ref<PhysicsScene> scene) : ownerScene(scene)
+    {
+    }
 
     PhysicsShape::PhysicsShape()
     {

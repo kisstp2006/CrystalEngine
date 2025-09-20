@@ -67,6 +67,8 @@ namespace CE::Vulkan
 			imageCount = frameGraph->GetSwapChain(0)->GetImageCount();
 		}
 
+		imageCount = Math::Min(imageCount, RHI::Limits::MaxSwapChainImageCount);
+
 		waitSemaphores.Clear();
 
 		// Render Finished semaphores & fences

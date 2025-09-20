@@ -145,6 +145,8 @@ namespace CE::Vulkan
 			presentSwapChains = true;
 		}
 
+		imageCount = Math::Min(imageCount, RHI::Limits::MaxSwapChainImageCount);
+
 		for (auto scope : frameGraph->scopes)
 		{
 			delete scope->passShaderResourceGroup;

@@ -11,9 +11,7 @@ namespace CE
 
 		virtual ~ShapeSettings() = default;
 
-        ShapeSettings(Ref<PhysicsScene> scene) : ownerScene(scene)
-        {
-        }
+        ShapeSettings(Ref<PhysicsScene> scene);
 
         FIELD()
     	WeakRef<PhysicsScene> ownerScene;

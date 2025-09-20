@@ -1175,8 +1175,9 @@ namespace CE
 	    FWordWrap wordWrap)
     {
         ZoneScoped;
+        // TODO: Fix SDF Cache
 
-        if (sdfTextCache.KeyExists(cacheId))
+        /*if (sdfTextCache.KeyExists(cacheId))
         {
             const FTextCacheEntry& entry = sdfTextCache.Get(cacheId);
             const Array<Rect>& quads = entry.quads;
@@ -1198,7 +1199,7 @@ namespace CE
             DrawSDFTextInternal(quads.GetData(), text.GetData(), text.GetLength(), currentFont, textPos);
             return finalSize;
         }
-        else
+        else*/
         {
             thread_local Array<Rect> quads{};
             const bool isFixedSize = !Math::ApproxEquals(size.x, 0.0f) && !Math::ApproxEquals(size.y, 0.0f);
@@ -1212,7 +1213,7 @@ namespace CE
 
             Vec2 finalSize = CalculateSDFTextQuads(quads, text, currentFont, size.width, wordWrap);
 
-			sdfTextCache[cacheId] = FTextCacheEntry{ .cacheId = cacheId, .finalSize = finalSize, .quads = quads };
+			//sdfTextCache[cacheId] = FTextCacheEntry{ .cacheId = cacheId, .finalSize = finalSize, .quads = quads };
 
             if (!isFixedSize && IsRectClipped(Rect::FromSize(textPos, finalSize)))
             {

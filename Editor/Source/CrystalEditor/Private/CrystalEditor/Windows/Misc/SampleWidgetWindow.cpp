@@ -231,10 +231,10 @@ namespace CE::Editor
             .windowFlags = PlatformWindowFlags::Utility | PlatformWindowFlags::DestroyOnClose
         };
 
-        Ref<SampleWidgetWindow> sampleWindow = (Ref<SampleWidgetWindow>)FusionApplication::Get()->CreateNativeWindow(
+        Ref<SampleWidgetWindow> sampleWindow = Object::CastTo<SampleWidgetWindow>(FusionApplication::Get()->CreateNativeWindow(
 			"SampleWidgetWindow", "Sample Widgets", 
             600, 625, 
-            Self::StaticClass(), info);
+            Self::StaticClass(), info));
 
         PlatformWindow* platformWindow = CastTo<FNativeContext>(sampleWindow->GetContext())->GetPlatformWindow();
 

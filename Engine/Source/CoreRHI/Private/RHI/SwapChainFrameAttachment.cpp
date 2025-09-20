@@ -7,7 +7,7 @@ namespace CE::RHI
 		: ImageFrameAttachment(id, nullptr)
 		, swapChain(swapChain)
     {
-		for (int i = 0; i < swapChain->GetImageCount(); i++)
+		for (int i = 0; i < Math::Min<int>(swapChain->GetImageCount(), resources.GetCapacity()); i++)
 		{
 			Texture* image = swapChain->GetImage(i);
 			if (image)

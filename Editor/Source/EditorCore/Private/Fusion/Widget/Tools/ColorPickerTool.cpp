@@ -525,10 +525,10 @@ namespace CE::Editor
             .windowFlags = PlatformWindowFlags::Utility | PlatformWindowFlags::DestroyOnClose | PlatformWindowFlags::SkipTaskbar
         };
 
-        Ref<ColorPickerTool> colorPickerTool = (Ref<ColorPickerTool>)FusionApplication::Get()->CreateNativeWindow(
+        Ref<ColorPickerTool> colorPickerTool = Object::CastTo<ColorPickerTool>(FusionApplication::Get()->CreateNativeWindow(
             "ColorPickerTool", "Color Picker Tool",
             450, 535,
-            Self::StaticClass(), info);
+            Self::StaticClass(), info));
 
         colorPickerTool->history = history;
 

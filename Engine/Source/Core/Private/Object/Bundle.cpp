@@ -532,7 +532,7 @@ namespace CE
         {
             LockGuard lock{ bundleRegistryMutex };
 
-            Ref<Bundle> bundle = (Ref<Bundle>)object;
+            Ref<Bundle> bundle = CastTo<Bundle>(object);
 
             if (loadedBundlesByUuid.KeyExists(oldUuid))
             {
