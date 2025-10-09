@@ -375,7 +375,7 @@ namespace CE
 
     void FWidget::OnPostComputeLayout()
     {
-
+        ZoneScoped;
     }
 
     bool FWidget::AddChild(FWidget* child)

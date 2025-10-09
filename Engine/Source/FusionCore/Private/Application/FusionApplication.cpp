@@ -304,6 +304,8 @@ namespace CE
 
     void FusionApplication::FlushDrawPackets(DrawListContext& drawList, u32 imageIndex)
     {
+        ZoneScoped;
+
         fontManager->Flush(imageIndex);
         imageAtlas->Flush(imageIndex);
 

@@ -46,6 +46,8 @@ namespace CE
 
 	CE::Scene* SceneSubsystem::FindRpiSceneOwner(RPI::Scene* scene)
 	{
+		ZoneScoped;
+
 		if (!scene)
 			return nullptr;
 

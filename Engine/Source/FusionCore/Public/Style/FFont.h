@@ -52,6 +52,15 @@ namespace CE
 	        return !operator==(rhs);
         }
 
+        SIZE_T GetHash() const
+        {
+            SIZE_T hash = CE::GetHash(family);
+            CombineHash(hash, (SIZE_T)fontSize);
+            CombineHash(hash, (SIZE_T)isBold);
+            CombineHash(hash, (SIZE_T)isItalic);
+            return hash;
+		}
+
     private:
 
         FIELD()

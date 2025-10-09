@@ -268,6 +268,8 @@ namespace CE
 
     FFontAtlas* FFontManager::FindFont(const Name& fontName)
     {
+        ZoneScoped;
+
         if (!fontAtlases.KeyExists(fontName))
             return nullptr;
 
@@ -276,6 +278,8 @@ namespace CE
 
     Ref<FSDFFontAtlas> FFontManager::FindSDFFont(const Name& fontName)
     {
+        ZoneScoped;
+
         if (!sdfFontAtlases.KeyExists(fontName))
             return nullptr;
 

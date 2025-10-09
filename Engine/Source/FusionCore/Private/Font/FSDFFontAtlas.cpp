@@ -296,6 +296,8 @@ namespace CE
         ZoneScoped;
 
         {
+			// We save a lot of time if we find the glyph in the cache
+
             auto it = glyphsByCharCode.Find(charCode);
 	        if (it != glyphsByCharCode.End())
 	        {

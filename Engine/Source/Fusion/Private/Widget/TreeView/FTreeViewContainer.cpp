@@ -54,6 +54,8 @@ namespace CE
 
     void FTreeViewContainer::OnPostComputeLayout()
     {
+        ZoneScoped;
+
 	    Super::OnPostComputeLayout();
 
         OnModelUpdate();
@@ -229,6 +231,8 @@ namespace CE
 
     void FTreeViewContainer::OnModelUpdate()
     {
+        ZoneScoped;
+
         if (treeView == nullptr || treeView->m_Model == nullptr || !treeView->m_Model->IsReady())
             return;
         if (!treeView->m_GenerateRowDelegate.IsValid())
