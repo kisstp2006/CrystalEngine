@@ -21,7 +21,7 @@ namespace CE
         Ref<CE::Shader> standardShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/Standard");
         Ref<CE::Shader> skyboxShader = assetManager->LoadAssetAtPath<CE::Shader>("/Engine/Assets/Shaders/PBR/SkyboxCubeMap");
 
-		CE::Scene* scene = GetScene();
+		CE::Scene* scene = GetScene().Get();
 
 		// - Textures & Materials -
 
