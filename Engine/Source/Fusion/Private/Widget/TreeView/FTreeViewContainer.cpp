@@ -282,21 +282,29 @@ namespace CE
                         rowHeight = treeView->m_RowHeightDelegate(index);
                     }
 
-                    f32 topY = curPosY;
-                    f32 bottomY = curPosY + rowHeight;
+                    const f32 topY = curPosY;
+                    const f32 bottomY = curPosY + rowHeight;
 
-					globalRowIndexCache[globalRowIdx] = index;
+                    int childrenCount = model->GetRowCount(index);
 
                     if (bottomY + rowHeight < scrollY)
                     {
                         curPosY += rowHeight; // We are above the scroll view
                         globalRowIdx++;
+
+                        if (childrenCount > 0 && expandedRows.Exists(index))
+                        {
+                            visitor(index, indentLevel + 1);
+                        }
+
                         continue;
                     }
                     else if (topY - rowHeight > scrollY + scrollViewHeight)
                     {
                         break; // We are below the scroll view
                     }
+
+                    globalRowIndexCache[globalRowIdx] = index;
 
                     FTreeViewRow* rowWidget = nullptr;
                     if (childIndex < children.GetCount())
@@ -327,8 +335,6 @@ namespace CE
                     curPosY += rowHeight;
 
                     model->SetData(i, *rowWidget, parent);
-
-                    int childrenCount = model->GetRowCount(index);
 
                     int headerCount = rowWidget->GetCellCount();
                     if (treeView->header)

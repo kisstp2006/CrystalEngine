@@ -3,8 +3,12 @@
 namespace CE
 {
 
+	static SIZE_T gWidgetCounter = 0;
+
     FWidget::FWidget()
     {
+        gWidgetCounter++;
+
         m_Scale = Vec2(1, 1);
         m_Anchor = Vec2(0.5f, 0.5f);
         m_MaxHeight = NumericLimits<f32>::Infinity();
@@ -16,7 +20,7 @@ namespace CE
 
     FWidget::~FWidget()
     {
-        
+        gWidgetCounter--;
     }
 
     Ref<FFusionContext> FWidget::GetContext()

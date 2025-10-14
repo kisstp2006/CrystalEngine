@@ -13,9 +13,12 @@ namespace CE::Editor
         Super::Construct();
 
         (*this)
+        .AutoHeight(true)
         .GenerateRowDelegate(MemberDelegate(&Self::GenerateRow, this))
         .Style("TreeView")
         ;
+
+        container->Name("DebugContainer");
     }
 
     void AssetBrowserTreeView::OnPostComputeLayout()

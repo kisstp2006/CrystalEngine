@@ -256,8 +256,6 @@ namespace CE::RPI
 
 		for (RenderPipeline* renderPipeline : renderPipelines)
 		{
-			//View* targetView = renderPipeline->view;
-
 			renderPipeline->GetPassTree()->IterateRecursively([&](Pass* pass)
 				{
 					if (!pass || pass->IsParentPass())

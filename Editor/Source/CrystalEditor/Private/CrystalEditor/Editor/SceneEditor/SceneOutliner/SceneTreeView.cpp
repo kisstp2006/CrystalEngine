@@ -17,8 +17,6 @@ namespace CE::Editor
         .AutoHeight(true)
             ;
 
-        container->Name("DebugContainer");
-
         Style("TreeView");
     }
 
