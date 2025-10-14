@@ -293,7 +293,6 @@ namespace CE::Editor
                 for (int y = -LightGrid.y / 2; y <= LightGrid.y / 2; ++y)
                 {
                     PointLight* pointLight = CreateObject<PointLight>(scene, String::Format("PointLight_{}", curLight++));
-                    //PointLight* pointLight = CreateObject<PointLight>(scene, "PointLight");
                     scene->AddActor(pointLight);
                     {
                         Ref<PointLightComponent> pointLightComponent = pointLight->GetPointLightComponent();
