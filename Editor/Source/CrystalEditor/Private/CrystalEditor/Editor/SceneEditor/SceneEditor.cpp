@@ -62,6 +62,7 @@ namespace CE::Editor
 
         EditorViewport* viewport = viewportTab->GetViewport();
         viewport->SetScene(scene->GetRpiScene());
+        viewport->RecreateFrameBuffer();
 
         sceneOutlinerTab->SetScene(scene.Get());
         detailsTab->SetSelectedActor(nullptr);

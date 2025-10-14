@@ -110,15 +110,8 @@ namespace CE
             currentSize = Vec2i(512, 512);
         }
 
-		bool isFirstTime = true;
-
         for (int i = 0; i < frames.GetSize(); ++i)
         {
-            if (frames[i] != nullptr)
-            {
-                isFirstTime = false;
-            }
-
             delete frames[i]; frames[i] = nullptr;
 
             RPI::RPISystem::Get().QueueDestroy(frameViews[i]); frameViews[i] = nullptr;
@@ -162,7 +155,7 @@ namespace CE
             textureDescriptor.texture.name = GetName().GetString() + " FrameBuffer " + i;
             frames[i] = new RPI::Texture(textureDescriptor);
 
-            if (isFirstTime)
+			// Ensure the texture is in the correct state
             {
                 frames[i]->TransitionResourceTo(RHI::ResourceState::Undefined, RHI::ResourceState::FragmentShaderResource);
             }
@@ -183,7 +176,7 @@ namespace CE
 
         MarkDirty();
 
-        m_OnFrameBufferRecreated();
+        m_OnFrameBufferRecreated.Broadcast();
     }
 
     void FViewport::OnPaint(FPainter* painter)
